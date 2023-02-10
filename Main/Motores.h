@@ -12,18 +12,6 @@ class Motores {
       motor1.set(m1Speed, m1P1, m1P2);
       motor2.set(m2Speed, m2P1, m2P2);
       motor3.set(m3Speed, m3P1, m3P2);
-      
-//      motor1Speed = m1Speed;
-//      motor1P1 = m1P1;
-//      motor1P2 = m1P2;
-//
-//      motor2Speed = m2Speed;
-//      motor2P1 = m2P1;
-//      motor2P2 = m2P2;
-//
-//      motor3Speed = m3Speed;
-//      motor3P1 = m3P1;
-//      motor3P2 = m3P2;
 
     }
 
@@ -31,17 +19,6 @@ class Motores {
       motor1.iniciarMotor();
       motor2.iniciarMotor();
       motor3.iniciarMotor();
-//      pinMode(motor1P1, OUTPUT);
-//      pinMode(motor1P2, OUTPUT);
-//      pinMode(motor1Speed, OUTPUT);
-//      
-//      pinMode(motor2P1, OUTPUT);
-//      pinMode(motor2P2, OUTPUT);
-//      pinMode(motor2Speed, OUTPUT);
-//      
-//      pinMode(motor3P1, OUTPUT);
-//      pinMode(motor3P2, OUTPUT);
-//      pinMode(motor3Speed, OUTPUT);
     }
 
     void movimientoLineal(int degree, int velocidad) {
@@ -116,47 +93,6 @@ class Motores {
       motor3.motorAtras();
     
     }
-
-//    void resetMotors(){
-//      digitalWrite(motor1P1, LOW);
-//      digitalWrite(motor1P2, LOW);
-//    
-//      digitalWrite(motor2P1, LOW);
-//      digitalWrite(motor2P2, LOW);
-//    
-//      digitalWrite(motor3P1, LOW);
-//      digitalWrite(motor3P2, LOW);
-//    }
-//    
-//    void motor1Adelante(){
-//      digitalWrite(motor1P1, HIGH);
-//      digitalWrite(motor1P2, LOW);
-//    }
-//    
-//    void motor2Adelante(){
-//      digitalWrite(motor2P1, HIGH);
-//      digitalWrite(motor2P2, LOW);
-//    }
-//    
-//    void motor3Adelante(){
-//      digitalWrite(motor3P1, HIGH);
-//      digitalWrite(motor3P2, LOW);
-//    }
-//    
-//    void motor1Atras(){
-//      digitalWrite(motor1P1, LOW);
-//      digitalWrite(motor1P2, HIGH);
-//    }
-//    
-//    void motor2Atras(){
-//      digitalWrite(motor2P1, LOW);
-//      digitalWrite(motor2P2, HIGH);
-//    }
-//    
-//    void motor3Atras(){
-//      digitalWrite(motor3P1, LOW);
-//      digitalWrite(motor3P2, HIGH);
-//    }
 
     
 };
