@@ -2,19 +2,23 @@
 //GND --> GND
 //P4 --> RX0
 
+
 //Librerías
 #include <HTInfraredSeeker.h>
 
+
 //Variables
 String colorPorteria = "y";
-bool posesion = true;
+bool posesion = false;
 int velocidades = 160;
 char input = 'a';
 char lastSeen = 'i';
 
+
 //LEDs
 int ledRojo = 2;
 int ledVerde = 3;
+
 
 //Motores
 int motor1Speed = 8;
@@ -30,11 +34,11 @@ int motor3P1 = 22;
 int motor3P2 = 23;
 
  
-
+//SETUP------------------------------------------------------
 void setup() {
    
-   Serial.begin(9600);
-   Serial3.begin(9600);
+  Serial.begin(9600);
+  Serial3.begin(9600);
 
   //Motores
   pinMode(motor1P1, OUTPUT);
@@ -58,34 +62,36 @@ void setup() {
   InfraredSeeker::Initialize();
 
 }
- 
+
+//LOOP-------------------------------------------------------
 void loop() {
   
-
-
   //Lectura de la cámara
-  Serial3.write("y");
-  if (Serial3.available()) {   
-        input =  Serial3.readString();
+    //Serial3.write("y");
+    if (Serial3.available()) {   
+       input =  Serial3.read();
        Serial.println(input);
     }
 
+  //Verificar si se debe buscar la pelota o portería
   if (posesion){   
     lastSeen = porteria(input, lastSeen);
   }
   else {
-   // seeker();
+    seeker();
   }
   
 }
 
+
+//Funciones--------------------------------------------------
 //Cuando ya se tenga la pelota
 char porteria (char input, char last){
-  char lastSeen = last;
-       int digitIn = input - 48;
+      char lastSeen = last;
+      int digitIn = input - 48;
 
-        //Si se ve la portería
-        if (input != 'a'){
+      //Si se ve la portería (recibe un valor 0-9)
+      if (input != 'a'){
   
             if (digitIn > 7){  //Derecha
               movimientoLineal(45, velocidades);  
@@ -93,8 +99,7 @@ char porteria (char input, char last){
               digitalWrite(ledRojo, HIGH);
               Serial.println(digitIn);
               Serial.println("Derecha");
-
-              
+        
                     
             } else if (digitIn < 2) {  //Izquierda
               movimientoLineal(-45, velocidades);
@@ -110,38 +115,33 @@ char porteria (char input, char last){
               digitalWrite(ledVerde, LOW);
               digitalWrite(ledRojo, LOW);
               Serial.println("Adelante");
-
-              
+                          
             }
           
-        } else {
+      } else {
               setAllMotorSpeed(120);
 
-                  if (lastSeen = 'i') {
+              if (lastSeen = 'i') {
                     giroAH();
                   
-                  } else {
+               } else {
                     giroH();
           
                  }
-//            //}
-        }
-      
+     }
+
+  //Retorna el último lugar en donde vió la portería (izquierda o derecha)
   return lastSeen;
 }
 
 
 //---------------------------------------SEEKER
-
 void seeker(){
 
     //Definir dirección
     InfraredResult InfraredBall = InfraredSeeker::ReadAC(); 
     int dirSeeker = InfraredBall.Direction;
     
-    Serial.println("Direction = ");
-    Serial.println(dirSeeker);
-
     //Si no se encuentra en el rango
     if (dirSeeker == 0){
       Serial.println("Nope");
@@ -152,15 +152,12 @@ void seeker(){
     //Transformar resultado del seeker a grados 
     else {
       int dirGrados = -150 + (dirSeeker*30);
-      Serial.print("Grados: ");
+     // Serial.print("Grados: ");
       Serial.println(dirGrados);
       movimientoLineal(dirGrados, 200);
      
     }
     
-    delay(2000);
-    resetMotors();
-    delay(1000);
   
 }
 
@@ -202,7 +199,7 @@ void movimientoLineal(int degree, int velocidad) {
 
 
 
-//----------------------------Movimientos básicos
+//-----------------------------------Movimientos básicos
 
 //Definir la velocidad de todos los motores
 void setAllMotorSpeed(int allSpeed){
@@ -218,9 +215,6 @@ void adelante(){
 }
 
 void atras(){
-  resetMotors();
-  delay(800);
-  
   motor1Adelante();
   motor2Atras();
 }
@@ -243,33 +237,24 @@ void giroAH(){
 
 //Noreste
 void NE(){
-  resetMotors();
-  delay(800);
-
   motor2Adelante();
   motor3Atras();
 }
 
 //Noroeste
 void NO(){
-  resetMotors();
-  delay(800);
-
   motor3Adelante();
   motor1Atras();
 }
 
 //Sureste
-//void SurE(){
-//  resetMotors();
-//  delay(800);
-//
-//  motor3Atras();
-//  motor1Adelante();
-//}
+void SurEste(){
+  motor3Atras();
+  motor1Adelante();
+}
 
 //Suroeste
-void SO(){
+void SurOeste(){
   motor2Atras();
   motor3Adelante();
 }
