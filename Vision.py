@@ -1,6 +1,6 @@
 # Vision - By: alecoeto - mié feb 1 2023
 
-import sensor, image, time, math, pyb
+import sensor, image, time, math, pyb, utime
 from pyb import UART
 
 #Thresholds (LAB)
@@ -19,7 +19,7 @@ sensor.set_auto_gain(False)
 sensor.set_auto_whitebal(False)
 
 clock = time.clock()
-uart = UART(3, 9600, timeout_char=1000)   #Comunicación serial por medio de UART
+uart = UART(3, 9600, timeout_char=0)   #Comunicación serial por medio de UART
 
 while(True):
     clock.tick()
@@ -28,7 +28,7 @@ while(True):
 
     count = 0
 
-    x = 'a'
+    xA = 'a'
     for blob in img.find_blobs([amarillo], pixels_threshold=200, area_threshold=300, merge=True):
         img.draw_rectangle(blob.rect(), color=(255,255,0))
         img.draw_cross(blob.cx(), blob.cy(), color=(255,255,0))
@@ -37,23 +37,31 @@ while(True):
 
         if count == 0:
             area = blob.area()
-            x = str(blob.cx()*10//320)
+            x = str(blob.x()) #*10//320)
+            width = str(blob.w())
+            height = str(blob.h())
         count += 1
 
 
         if blob.area() > area:
-            x = str(blob.cx()*10//320)
+            x = str(blob.x())#*10//320)
 
         area = max(blob.area(), area)
+        print("x = ",blob.x())
+        print("cx = ",blob.cx())
+
+        print("y = ",blob.y())
+
+
     uart.write(x)
+    uart.write('\n')
+    #if (uart.any()):
+        #uart.write(x)
+        #colorIn = uart.read()
+        #print(colorIn, '\n')
 
-    if (uart.any()):
-        uart.write(x)
-        colorIn = uart.read()
-        print(colorIn)
-
-        if colorIn == bytes("y", "ascii"):
-            uart.write("si")
+        #if colorIn == b"y":
+            #print("si")
 
     #for blob in img.find_blobs([azul], pixels_threshold=200, area_threshold=300, merge=True):
         #img.draw_rectangle(blob.rect(), color=(0,196,255))
