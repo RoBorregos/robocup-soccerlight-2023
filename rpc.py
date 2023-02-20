@@ -10,7 +10,7 @@ red_led = pyb.LED(1)
 
 interface = rpc.rpc_uart_slave(baudrate=115200)
 
-def detectar_porteria(data):
+def porteria_detection(data):
     sensor.set_pixformat(sensor.RGB565)
     sensor.set_framesize(sensor.QVGA)
     thresholds = struct.unpack("<bbbbbb", data)
@@ -52,6 +52,6 @@ def detectar_porteria(data):
     return struct.pack("<HH", x, cx)
 
 
-interface.register_callback(detectar_porteria)
+interface.register_callback(porteria_detection)
 interface.loop()
 

@@ -8,8 +8,10 @@
 #include <openmvrpc.h>
 #include "Camara.h"
 
+//#include <openmvrpc.h>
 openmv::rpc_scratch_buffer<256> scratch_buffer; // All RPC objects share this buffer.
 openmv::rpc_hardware_serial3_uart_master interface(115200);
+
 
 
 //Variables
@@ -37,7 +39,7 @@ Camara openMV;
  
 //SETUP------------------------------------------------------
 void setup() {
-  Serial3.begin(9600);
+  //Serial3.begin(9600);
 
   //Motores
   motoresRobot.iniciar();
@@ -48,6 +50,8 @@ void setup() {
   
   //Seeker
   InfraredSeeker::Initialize();
+
+  openMV.iniciar();
 
 }
 
@@ -85,7 +89,7 @@ void loop() {
   return;
   //Verificar si se debe buscar la pelota o portería
   if (posesion){   
-    lastSeen = porteria(input, lastSeen);
+    openMV.exe_porteria_detection(interface);
   }
   else {
     seeker(last);
