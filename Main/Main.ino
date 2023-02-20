@@ -2,16 +2,12 @@
 //GND --> GND
 //P4 --> RX0
 
-
+ 
 //Librerías
 #include <HTInfraredSeeker.h>
 #include <openmvrpc.h>
-#include "Camara.h"
-
-//#include <openmvrpc.h>
-openmv::rpc_scratch_buffer<256> scratch_buffer; // All RPC objects share this buffer.
-openmv::rpc_hardware_serial3_uart_master interface(115200);
-
+#include "Porteria.h"
+//#include "Camara.h"
 
 
 //Variables
@@ -26,6 +22,7 @@ int count = 0;
 int threshold = 300;
 
 
+
 //LEDs
 int ledRojo = 2;
 int ledVerde = 3;
@@ -34,12 +31,14 @@ int ledVerde = 3;
 //Motores
 Motores motoresRobot(8,24,25,9,26,27,10,22,23);
 
-//Camara 
-Camara openMV;
+Porteria porteria;
+
+
  
 //SETUP------------------------------------------------------
 void setup() {
-  //Serial3.begin(9600);
+  Serial3.begin(9600);
+  Serial.begin(9600);
 
   //Motores
   motoresRobot.iniciar();
@@ -51,16 +50,14 @@ void setup() {
   //Seeker
   InfraredSeeker::Initialize();
 
-  openMV.iniciar();
-
 }
 
 //LOOP-------------------------------------------------------
 void loop() {
 
-  int value = 0;
-  value = digitalRead(sensorPin);  //lectura digital de pin
- 
+  //int value = 0;
+  //value = digitalRead(sensorPin);  //lectura digital de pin
+  
 //  if (value == LOW) {
 //      posesion = true;
 //
@@ -83,26 +80,58 @@ void loop() {
   //Lectura de la cámara
     if (Serial3.available()) {   
        // Serial3.write("y");
+
        input =  Serial3.readStringUntil('\n');
-       Serial.println(input);
+       porteria.actualizar(input);
     }
-  return;
+    
+  
   //Verificar si se debe buscar la pelota o portería
   if (posesion){   
-    openMV.exe_porteria_detection(interface);
+    gol(porteria);
   }
   else {
     seeker(last);
   }
 
-  
-  
 }
 
 
 //Funciones--------------------------------------------------
-//Cuando ya se tenga la pelota
 
+//---------------------------------------GOL
+void gol (Porteria p){
+  //Serial.println(p.x);
+
+            if (p.x == -1)
+              Serial.println("Nothing yet");
+            else {
+            if (p.x > 170){  //Derecha
+              motoresRobot.movimientoLineal(45, velocidades);  
+              digitalWrite(ledRojo, HIGH);
+              //Serial.println(digitIn);
+              Serial.println("der");
+        
+                    
+            } else if (p.x < 60) {  //Izquierda
+              motoresRobot.movimientoLineal(-45, velocidades);
+              lastSeen = 'i';
+              digitalWrite(ledVerde, HIGH);
+              //Serial.println(digitIn);
+              Serial.println("izq");
+
+
+            } else {  //Centro
+              motoresRobot.setAllMotorSpeed(velocidades);
+              motoresRobot.adelante();
+              digitalWrite(ledVerde, LOW);
+              //digitalWrite(ledRojo, LOW);
+              Serial.println("Adelante");
+                          
+            }
+            }
+          
+}
 
 
 //---------------------------------------SEEKER
