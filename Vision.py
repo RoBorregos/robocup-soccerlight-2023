@@ -49,11 +49,11 @@ def detectar_porteria(color, tag):
             area = max(blob.area(), area)
 
             if tag == 'a':
-                #print(f"a,{x},{y},{w},{h} \n")
+                print(f"a,{x},{y},{w},{h} \n")
                 uart.write(f"0,{x},{y},{w},{h}\n")
 
             else:
-                #print(f"b,{x},{y},{w},{h} \n")
+                print(f"b,{x},{y},{w},{h} \n")
                 uart.write(f"1,{x},{y},{w},{h}\n")
 
 while(True):

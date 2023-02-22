@@ -1,3 +1,6 @@
+//GND --> GND
+//P4 --> RX0
+
 //#pragma once
 //
 //#include <openmvrpc.h>
