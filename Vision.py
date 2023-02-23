@@ -52,9 +52,15 @@ def detectar_porteria(color, tag):
                 print(f"a,{x},{y},{w},{h} \n")
                 uart.write(f"0,{x},{y},{w},{h}\n")
 
+
             else:
                 print(f"b,{x},{y},{w},{h} \n")
                 uart.write(f"1,{x},{y},{w},{h}\n")
+
+
+    if count == 0:
+        uart.write("-1,-1,-1,-1,-1\n")
+        print("-1")
 
 while(True):
     clock.tick()
