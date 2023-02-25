@@ -4,7 +4,7 @@ import sensor, image, time, math, pyb, utime
 from pyb import UART
 
 #Thresholds (LAB)
-amarillo = (52, 97, -25, 10, 33, 90) #Amarillo
+amarillo = (52, 97, -25, 10, 33, 90)     #Amarillo
 azul = (21, 60, -6, 30, -74, -28)        #Azul
 
 
@@ -20,11 +20,23 @@ sensor.set_auto_gain(False)
 sensor.set_auto_whitebal(False)
 
 clock = time.clock()
-uart = UART(3, 9600, timeout_char=0)   #Comunicación serial por medio de UART
+uart = UART(3, 9600, timeout_char=0)     #Comunicación serial por medio de UART
 
+#Funcion para enviar cordenadas de blobs detectadas
 def detectar_porteria(color, tag):
     count = 0
     area = 0
+    x = -1
+    y = -1
+    h = -1
+    w = -1
+
+    if tag == 'a':
+        index = 0
+
+    else:
+        index = 1
+
 
     for blob in img.find_blobs([color], pixels_threshold=200, area_threshold=300, merge=True):
             img.draw_rectangle(blob.rect(), color=(255,255,0))
@@ -39,7 +51,6 @@ def detectar_porteria(color, tag):
                 h = str(blob.h())
             count += 1
 
-
             if blob.area() > area:
                 x = str(blob.cx())
                 y = str(blob.cy())
@@ -48,20 +59,10 @@ def detectar_porteria(color, tag):
 
             area = max(blob.area(), area)
 
-            if tag == 'a':
-                print(f"a,{x},{y},{w},{h} \n")
-                uart.write(f"0,{x},{y},{w},{h}\n")
+    uart.write(f"{index},{x},{y},{w},{h}\n")
+    print(f"{index},{x},{y},{w},{h}\n")
 
-
-            else:
-                print(f"b,{x},{y},{w},{h} \n")
-                uart.write(f"1,{x},{y},{w},{h}\n")
-
-
-    if count == 0:
-        uart.write("-1,-1,-1,-1,-1\n")
-        print("-1")
-
+#Loop
 while(True):
     clock.tick()
     img = sensor.snapshot()

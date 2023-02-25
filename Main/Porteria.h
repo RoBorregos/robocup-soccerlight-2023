@@ -7,6 +7,7 @@ class Porteria {
   int h;
 
   Porteria(){
+     color = -1;
      x = -1;
      y = -1;
      w = -1;
