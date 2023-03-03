@@ -5,11 +5,13 @@
 //#include <openmvrpc.h>
 #include "Porteria.h"
 #include "Motores.h"
+#include "Imu.h"
+#include "PID.h"
 
 
 //Variables
-bool posesion = true;
-int velocidades = 180;
+bool posesion = false;
+int velocidades = 100;
 
 
 //LEDs
@@ -23,10 +25,15 @@ int dirGrados;
 int strSeeker;
 int lastSeen = 1;
 
+//IMU
+Imu imu;
+
+//PID
+PID pid;
 
 //MOTORES
-//Motores motoresRobot(8,24,25,9,26,27,10,22,23);
-Motores motoresRobot(6,22,23,7,25,24,8,41,27);
+Motores motoresRobot(8,24,25,9,26,27,10,22,23);
+//Motores motoresRobot(8,41,27,7,25,24,6,22,23);
 
 //Porterias
 Porteria porteriaAzul;
@@ -45,11 +52,11 @@ void setup() {
   //Motores
   motoresRobot.iniciar();
   
-  Serial.println("antes de seeker");
-
   //Seeker
-  InfraredSeeker::Initialize();
-  Serial.println("despues de seeker");
+ // InfraredSeeker::Initialize();
+
+imu.iniciar();
+  pid.setPID(0.7,0.5);
 
 
 }
@@ -57,37 +64,75 @@ void setup() {
 //LOOP-------------------------------------------------------
 void loop() {
 
+  imu.readValues();
+
+  //Serial.println(imu.getYaw());
+  int change = pid.calcularError(0,imu.getYaw(),velocidades);
+  
+  motoresRobot.giro(change, imu.isRight());
+
+  Serial.println(change);
     //Seeker
+        //Serial.println("Seeker: ");
+
 //    InfraredResult InfraredBall = InfraredSeeker::ReadAC(); 
+//    Serial.println("1");
+//
 //    dirSeeker = InfraredBall.Direction;
 //    dirGrados = -150 + (dirSeeker*30);
 //    strSeeker = InfraredBall.Strength;
-    //Serial.println(dirGrados);
+//    Serial.println(dirGrados);
 
-
-
-
-    //Cámara
-    if (Serial3.available()) {   
-        input =  Serial3.readStringUntil('\n');
-        //Serial.println(input);
-        if(input[0] == '0')
-          porteriaAmarilla.actualizar(input);
-        else
-          porteriaAzul.actualizar(input);
-     }
+    //motoresRobot.motor1Mover();
+    //motoresRobot.adelante();
+//  motoresRobot.movimientoLineal(0,velocidades);
+//  delay(1000);
+//
+// motoresRobot.movimientoLineal(180,velocidades);
+//  delay(1000);
   
-      
-    //posesion = hasPosesion(strSeeker, dirSeeker);
-    
-    //Verificar si se debe buscar la pelota o portería
-    if (posesion){   
-      //motoresRobot.apagarMotores();
-      gol(porteriaAmarilla, lastP);
-    }
-    else {
-      lastSeen = seeker(dirSeeker, lastSeen);
-    }
+//  motoresRobot.movimientoLineal(90,velocidades);
+//  delay(1000);
+//
+// motoresRobot.movimientoLineal(-90,velocidades);
+//  delay(1000);
+//
+//  motoresRobot.movimientoLineal(45,velocidades);
+//  delay(1000);
+//
+//    motoresRobot.movimientoLineal(-135,velocidades);
+//  delay(1000);
+//
+//  motoresRobot.movimientoLineal(-45,velocidades);
+//  delay(1000);
+//
+//motoresRobot.movimientoLineal(135,velocidades);
+//  delay(1000);
+
+
+  
+
+//    //Cámara
+//    if (Serial3.available()) {   
+//        input =  Serial3.readStringUntil('\n');
+//        //Serial.println(input);
+//        if(input[0] == '0')
+//          porteriaAmarilla.actualizar(input);
+//        else
+//          porteriaAzul.actualizar(input);
+//     }
+//  
+//      
+//    //posesion = hasPosesion(strSeeker, dirSeeker);
+//    
+//    //Verificar si se debe buscar la pelota o portería
+//    if (posesion){   
+//      //motoresRobot.apagarMotores();
+//      gol(porteriaAmarilla, lastP);
+//    }
+//    else {
+//      lastSeen = seeker(dirSeeker, lastSeen);
+//    }
 
 }
 
@@ -160,7 +205,7 @@ bool hasPosesion(int strSeeker, int dirSeeker){
 int seeker(int dirSeeker, int last){
     
     int dirGrados = -150 + (dirSeeker*30);
-      Serial.println(dirSeeker);
+      //Serial.println(dirSeeker);
 
      Serial.println(dirGrados);
 
@@ -195,11 +240,6 @@ int seeker(int dirSeeker, int last){
       last = 1;
 
     return last;
-    //return last;
-    //rojo 5v
-    //3.3v
-    //gnd
-    //scl
-    //sda
+
   
 }

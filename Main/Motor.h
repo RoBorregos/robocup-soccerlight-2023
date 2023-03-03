@@ -1,10 +1,12 @@
 #pragma once
 
 class Motor {
-  public:
+  private:
     int motorSpeed;
     int pin1;
     int pin2;
+    
+  public:
 
      Motor(){
      }
@@ -16,7 +18,7 @@ class Motor {
      }
 
      void iniciarMotor(){
-        pinMode(motorSpeed, OUTPUT);
+        //pinMode(motorSpeed, OUTPUT);
         pinMode(pin1, OUTPUT);
         pinMode(pin2, OUTPUT);
      }
@@ -34,5 +36,17 @@ class Motor {
      void apagar(){
         digitalWrite(pin1, LOW);
         digitalWrite(pin2, LOW);
+     }
+
+     int getMotorSpeed(){
+      return motorSpeed;
+     }
+
+     int getPin1(){
+      return pin1;
+     }
+
+     int getPin2(){
+      return pin2;
      }
 };
