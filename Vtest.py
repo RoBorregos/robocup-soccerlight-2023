@@ -70,11 +70,4 @@ while(True):
 
     detectar_porteria(amarillo, 'a')
     detectar_porteria(azul, 'b')
-
-
-
-
-
-
-
-
+    detectar_robot()

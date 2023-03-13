@@ -6,147 +6,211 @@ class Motores {
     Motor motor1;
     Motor motor2;
     Motor motor3;
-    
 
-    Motores (int m1Speed, int m1P1, int m1P2, int m2Speed, int m2P1, int m2P2, int m3Speed, int m3P1, int m3P2){
+
+    Motores (int m1Speed, int m1P1, int m1P2, int m2Speed, int m2P1, int m2P2, int m3Speed, int m3P1, int m3P2) {
       motor1.set(m1Speed, m1P1, m1P2);
       motor2.set(m2Speed, m2P1, m2P2);
       motor3.set(m3Speed, m3P1, m3P2);
     }
 
-    void iniciar(){
+    void iniciar() {
       motor1.iniciarMotor();
       motor2.iniciarMotor();
       motor3.iniciarMotor();
     }
 
     void movimientoLineal(int degree, int velocidad) {
-    
-        //En base a los grados se definen las velocidades de cada motor
-        float m1 = cos(((150-degree) * PI / 180));
-        float m2 = cos(((30-degree) * PI / 180));;
-        float m3 = cos(((270-degree) * PI / 180));
-        int speedA = abs(int(m1*velocidad));
-        int speedB = abs(int(m2*velocidad));
-        int speedC = abs(int(m3*velocidad));
-    
-        //Definir la velocidad de cada motor
-        analogWrite(motor1.getMotorSpeed(), speedA);
-        analogWrite(motor2.getMotorSpeed(), speedB);
-        analogWrite(motor3.getMotorSpeed(), speedC);
-    
-        //Mover motores según la velocidad (positiva o negativa)
-        if (m1 >= 0){
-//          analogWrite(motor1.pin1, speedA);
-//          analogWrite(motor1.pin2, 0);
-            motor1.motorAdelante();
-        } else {
-//            analogWrite(motor1.pin1, 0);
-//            analogWrite(motor1.pin2, -1*speedA);
-            motor1.motorAtras();
-        }
-        
-        if (m2 >= 0){
-//          analogWrite(motor2.pin1, speedB);
-//          analogWrite(motor2.pin2, 0);
-            motor2.motorAdelante();
-        } else {
-//          analogWrite(motor2.pin1, 0);
-//          analogWrite(motor2.pin2, -1*speedB);
-            motor2.motorAtras();
-        } 
-        
-        if (m3 >= 0){
-//          analogWrite(motor3.pin1, speedC);
-//          analogWrite(motor3.pin2, 0);
-            motor3.motorAdelante();
-        } else {
-//          analogWrite(motor3.pin1, 0);
-//          analogWrite(motor3.pin2, -1*speedC);
-            motor3.motorAtras();
-        }
+      //En base a los grados se definen las velocidades de cada motor
+      float m1 = cos(((150 - degree) * PI / 180));
+      float m2 = cos(((30 - degree) * PI / 180));;
+      float m3 = cos(((270 - degree) * PI / 180));
+      int speedA = abs(int(m1 * velocidad));
+      int speedB = abs(int(m2 * velocidad));
+      int speedC = abs(int(m3 * velocidad));
+
+      //Definir la velocidad de cada motor
+      analogWrite(motor1.getMotorSpeed(), speedA);
+      analogWrite(motor2.getMotorSpeed(), speedB);
+      analogWrite(motor3.getMotorSpeed(), speedC);
+
+      //Mover motores según la velocidad (positiva o negativa)
+      if (m1 >= 0) {
+        //          analogWrite(motor1.pin1, speedA);
+        //          analogWrite(motor1.pin2, 0);
+        motor1.motorAdelante();
+      } else {
+        //            analogWrite(motor1.pin1, 0);
+        //            analogWrite(motor1.pin2, -1*speedA);
+        motor1.motorAtras();
+      }
+
+      if (m2 >= 0) {
+        //          analogWrite(motor2.pin1, speedB);
+        //          analogWrite(motor2.pin2, 0);
+        motor2.motorAdelante();
+      } else {
+        //          analogWrite(motor2.pin1, 0);
+        //          analogWrite(motor2.pin2, -1*speedB);
+        motor2.motorAtras();
+      }
+
+      if (m3 >= 0) {
+        //          analogWrite(motor3.pin1, speedC);
+        //          analogWrite(motor3.pin2, 0);
+        motor3.motorAdelante();
+      } else {
+        //          analogWrite(motor3.pin1, 0);
+        //          analogWrite(motor3.pin2, -1*speedC);
+        motor3.motorAtras();
+      }
+
     }
 
-
+//    void movimientoLineal(int degree, int velocidad) {
+//      imu.readValues();
 //
-//    int giroMasPreciso(int objetivo, int velocidad, int prevError){
+//      Serial.println(imu.getYaw());
+//      int velocidadGiro = pid.calcularError(0, imu.getYaw(), velocidades);
+//      bool dirRight = imu.isRight());
+//      //En base a los grados se definen las velocidades de cada motor
+//      float m1 = cos(((150 - degree) * PI / 180));
+//      float m2 = cos(((30 - degree) * PI / 180));;
+//      float m3 = cos(((270 - degree) * PI / 180));
+//      int speedA = abs(int(m1 * velocidad));
+//      int speedB = abs(int(m2 * velocidad));
+//      int speedC = abs(int(m3 * velocidad));
 //
-//      int kP = 0.2;
-//      
-//      int actual = imu.readValue();
-//      int error = objetivo - actual;
-//      
-//      int kD = (error - prevError)/millis();
-//      int velocidadMotores = kP*error;
+//      //Definir la velocidad de cada motor
+//      analogWrite(motor1.getMotorSpeed(), speedA);
+//      analogWrite(motor2.getMotorSpeed(), speedB);
+//      analogWrite(motor3.getMotorSpeed(), speedC);
 //
-//      while (error != 0){
-//        giro(velocidadMotores);
-//        error = objetivo - imu.readValue();
-//        velocidadMotores = kP*error + kD;
-//        
+//
+//
+//      //Mover motores según la velocidad (positiva o negativa)
+//      if (m1 >= 0) {
+//      if (velocidadGiro > 0 && dirRight) {
+//          speedA = speedA * 0.7 + velocidadGiro * 0.3;
+//        }
+//        //          analogWrite(motor1.pin1, speedA);
+//        //          analogWrite(motor1.pin2, 0);
+//        motor1.motorAdelante();
+//      } else {
+//        if (velocidadGiro > 0 && !dirRight) {
+//          speedA = speedA * 0.7 + velocidadGiro * 0.3;
+//        }
+//        //            analogWrite(motor1.pin1, 0);
+//        //            analogWrite(motor1.pin2, -1*speedA);
+//        motor1.motorAtras();
 //      }
 //
-//        apagarMotores();
-//      //return velocidadMotores;
+//      if (m2 >= 0) {
+//      //          analogWrite(motor2.pin1, speedB);
+//      //          analogWrite(motor2.pin2, 0);
+//      motor2.motorAdelante();
+//      } else {
+//        //          analogWrite(motor2.pin1, 0);
+//        //          analogWrite(motor2.pin2, -1*speedB);
+//        motor2.motorAtras();
+//      }
 //
-//   
+//      if (m3 >= 0) {
+//      //          analogWrite(motor3.pin1, speedC);
+//      //          analogWrite(motor3.pin2, 0);
+//      motor3.motorAdelante();
+//      } else {
+//        //          analogWrite(motor3.pin1, 0);
+//        //          analogWrite(motor3.pin2, -1*speedC);
+//        motor3.motorAtras();
+//      }
 //    }
 
-    void setAllMotorSpeed(int allSpeed){
+
+    void setAllMotorSpeed(int allSpeed) {
       analogWrite(motor1.getMotorSpeed(), allSpeed);
       analogWrite(motor2.getMotorSpeed(), allSpeed);
       analogWrite(motor3.getMotorSpeed(), allSpeed);
     }
 
-    void motor1Mover(){
-      motor1.motorAdelante();
-    }
-    
-    void apagarMotores(){
+    void apagarMotores() {
       motor1.apagar();
       motor2.apagar();
       motor3.apagar();
     }
-    
-    void adelante(){
+
+    void adelante() {
       apagarMotores();
       motor1.motorAtras();
       motor2.motorAdelante();
     }
-    
-    void atras(){
+
+    void atras() {
       motor1.motorAdelante();
       motor2.motorAtras();
     }
 
-    void giroH(){
+    void giroH() {
       motor1.motorAdelante();
       motor2.motorAdelante();
       motor3.motorAdelante();
-    
+
     }
 
-    void giro(int velocidad, bool right){
-        setAllMotorSpeed(abs(velocidad));
-        if (right){
-        motor1.motorAdelante();
-        motor2.motorAdelante();
-        motor3.motorAdelante(); 
-          
+    void giro(int velocidad, bool right) {
+          setAllMotorSpeed(abs(velocidad));
+      if (velocidad != 0){
+        if (right) {
+          motor1.motorAdelante();
+          motor2.motorAdelante();
+          motor3.motorAdelante();
+  
         } else {
-        motor1.motorAtras();
-        motor2.motorAtras();
-        motor3.motorAtras();
-        } 
+          motor1.motorAtras();
+          motor2.motorAtras();
+          motor3.motorAtras();
+        }
+      }
+      
     }
-    
+
     //Rotación antihoraria
-    void giroAH(){
+    void giroAH() {
       motor1.motorAtras();
       motor2.motorAtras();
       motor3.motorAtras();
-    
+
     }
 
-    
+    void pruebaMovimiento(int velocidades) {
+      movimientoLineal(0, velocidades);
+      delay(1000);
+
+      movimientoLineal(180, velocidades);
+      delay(1000);
+
+      movimientoLineal(90, velocidades);
+      delay(1000);
+
+      movimientoLineal(-90, velocidades);
+      delay(1000);
+
+      movimientoLineal(45, velocidades);
+      delay(1000);
+
+      movimientoLineal(-135, velocidades);
+      delay(1000);
+
+      movimientoLineal(-45, velocidades);
+      delay(1000);
+
+      movimientoLineal(135, velocidades);
+      delay(1000);
+    }
+
+    void motor1Mover() {
+      motor3.motorAdelante();
+    }
+
+
 };

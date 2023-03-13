@@ -1,8 +1,6 @@
-#include <ICM_20948.h>
-
 //Librerías
+#include <ICM_20948.h>
 #include <HTInfraredSeeker.h>
-//#include <openmvrpc.h>
 #include "Porteria.h"
 #include "Motores.h"
 #include "Imu.h"
@@ -10,14 +8,14 @@
 
 
 //Variables
-bool posesion = false;
-int velocidades = 100;
-
+bool posesion = true;
+int velocidades = 180;
+String input = "";
+char lastP = "i";
 
 //LEDs
 int ledRojo = 2;
 int ledVerde = 3;
-
 
 //Seeker
 int dirSeeker;
@@ -32,107 +30,119 @@ Imu imu;
 PID pid;
 
 //MOTORES
-Motores motoresRobot(8,24,25,9,26,27,10,22,23);
-//Motores motoresRobot(8,41,27,7,25,24,6,22,23);
+//Motores motoresRobot(8, 24, 25, 9, 26, 27, 10, 22, 23);
+Motores motoresRobot(8,41,27,7,25,24,6,22,23);
 
 //Porterias
 Porteria porteriaAzul;
 Porteria porteriaAmarilla;
 Porteria porterias[] = {porteriaAmarilla, porteriaAzul};
-int indexColor = 0;
+int indexColor = 1;
 
-String input = "";
-char lastP = "i";
- 
+enum Estados {
+  linea, 
+  buscarPelota, 
+  hasPelota,
+  golPorteria, 
+  nada
+};
+
+Estados estado = nada;
+
 //SETUP------------------------------------------------------
 void setup() {
-  Serial3.begin(9600);
-  Serial.begin(9600);
+  Serial2.begin(9600);
+  Serial.begin(115200);
 
-  //Motores
+  //Iniciar clases
   motoresRobot.iniciar();
-  
-  //Seeker
- // InfraredSeeker::Initialize();
+  pid.setKP(0.3);
 
-imu.iniciar();
-  pid.setPID(0.7,0.5);
 
+  imu.iniciar();
+    Serial.println("done");
+
+  //InfraredSeeker::Initialize();
 
 }
 
 //LOOP-------------------------------------------------------
 void loop() {
 
+
+//Código para un atacante
+if (estado == linea) {
+ // estado = (inLinea()) ? linea : hasPelota;
+ estado = hasPelota;
+}
+
+if (estado = hasPelota) {
+  //estado = (hasPosesion()) ? golPorteria : buscarPelota; 
+  estado = golPorteria;
+}
+
+if (estado == buscarPelota) {
+  lastSeen = seeker(dirSeeker, lastSeen);
+}
+
+if (estado == golPorteria) {
+   if (Serial2.available()) {
+    input =  Serial2.readStringUntil('\n');
+    Serial.println(input);
+    if (input[0] == '0')
+      porteriaAmarilla.actualizar(input);
+    else
+      porteriaAzul.actualizar(input);
+  }
+  gol(porteriaAzul, lastP);
+
+      imu.readValues();
+      int change = pid.calcularError(0,imu.getYaw(),velocidades);
+//      Serial.print("Change: ");
+//        Serial.println(change);
+
+        if (change > 0) {
+          motoresRobot.giro(change, imu.isRight());
+        }
+
+        if (porteriaAzul.area > 60000)
+          estado = nada;
+  
+}
+
+if (estado == nada) {
+  motoresRobot.apagarMotores();
   imu.readValues();
+      int change = pid.calcularError(0,imu.getYaw(),velocidades);
+//      Serial.print("Change: ");
+//        Serial.println(change);
 
-  //Serial.println(imu.getYaw());
-  int change = pid.calcularError(0,imu.getYaw(),velocidades);
-  
-  motoresRobot.giro(change, imu.isRight());
+        if (change > 0) {
+          motoresRobot.giro(change, imu.isRight());
+        }
+}
 
-  Serial.println(change);
-    //Seeker
-        //Serial.println("Seeker: ");
-
-//    InfraredResult InfraredBall = InfraredSeeker::ReadAC(); 
-//    Serial.println("1");
+estado = nada;
 //
-//    dirSeeker = InfraredBall.Direction;
-//    dirGrados = -150 + (dirSeeker*30);
-//    strSeeker = InfraredBall.Strength;
-//    Serial.println(dirGrados);
-
-    //motoresRobot.motor1Mover();
-    //motoresRobot.adelante();
-//  motoresRobot.movimientoLineal(0,velocidades);
-//  delay(1000);
 //
-// motoresRobot.movimientoLineal(180,velocidades);
-//  delay(1000);
-  
-//  motoresRobot.movimientoLineal(90,velocidades);
-//  delay(1000);
-//
-// motoresRobot.movimientoLineal(-90,velocidades);
-//  delay(1000);
-//
-//  motoresRobot.movimientoLineal(45,velocidades);
-//  delay(1000);
-//
-//    motoresRobot.movimientoLineal(-135,velocidades);
-//  delay(1000);
-//
-//  motoresRobot.movimientoLineal(-45,velocidades);
-//  delay(1000);
-//
-//motoresRobot.movimientoLineal(135,velocidades);
-//  delay(1000);
-
-
-  
-
-//    //Cámara
-//    if (Serial3.available()) {   
-//        input =  Serial3.readStringUntil('\n');
-//        //Serial.println(input);
-//        if(input[0] == '0')
-//          porteriaAmarilla.actualizar(input);
-//        else
-//          porteriaAzul.actualizar(input);
-//     }
 //  
-//      
-//    //posesion = hasPosesion(strSeeker, dirSeeker);
-//    
-//    //Verificar si se debe buscar la pelota o portería
-//    if (posesion){   
-//      //motoresRobot.apagarMotores();
-//      gol(porteriaAmarilla, lastP);
-//    }
-//    else {
-//      lastSeen = seeker(dirSeeker, lastSeen);
-//    }
+//
+////  Cámara
+//
+//
+//  //    posesion = hasPosesion(strSeeker, dirSeeker);
+//
+//  //Verificar si se debe buscar la pelota o portería
+////  if (posesion) {
+////    //motoresRobot.apagarMotores();
+////    gol(porteriaAzul, lastP);
+////
+////  }
+////  else {
+////    lastSeen = seeker(dirSeeker, lastSeen);
+////  }
+
+
 
 }
 
@@ -140,106 +150,139 @@ void loop() {
 //Funciones--------------------------------------------------
 
 //---------------------------------------GOL
-char gol (Porteria p, char lastP){
+char gol (Porteria p, char lastP) {
+  
+   
+  
   //Serial.println(p.x);
 
-            if (p.x == -1){
-                  motoresRobot.setAllMotorSpeed(velocidades-50);
-                  if(lastP == 'i')
-                    motoresRobot.giroAH();
-                  else
-                    motoresRobot.giroH();
-              //Serial.println("Nothing yet");
-            }
-            else {
-              if (p.x > 220){  //Derecha
-                  motoresRobot.movimientoLineal(45, velocidades);  
-                 // digitalWrite(ledRojo, HIGH);
-                  //Serial.println(digitIn);
-                  Serial.println("der");
-                  lastP  = 'd';
-            
-                        
-                } else if (p.x < 100) {  //Izquierda
-                  motoresRobot.movimientoLineal(-45, velocidades);
-                  //lastSeen = 'i';
-                  //digitalWrite(ledVerde, HIGH);
-                  //Serial.println(digitIn);
-                  Serial.println("izq");
-                  lastP = 'i';
-    
-    
-                } else {  //Centro
-                  motoresRobot.setAllMotorSpeed(velocidades);
-                  motoresRobot.adelante();
-                  //digitalWrite(ledVerde, LOW);
-                  //digitalWrite(ledRojo, LOW);
-                  Serial.println("Adelante");
-                              
-                }
-            }
-            return lastP;
-          
-} 
+  //Si no ve la portería
+  if (p.x == -1) {
+    motoresRobot.setAllMotorSpeed(velocidades - 50);
+   // motoresRobot.apagarMotores();
+    //                  if(lastP == 'i')
+    //                    motoresRobot.giroAH();
+    //                  else
+    //                    motoresRobot.giroH();
+    Serial.println("Nothing yet");
+  }
+  else {
+    if (p.x > 220) { //Derecha
+      motoresRobot.movimientoLineal(45, velocidades);
+      // digitalWrite(ledRojo, HIGH);
+      //Serial.println(digitIn);
+      Serial.println("der");
+      lastP  = 'd';
+
+
+    } else if (p.x < 100) {  //Izquierda
+      motoresRobot.movimientoLineal(-45, velocidades);
+      //lastSeen = 'i';
+      //digitalWrite(ledVerde, HIGH);
+      //Serial.println(digitIn);
+      Serial.println("izq");
+      lastP = 'i';
+
+
+    } else {  //Centro
+      motoresRobot.setAllMotorSpeed(velocidades);
+      motoresRobot.adelante();
+      //digitalWrite(ledVerde, LOW);
+      //digitalWrite(ledRojo, LOW);
+      Serial.println("Adelante");
+
+    }
+  }
+  //}
+
+  return lastP;
+
+}
+
+//    imu.readValues();
+//  
+//    Serial.println(imu.getYaw());
+//       int change = pid.calcularError(0,imu.getYaw(),velocidades);
+//        Serial.print("Change: ");
+//        Serial.println(change);
+//  
+//        if (change > 0) {
+//          motoresRobot.giro(change, imu.isRight());
+//        }
 
 
 //---------------------------------------SEEKER
 
-bool hasPosesion(int strSeeker, int dirSeeker){
+bool hasPosesion() {
+      InfraredResult InfraredBall = InfraredSeeker::ReadAC();
+      dirSeeker = InfraredBall.Direction;
+  //    dirGrados = -150 + (dirSeeker*30);
+      strSeeker = InfraredBall.Strength;
+  //    Serial.println(dirGrados);
   //Serial.println(strSeeker);
-  if ((dirSeeker == 5) && (strSeeker > 140)){
+
+  
+  if ((dirSeeker == 5) && (strSeeker > 140)) {
     //Serial.println("true");
-   digitalWrite(ledRojo, LOW);
-     digitalWrite(ledVerde, HIGH);
+    digitalWrite(ledRojo, LOW);
+    digitalWrite(ledVerde, HIGH);
 
     return true;
   }
-    //Serial.println("false");
-    digitalWrite(ledVerde, LOW);
-    digitalWrite(ledRojo, HIGH);
+  
+  digitalWrite(ledVerde, LOW);
+  digitalWrite(ledRojo, HIGH);
 
   return false;
 }
 
 //-------------------------------------
-int seeker(int dirSeeker, int last){
-    
-    int dirGrados = -150 + (dirSeeker*30);
-      //Serial.println(dirSeeker);
+int seeker(int dirSeeker, int last) {
+  //long tiempoObjetivo = millis() + 1000;
 
-     Serial.println(dirGrados);
+  //    while(millis() < tiempoObjetivo){
 
-    if (dirSeeker == 0){
-      Serial.println("Diagonal");
-      motoresRobot.movimientoLineal(last*120, velocidades);
-      Serial.println(last*120);
+  int dirGrados = -150 + (dirSeeker * 30);
+  //Serial.println(dirSeeker);
 
-      
-    } else if ((abs(dirGrados) <= 30)) {
-      Serial.println("directo");
-      motoresRobot.movimientoLineal(dirGrados, velocidades);
-     
-    } else if ((dirGrados != 0) && (abs(dirGrados) < 90)) {
-      Serial.println("casi directoo");
-      dirGrados += (dirGrados > 0) ? 20 : -20;
-      motoresRobot.movimientoLineal(dirGrados, velocidades);
-     
-    }
+  Serial.println(dirGrados);
 
-    //Transformar resultado del seeker a grados 
-    else {
-      Serial.println("Atras");
-      motoresRobot.setAllMotorSpeed(velocidades);
-      motoresRobot.atras();
-     
-    }
-//
-    if (dirGrados > 0)
-      last = -1;
-    else
-      last = 1;
+  if (dirSeeker == 0) {
+    Serial.println("Diagonal");
+    motoresRobot.movimientoLineal(last * 120, velocidades);
+    Serial.println(last * 120);
 
-    return last;
 
-  
+  } else if ((abs(dirGrados) <= 30)) {
+    Serial.println("directo");
+    motoresRobot.movimientoLineal(dirGrados, velocidades);
+
+  } else if ((dirGrados != 0) && (abs(dirGrados) < 90)) {
+    Serial.println("casi directoo");
+    dirGrados += (dirGrados > 0) ? 20 : -20;
+    motoresRobot.movimientoLineal(dirGrados, velocidades);
+
+  }
+
+  //Transformar resultado del seeker a grados
+  else {
+    Serial.println("Atras");
+    motoresRobot.setAllMotorSpeed(velocidades);
+    motoresRobot.atras();
+
+  }
+  //}
+
+  int change = pid.calcularError(0, imu.getYaw(), velocidades);
+  motoresRobot.giro(change, imu.isRight());
+
+
+  if (dirGrados > 0)
+    last = -1;
+  else
+    last = 1;
+
+  return last;
+
+
 }

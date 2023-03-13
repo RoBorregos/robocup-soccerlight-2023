@@ -4,7 +4,7 @@ import sensor, image, time, math, pyb, utime
 from pyb import UART
 
 #Thresholds (LAB)
-amarillo = (52, 97, -25, 10, 33, 90)     #Amarillo
+amarillo = (52, 98, -26, 14, 12, 71)     #Amarillo
 azul = (21, 60, -6, 30, -74, -28)        #Azul
 
 
