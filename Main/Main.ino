@@ -5,6 +5,7 @@
 #include "Motores.h"
 #include "Imu.h"
 #include "PID.h"
+#include "AroIR.h"
 
 
 //Variables
@@ -23,10 +24,9 @@ int dirGrados;
 int strSeeker;
 int lastSeen = 1;
 
-//IMU
+//Objetos
 Imu imu;
-
-//PID
+AroIR aroIR;
 PID pid;
 
 //MOTORES
@@ -57,10 +57,7 @@ void setup() {
   //Iniciar clases
   motoresRobot.iniciar();
   pid.setKP(0.3);
-
-
   imu.iniciar();
-    Serial.println("done");
 
   //InfraredSeeker::Initialize();
 
@@ -69,49 +66,42 @@ void setup() {
 //LOOP-------------------------------------------------------
 void loop() {
 
-
-//Código para un atacante
+//Código para atacante
 if (estado == linea) {
  // estado = (inLinea()) ? linea : hasPelota;
  estado = hasPelota;
 }
 
-if (estado = hasPelota) {
+if (estado == hasPelota) {
   //estado = (hasPosesion()) ? golPorteria : buscarPelota; 
   estado = golPorteria;
 }
 
 if (estado == buscarPelota) {
-  lastSeen = seeker(dirSeeker, lastSeen);
+  lastSeen = buscar(lastSeen);
+  //lastSeen = seeker(dirSeeker, lastSeen);
 }
 
 if (estado == golPorteria) {
-   if (Serial2.available()) {
-    input =  Serial2.readStringUntil('\n');
-    Serial.println(input);
-    if (input[0] == '0')
-      porteriaAmarilla.actualizar(input);
-    else
-      porteriaAzul.actualizar(input);
-  }
+  actualizarPorterias();
   gol(porteriaAzul, lastP);
-
-      imu.readValues();
-      int change = pid.calcularError(0,imu.getYaw(),velocidades);
-//      Serial.print("Change: ");
-//        Serial.println(change);
-
-        if (change > 0) {
-          motoresRobot.giro(change, imu.isRight());
-        }
-
-        if (porteriaAzul.area > 60000)
-          estado = nada;
-  
+  correccionesImu(); 
 }
 
 if (estado == nada) {
   motoresRobot.apagarMotores();
+  correccionesImu();
+}
+
+estado = linea;
+
+}
+
+
+//-------------------------- Funciones de estados --------------------------------------------------
+
+//---------------------------------------IMU
+void correccionesImu(){
   imu.readValues();
       int change = pid.calcularError(0,imu.getYaw(),velocidades);
 //      Serial.print("Change: ");
@@ -122,37 +112,8 @@ if (estado == nada) {
         }
 }
 
-estado = nada;
-//
-//
-//  
-//
-////  Cámara
-//
-//
-//  //    posesion = hasPosesion(strSeeker, dirSeeker);
-//
-//  //Verificar si se debe buscar la pelota o portería
-////  if (posesion) {
-////    //motoresRobot.apagarMotores();
-////    gol(porteriaAzul, lastP);
-////
-////  }
-////  else {
-////    lastSeen = seeker(dirSeeker, lastSeen);
-////  }
-
-
-
-}
-
-
-//Funciones--------------------------------------------------
-
 //---------------------------------------GOL
 char gol (Porteria p, char lastP) {
-  
-   
   
   //Serial.println(p.x);
 
@@ -199,20 +160,56 @@ char gol (Porteria p, char lastP) {
 
 }
 
-//    imu.readValues();
-//  
-//    Serial.println(imu.getYaw());
-//       int change = pid.calcularError(0,imu.getYaw(),velocidades);
-//        Serial.print("Change: ");
-//        Serial.println(change);
-//  
-//        if (change > 0) {
-//          motoresRobot.giro(change, imu.isRight());
-//        }
+//---------------------------------------Porterias
+void actualizarPorterias(){
+      imu.readValues();
+  
+    Serial.println(imu.getYaw());
+       int change = pid.calcularError(0,imu.getYaw(),velocidades);
+        Serial.print("Change: ");
+        Serial.println(change);
+  
+        if (change > 0) {
+          motoresRobot.giro(change, imu.isRight());
+        }
+}
 
 
-//---------------------------------------SEEKER
+//-------------------------------------AROIR
+int buscar(int last){
+  double angulo = aroIR.getAngulo();
+  
+  if ((abs(angulo) <= 30)) {
+    Serial.println("directo");
+    motoresRobot.movimientoLineal(angulo, velocidades);
 
+  } else if (abs(angulo) < 90) {
+    Serial.println("casi directoo");
+    dirGrados += (dirGrados > 0) ? 20 : -20;
+    motoresRobot.movimientoLineal(dirGrados, velocidades);
+
+  } else if (angulo < 110) {
+    Serial.println("Atras");
+    motoresRobot.setAllMotorSpeed(velocidades);
+    motoresRobot.atras();
+    
+  } else {
+    Serial.println("Diagonal");
+    motoresRobot.movimientoLineal(last * 120, velocidades);
+    Serial.println(last * 120);
+  }
+
+  if (angulo > 0)
+    last = -1;
+  else
+    last = 1;
+
+  return last;
+  
+}
+
+
+//---------------------------------------Posesion
 bool hasPosesion() {
       InfraredResult InfraredBall = InfraredSeeker::ReadAC();
       dirSeeker = InfraredBall.Direction;
@@ -236,7 +233,7 @@ bool hasPosesion() {
   return false;
 }
 
-//-------------------------------------
+//---------------------------------------SEEKER
 int seeker(int dirSeeker, int last) {
   //long tiempoObjetivo = millis() + 1000;
 
@@ -273,6 +270,7 @@ int seeker(int dirSeeker, int last) {
   }
   //}
 
+//---------------------------------------PID
   int change = pid.calcularError(0, imu.getYaw(), velocidades);
   motoresRobot.giro(change, imu.isRight());
 
@@ -283,6 +281,5 @@ int seeker(int dirSeeker, int last) {
     last = 1;
 
   return last;
-
 
 }
