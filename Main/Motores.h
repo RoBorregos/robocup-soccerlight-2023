@@ -67,6 +67,80 @@ class Motores {
 
     }
 
+    void movimientoLinealCorregido(int degree, int velocidad, int error, bool isRight) {
+      //En base a los grados se definen las velocidades de cada motor
+      float m1 = cos(((150 - degree) * PI / 180));
+      float m2 = cos(((30 - degree) * PI / 180));;
+      float m3 = cos(((270 - degree) * PI / 180));
+
+      int speedA = (int(m1 * velocidad));
+      int speedB = (int(m2 * velocidad));
+      int speedC = (int(m3 * velocidad));
+
+      if (isRight){
+        speedA += error;
+        speedB += error;
+        speedC += error;       
+      } else {
+        speedA -= error;
+        speedB -= error;
+        speedC -= error; 
+      } 
+
+      int abSpeedA = abs(speedA);
+      int abSpeedB = abs(speedB);
+      int abSpeedC = abs(speedC);
+
+
+      int maxSpeed = max(abSpeedA,max(abSpeedB, abSpeedC));
+
+      if (maxSpeed > 255){
+        abSpeedA = map(abSpeedA, 0, maxSpeed, 0, 255);
+        abSpeedB = map(abSpeedB, 0, maxSpeed, 0, 255);
+        abSpeedC = map(abSpeedC, 0, maxSpeed, 0, 255);
+      }
+
+      
+      //Definir la velocidad de cada motor
+      analogWrite(motor1.getMotorSpeed(), abSpeedA);
+      analogWrite(motor2.getMotorSpeed(), abSpeedB);
+      analogWrite(motor3.getMotorSpeed(), abSpeedC);
+
+      //Mover motores según la velocidad (positiva o negativa)
+      if (speedA >= 0) {
+        //          analogWrite(motor1.pin1, speedA);
+        //          analogWrite(motor1.pin2, 0);
+        
+        motor1.motorAdelante();
+      } else {
+        //            analogWrite(motor1.pin1, 0);
+        //            analogWrite(motor1.pin2, -1*speedA);
+        motor1.motorAtras();
+      }
+
+      if (speedB >= 0) {
+        //          analogWrite(motor2.pin1, speedB);
+        //          analogWrite(motor2.pin2, 0);
+        motor2.motorAdelante();
+      } else {
+        //          analogWrite(motor2.pin1, 0);
+        //          analogWrite(motor2.pin2, -1*speedB);
+        motor2.motorAtras();
+      }
+
+      if (speedC >= 0) {
+        //          analogWrite(motor3.pin1, speedC);
+        //          analogWrite(motor3.pin2, 0);
+        motor3.motorAdelante();
+      } else {
+        //          analogWrite(motor3.pin1, 0);
+        //          analogWrite(motor3.pin2, -1*speedC);
+        motor3.motorAtras();
+      }
+
+    }
+
+
 //    void movimientoLineal(int degree, int velocidad) {
 //      imu.readValues();
 //

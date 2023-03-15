@@ -10,7 +10,7 @@
 
 //Variables
 bool posesion = true;
-int velocidades = 180;
+int velocidades = 160;
 String input = "";
 char lastP = "i";
 
@@ -31,7 +31,7 @@ PID pid;
 
 //MOTORES
 //Motores motoresRobot(8, 24, 25, 9, 26, 27, 10, 22, 23);
-Motores motoresRobot(8,41,27,7,25,24,6,22,23);
+Motores motoresRobot(8,41,27,7,25,24,6,23,22);
 
 //Porterias
 Porteria porteriaAzul;
@@ -47,12 +47,12 @@ enum Estados {
   nada
 };
 
-Estados estado = nada;
+Estados estado = linea;
 
 //SETUP------------------------------------------------------
 void setup() {
   Serial2.begin(9600);
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   //Iniciar clases
   motoresRobot.iniciar();
@@ -85,12 +85,23 @@ if (estado == buscarPelota) {
 if (estado == golPorteria) {
   actualizarPorterias();
   gol(porteriaAzul, lastP);
-  correccionesImu(); 
+  //correccionesImu(); 
 }
 
 if (estado == nada) {
-  motoresRobot.apagarMotores();
-  correccionesImu();
+  motoresRobot.movimientoLinealCorregido(45,velocidades,correccionesImu(), imu.isRight());
+  //motoresRobot.apagarMotores();
+  //correccionesImu();
+  
+//    motoresRobot.setAllMotorSpeed(velocidades);
+//    motoresRobot.giroH();
+//    delay(1000);
+////    motoresRobot.apagarMotores();
+////    delay(1000);
+////    motoresRobot.giroAH();
+////    delay(1000);
+//    motoresRobot.apagarMotores();
+//    delay(1000);
 }
 
 estado = linea;
@@ -101,15 +112,20 @@ estado = linea;
 //-------------------------- Funciones de estados --------------------------------------------------
 
 //---------------------------------------IMU
-void correccionesImu(){
+int correccionesImu(){
+  
   imu.readValues();
       int change = pid.calcularError(0,imu.getYaw(),velocidades);
 //      Serial.print("Change: ");
 //        Serial.println(change);
 
-        if (change > 0) {
-          motoresRobot.giro(change, imu.isRight());
-        }
+//        if (change > 0) {
+//          motoresRobot.giro(change, imu.isRight());
+//        } else {
+//          motoresRobot.apagarMotores();
+//        }
+
+        return change;
 }
 
 //---------------------------------------GOL
@@ -117,19 +133,27 @@ char gol (Porteria p, char lastP) {
   
   //Serial.println(p.x);
 
+  imu.readValues();
+  int change = pid.calcularError(0,imu.getYaw(),velocidades);
+
   //Si no ve la portería
   if (p.x == -1) {
-    motoresRobot.setAllMotorSpeed(velocidades - 50);
-   // motoresRobot.apagarMotores();
-    //                  if(lastP == 'i')
-    //                    motoresRobot.giroAH();
-    //                  else
-    //                    motoresRobot.giroH();
+    if (change > 0)
+      motoresRobot.giro(change, imu.isRight());
+    else
+      motoresRobot.apagarMotores();
+    
+//    motoresRobot.setAllMotorSpeed(100);
+//   
+//      if(lastP == 'i')
+//        motoresRobot.giroAH();
+//      else
+//        motoresRobot.giroH();
     Serial.println("Nothing yet");
   }
   else {
     if (p.x > 220) { //Derecha
-      motoresRobot.movimientoLineal(45, velocidades);
+      motoresRobot.movimientoLinealCorregido(45, velocidades,change,imu.isRight());
       // digitalWrite(ledRojo, HIGH);
       //Serial.println(digitIn);
       Serial.println("der");
@@ -137,7 +161,7 @@ char gol (Porteria p, char lastP) {
 
 
     } else if (p.x < 100) {  //Izquierda
-      motoresRobot.movimientoLineal(-45, velocidades);
+      motoresRobot.movimientoLinealCorregido(-45, velocidades,change,imu.isRight());
       //lastSeen = 'i';
       //digitalWrite(ledVerde, HIGH);
       //Serial.println(digitIn);
@@ -146,8 +170,7 @@ char gol (Porteria p, char lastP) {
 
 
     } else {  //Centro
-      motoresRobot.setAllMotorSpeed(velocidades);
-      motoresRobot.adelante();
+      motoresRobot.movimientoLinealCorregido(0, velocidades,change,imu.isRight());
       //digitalWrite(ledVerde, LOW);
       //digitalWrite(ledRojo, LOW);
       Serial.println("Adelante");
@@ -162,16 +185,14 @@ char gol (Porteria p, char lastP) {
 
 //---------------------------------------Porterias
 void actualizarPorterias(){
-      imu.readValues();
-  
-    Serial.println(imu.getYaw());
-       int change = pid.calcularError(0,imu.getYaw(),velocidades);
-        Serial.print("Change: ");
-        Serial.println(change);
-  
-        if (change > 0) {
-          motoresRobot.giro(change, imu.isRight());
-        }
+      if (Serial2.available()) {   
+        input =  Serial2.readStringUntil('\n');
+        //Serial.println(input);
+        if(input[0] == '0')
+          porteriaAmarilla.actualizar(input);
+        else
+          porteriaAzul.actualizar(input);
+     }
 }
 
 

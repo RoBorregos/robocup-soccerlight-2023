@@ -22,7 +22,7 @@ void setup() {
 void loop() {
 
   // Serial.println(anguloIR());
-    Serial.println(anguloIR());
+    Serial.println(String(anguloIR()));
 
 }
 
