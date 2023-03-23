@@ -189,20 +189,37 @@ int buscar(int last) {
   }
 
   //Pelota Adelante 
-  if ((abs(angulo) <= 30)) {
+  if ((abs(angulo) < 45)) {
     Serial.println("directo");
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, imu.isRight());
+    // motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, imu.isRight());
+    do {
+      motoresRobot.movimientoLinealCorregido(45, velocidades, change, imu.isRight());
+    } while (aroIR.getAngulo() > 2);
 
   //Pelota Adelante diagonal
-  } else if (abs(angulo) < 45) {
-    angulo += (angulo > 0) ? 25 : -25;
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, imu.isRight());
+  } else if (abs(angulo) < 140) {
+    do{
+      motoresRobot.movimientoLinealCorregido(180, velocidades, change, imu.isRight());
+    } while (aroIR.getAngulo() > 45);
+    short i = 0;
+    do{
+      motoresRobot.movimientoLinealCorregido(i, velocidades, change, imu.isRight());
+      delay(20);
+      i += 1;
+    } while (aroIR.getAngulo() > 2);
 
   //Pelota Adelante a los lados
-  } else if (abs(angulo) < 80) {
+  } else if (abs(angulo) < 225) {
     Serial.println("casi directoo");
-    angulo += (angulo > 0) ? 40 : -40;
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, imu.isRight());
+    do{
+      motoresRobot.movimientoLinealCorregido(180, velocidades, change, imu.isRight());
+    } while (aroIR.getAngulo() > 90);
+    short i = 0;
+    do{
+      motoresRobot.movimientoLinealCorregido(i, velocidades, change, imu.isRight());
+      delay(20);
+      i += 1;
+    } while (aroIR.getAngulo() > 2);
 
   //Pelota a los lados
   } else if (abs(angulo) < 120) {
@@ -317,4 +334,102 @@ void tests() {
   ////    delay(1000);
   //    motoresRobot.apagarMotores();
   //    delay(1000);
+}
+
+
+
+
+// FOTOTRANSISTORES
+void lecturaF(){
+  for (int i=0; i<3; i++){
+    for (int j=0; j<8; j++){
+      if (lectura(j,i) >= fotoMinB[i][j] && lectura(j,i) <= fotoMaxB[i][j]){
+        Serial.print("Jaló el (P  F): ");
+        Serial.print(i);
+        Serial.print(" ");
+        Serial.println(j);
+        motoresRobot.movimientoLineal(180,velocidades);
+        delay(10);
+      }
+    }
+  }
+}
+int lectura(int ft, int placa){   // 1: derecha (1,3,4)
+  switch (ft){
+    case 0: binario(0,placa); return analogRead(sig[placa]); break;
+    case 1: binario(1,placa); return analogRead(sig[placa]); break;
+    case 2: binario(2,placa); return analogRead(sig[placa]); break;
+    case 3: binario(3,placa); return analogRead(sig[placa]); break;
+    case 4: binario(4,placa); return analogRead(sig[placa]); break;
+    case 5: binario(5,placa); return analogRead(sig[placa]); break;
+    case 6: binario(6,placa); return analogRead(sig[placa]); break;
+    case 7: binario(7,placa); return analogRead(sig[placa]); break;
+  }
+}
+void binario(int pin, int lado){
+  switch (pin){
+    case 0: 
+      digitalWrite(sC[lado],0); 
+      digitalWrite(sB[lado],0); 
+      digitalWrite(sA[lado],0); break;
+    case 1:
+      digitalWrite(sC[lado],0); 
+      digitalWrite(sB[lado],0); 
+      digitalWrite(sA[lado],1); break;
+    case 2:
+      digitalWrite(sC[lado],0); 
+      digitalWrite(sB[lado],1); 
+      digitalWrite(sA[lado],0); break;
+    case 3:
+      digitalWrite(sC[lado],0); 
+      digitalWrite(sB[lado],1); 
+      digitalWrite(sA[lado],1); break;
+    case 4: 
+      digitalWrite(sC[lado],1); 
+      digitalWrite(sB[lado],0); 
+      digitalWrite(sA[lado],0); break;
+    case 5: 
+      digitalWrite(sC[lado],1); 
+      digitalWrite(sB[lado],0); 
+      digitalWrite(sA[lado],1); break;
+    case 6: 
+      digitalWrite(sC[lado],1); 
+      digitalWrite(sB[lado],1); 
+      digitalWrite(sA[lado],0); break;
+    case 7: 
+      digitalWrite(sC[lado],1); 
+      digitalWrite(sB[lado],1); 
+      digitalWrite(sA[lado],1); break;
+  }
+}
+void calibracionFototransistores(){
+
+  for (int i=0; i<3; i++){   // calibrar VERDE
+    for (int j=0; j<8; j++){
+      for (int k=0; k<1000; k++){
+        int lec = lectura(j,i);
+        if (lec < fotoMinV[i][j]){
+          fotoMinV[i][j] = lec;
+        }
+        else if (lec > fotoMaxV[i][j]){
+          fotoMaxV[i][j] = lec;
+        }
+      }
+    }
+  }
+
+  for (int i=0; i<3; i++){   // calibrar BLANCO
+    for (int j=0; j<8; j++){
+      for (int k=0; k<1000; k++){
+        int lec = lectura(j,i);
+        if (lec < fotoMinB[i][j]){
+          fotoMinB[i][j] = lec;
+        }
+        else if (lec > fotoMaxB[i][j]){
+          fotoMaxB[i][j] = lec;
+        }
+      }
+    }
+    while (digitalRead(pinBoton) == 1){}
+  }
 }
