@@ -13,25 +13,12 @@ bool posesion = true;
 int velocidades = 160;
 String input = "";
 char lastP = "i";
-
-//LEDs
-int ledRojo = 2;
-int ledVerde = 3;
-
-//Seeker
-int dirSeeker;
-int dirGrados;
-int strSeeker;
 int lastSeen = 1;
 
 //Objetos
 Imu imu;
 AroIR aroIR;
 PID pid;
-//Ultrasonicos ultrasonicos();
-
-//MOTORES
-//Motores motoresRobot(8, 24, 25, 9, 26, 27, 10, 22, 23);
 Motores motoresRobot(8, 41, 27, 7, 25, 24, 6, 23, 22);
 
 //Porterias
@@ -61,11 +48,10 @@ void setup() {
   pid.setKP(0.3);
   imu.iniciar();
 
-
 }
 
-//Código para atacante
 
+//Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
   
@@ -133,10 +119,8 @@ char gol (Porteria p, char lastP) {
     else
       motoresRobot.apagarMotores();
 
-    Serial.println("Nothing yet");
-    
+    Serial.println("Nothing yet");   
   }
-
   
   else {
     if (p.x > 220) { //Derecha
