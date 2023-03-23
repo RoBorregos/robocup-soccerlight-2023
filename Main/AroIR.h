@@ -11,6 +11,7 @@ class AroIR {
     }
 
 
+    //Leer datos del aro IR
     void actualizarDatos() {
       if (Serial3.available()) {
         String input = Serial3.readStringUntil('\n');
@@ -25,6 +26,7 @@ class AroIR {
     }
 
 
+    //Getters
     double getAngulo() {
       return angulo;
     }

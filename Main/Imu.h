@@ -111,6 +111,7 @@ class Imu {
       }
     }
 
+    //Getters
     double getYaw() {
       right = (yaw > 0) ? true : false;
       return yaw;

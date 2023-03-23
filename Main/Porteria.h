@@ -7,6 +7,7 @@ class Porteria {
     int h;
     int area;
 
+    //Default
     Porteria() {
       color = -1;
       x = -1;
@@ -15,7 +16,8 @@ class Porteria {
       h = -1;
     }
 
-    
+
+    //Almacenar los datos de la cámara
     void actualizar(String str) {
       int arr[5];
       String data = "";
