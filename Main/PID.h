@@ -12,20 +12,8 @@ class PID {
     PID() {
     }
 
-    PID(double P) {
-      kP = P;
-    }
-    void setPID(double kP, double kD) {
-      setKP(kP);
-      setKD(kD);
-    }
-
     void setKP(double P) {
       kP = P;
-    }
-
-    void setKD(double kD) {
-      this->kD = kD;
     }
 
     double getKP() {
@@ -38,7 +26,6 @@ class PID {
       if (error <= 5) return 0;
       error = min(kP * error, 60);
       error = map(error, 0, 60, minToMove, 255);
-
 
       return error;
     }

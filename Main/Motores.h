@@ -140,67 +140,6 @@ class Motores {
 
     }
 
-
-//    void movimientoLineal(int degree, int velocidad) {
-//      imu.readValues();
-//
-//      Serial.println(imu.getYaw());
-//      int velocidadGiro = pid.calcularError(0, imu.getYaw(), velocidades);
-//      bool dirRight = imu.isRight());
-//      //En base a los grados se definen las velocidades de cada motor
-//      float m1 = cos(((150 - degree) * PI / 180));
-//      float m2 = cos(((30 - degree) * PI / 180));;
-//      float m3 = cos(((270 - degree) * PI / 180));
-//      int speedA = abs(int(m1 * velocidad));
-//      int speedB = abs(int(m2 * velocidad));
-//      int speedC = abs(int(m3 * velocidad));
-//
-//      //Definir la velocidad de cada motor
-//      analogWrite(motor1.getMotorSpeed(), speedA);
-//      analogWrite(motor2.getMotorSpeed(), speedB);
-//      analogWrite(motor3.getMotorSpeed(), speedC);
-//
-//
-//
-//      //Mover motores según la velocidad (positiva o negativa)
-//      if (m1 >= 0) {
-//      if (velocidadGiro > 0 && dirRight) {
-//          speedA = speedA * 0.7 + velocidadGiro * 0.3;
-//        }
-//        //          analogWrite(motor1.pin1, speedA);
-//        //          analogWrite(motor1.pin2, 0);
-//        motor1.motorAdelante();
-//      } else {
-//        if (velocidadGiro > 0 && !dirRight) {
-//          speedA = speedA * 0.7 + velocidadGiro * 0.3;
-//        }
-//        //            analogWrite(motor1.pin1, 0);
-//        //            analogWrite(motor1.pin2, -1*speedA);
-//        motor1.motorAtras();
-//      }
-//
-//      if (m2 >= 0) {
-//      //          analogWrite(motor2.pin1, speedB);
-//      //          analogWrite(motor2.pin2, 0);
-//      motor2.motorAdelante();
-//      } else {
-//        //          analogWrite(motor2.pin1, 0);
-//        //          analogWrite(motor2.pin2, -1*speedB);
-//        motor2.motorAtras();
-//      }
-//
-//      if (m3 >= 0) {
-//      //          analogWrite(motor3.pin1, speedC);
-//      //          analogWrite(motor3.pin2, 0);
-//      motor3.motorAdelante();
-//      } else {
-//        //          analogWrite(motor3.pin1, 0);
-//        //          analogWrite(motor3.pin2, -1*speedC);
-//        motor3.motorAtras();
-//      }
-//    }
-
-
     void setAllMotorSpeed(int allSpeed) {
       analogWrite(motor1.getMotorSpeed(), allSpeed);
       analogWrite(motor2.getMotorSpeed(), allSpeed);
