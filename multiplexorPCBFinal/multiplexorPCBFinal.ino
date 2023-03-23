@@ -22,9 +22,9 @@ double DIAMETRO = 0.11; //m
 
 int sig[3] = {A1,A0,A2}; // pines signal: DERECHA, IZQUIERDA, PRINCIPAL
 
-int sC[3] = {1,49,1};  // pines de 'control' ABC 
-int sB[3] = {1,48,1};
-int sA[3] = {1,47,1};
+int sC[3] = {1,7,1};  // pines de 'control' ABC 
+int sB[3] = {1,8,1};
+int sA[3] = {1,9,1};
 
 int fotoD[8] = {0,0,0,0,0,0,0,0};     // lecturas de los fototransistores
 int fotoI[8] = {0,0,0,0,0,0,0,0}; 
@@ -33,7 +33,6 @@ int fotoP[8] = {0,0,0,0,0,0,0,0};
 #define blanco 0      // detección del blanco
 #define verde 0
 #define error 10     // rango de detección del blanco
-
 
 
 
@@ -81,8 +80,8 @@ void loop(){
     Serial.print("Lectura del ft IZQUIERDA");
     Serial.print(i);
     Serial.print(" : ");
-    fotoI[i] = lectura(i,1);
-    Serial.println(lectura(i,1));
+    fotoI[i] = lectura(i,0);
+    Serial.println(lectura(i,0));
     delay(1);
     
     if (fotoI[i] <= blanco+10 and fotoI[i] >= blanco-10){ // si detecta blanco 

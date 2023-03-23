@@ -15,6 +15,7 @@ class Porteria {
       h = -1;
     }
 
+    
     void actualizar(String str) {
       int arr[5];
       String data = "";

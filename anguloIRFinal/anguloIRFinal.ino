@@ -22,7 +22,8 @@ void setup() {
 void loop() {
 
   // Serial.println(anguloIR());
-    Serial.println(String(anguloIR()));
+  String angulo = "a " + String(anguloIR()) + "\n";
+    Serial.print(angulo);
 
 }
 
