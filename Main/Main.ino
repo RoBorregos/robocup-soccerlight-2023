@@ -6,6 +6,8 @@
 #include "Imu.h"
 #include "PID.h"
 #include "AroIR.h"
+#include "Posicion.h"
+#include "Color.h"
 
 
 //Variables
@@ -19,6 +21,9 @@ int lastSeen = 1;
 Imu imu;
 AroIR aroIR;
 PID pid;
+Posicion pos;
+Color color;
+
 Motores motoresRobot(8, 41, 27, 7, 25, 24, 6, 23, 22);
 
 //Porterias
@@ -47,6 +52,9 @@ void setup() {
   motoresRobot.iniciar();
   pid.setKP(0.3);
   imu.iniciar();
+  pos.iniciar();
+  color.iniciar();
+  color.calibrar();
 
 }
 
