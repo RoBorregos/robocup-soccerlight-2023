@@ -190,7 +190,7 @@ int buscar(int last) {
 
   //Pelota Adelante 
   if ((abs(angulo) < 45)) {
-    Serial.println("directo");
+    Serial.println("< 45");
     // motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, imu.isRight());
     do {
       motoresRobot.movimientoLinealCorregido(45, velocidades, change, imu.isRight());
@@ -198,6 +198,7 @@ int buscar(int last) {
 
   //Pelota Adelante diagonal
   } else if (abs(angulo) < 140) {
+    Serial.println("< 140");
     do{
       motoresRobot.movimientoLinealCorregido(180, velocidades, change, imu.isRight());
     } while (aroIR.getAngulo() > 45);
@@ -209,8 +210,8 @@ int buscar(int last) {
     } while (aroIR.getAngulo() > 2);
 
   //Pelota Adelante a los lados
-  } else if (abs(angulo) < 225) {
-    Serial.println("casi directoo");
+  } else if (abs(angulo) < 250) {
+    Serial.println("< 250");
     do{
       motoresRobot.movimientoLinealCorregido(180, velocidades, change, imu.isRight());
     } while (aroIR.getAngulo() > 90);
@@ -222,10 +223,11 @@ int buscar(int last) {
     } while (aroIR.getAngulo() > 2);
 
   //Pelota a los lados
-  } else if (abs(angulo) < 120) {
-    Serial.println("Atras");
-    motoresRobot.setAllMotorSpeed(velocidades);
-    motoresRobot.movimientoLinealCorregido(180, velocidades, change, imu.isRight());
+  } else if (abs(angulo) < 360) {
+        Serial.println("< 360");
+    do {
+      motoresRobot.movimientoLinealCorregido(225, velocidades, change, imu.isRight());
+    } while (aroIR.getAngulo() > 2);
 
   //Pelota atrás diagonal
   } else {
