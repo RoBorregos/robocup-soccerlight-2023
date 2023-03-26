@@ -21,7 +21,6 @@ class AroIR {
         }
         else
           strength = input.substring(2, input.length()).toDouble();
-
       }
     }
 
@@ -34,6 +33,8 @@ class AroIR {
     double getStrength() {
       return strength;
     }
+
+    
 
 
 

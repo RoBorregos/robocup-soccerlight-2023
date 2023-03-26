@@ -12,8 +12,7 @@ class Imu {
     bool right = true;
 
   public:
-    Imu() {
-     
+    Imu() {    
     }
 
     void iniciar() {

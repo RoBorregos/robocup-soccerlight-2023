@@ -3,9 +3,11 @@
 #include <HTInfraredSeeker.h>
 #include "Porteria.h"
 #include "Motores.h"
-#include "Imu.h"
+//#include "Imu.h"
 #include "PID.h"
 #include "AroIR.h"
+#include "Color.h"
+#include "BNO.h"
 
 
 //Variables
@@ -16,10 +18,13 @@ char lastP = "i";
 int lastSeen = 1;
 
 //Objetos
-Imu imu;
+//Imu imu;
 AroIR aroIR;
 PID pid;
 Motores motoresRobot(8, 41, 27, 7, 25, 24, 6, 23, 22);
+Color color;
+//Adafruit_BNO055 bno;
+BNO gyro;
 
 //Porterias
 Porteria porteriaAzul;
@@ -36,7 +41,7 @@ enum Estados {
   nada
 };
 
-Estados estado = linea;
+Estados estado = nada;
 
 //SETUP------------------------------------------------------
 void setup() {
@@ -46,7 +51,8 @@ void setup() {
   //Iniciar objetos
   motoresRobot.iniciar();
   pid.setKP(0.3);
-  imu.iniciar();
+  gyro.iniciar();
+  color.iniciar();
 
 }
 
@@ -55,11 +61,13 @@ void setup() {
 //LOOP-------------------------------------------------------
 void loop() {
   
+//   motoresRobot.setAllMotorSpeed(velocidades);
+//   motoresRobot.motor1Mover();
 
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
-    // estado = (inLinea()) ? linea : hasPelota;
-    estado = hasPelota;
+
+    //estado = hasPelota;
   }
 
   //Revisar si se tiene posesión de la pelota
@@ -82,11 +90,14 @@ void loop() {
 
   //Pruebas
   if (estado == nada) {
-    lastSeen = buscar(lastSeen);
+    //lastSeen = buscar(lastSeen);
     //tests();
+    gyro.readValues();
+    Serial.println(gyro.getYaw());
+  
   }
 
-  estado = linea;
+  estado = nada;
 
 }
 
@@ -96,12 +107,19 @@ void loop() {
 //---------------------------------------IMU
 //Devolver el error a corregir
 int correccionesImu() {
-  imu.readValues();
-  int change = pid.calcularError(0, imu.getYaw(), velocidades);
+  gyro.readValues();
+  int change = pid.calcularError(0, gyro.getYaw(), velocidades);
 
   return change;
 }
 
+bool salirLinea(int angulo){
+  int change = correccionesImu();
+     motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
+     estado = color.checkForLinea() ? linea : hasPelota;
+
+    return true;
+}
 
 //---------------------------------------GOL
 //Ir a la portería dependiendo de las lecturas de la OpenMV
@@ -109,13 +127,13 @@ char gol (Porteria p, char lastP) {
 
   //Serial.println(p.x);
 
-  imu.readValues();
-  int change = pid.calcularError(0, imu.getYaw(), velocidades);
+  gyro.readValues();
+  int change = pid.calcularError(0, gyro.getYaw(), velocidades);
 
   //Si no ve la portería
   if (p.x == -1) {
     if (change > 0)
-      motoresRobot.giro(change, imu.isRight());
+      motoresRobot.giro(change, gyro.isRight());
     else
       motoresRobot.apagarMotores();
 
@@ -124,7 +142,7 @@ char gol (Porteria p, char lastP) {
   
   else {
     if (p.x > 220) { //Derecha
-      motoresRobot.movimientoLinealCorregido(45, velocidades, change, imu.isRight());
+      motoresRobot.movimientoLinealCorregido(45, velocidades, change, gyro.isRight());
       // digitalWrite(ledRojo, HIGH);
       //Serial.println(digitIn);
       Serial.println("der");
@@ -132,7 +150,7 @@ char gol (Porteria p, char lastP) {
 
 
     } else if (p.x < 100) {  //Izquierda
-      motoresRobot.movimientoLinealCorregido(-45, velocidades, change, imu.isRight());
+      motoresRobot.movimientoLinealCorregido(-45, velocidades, change, gyro.isRight());
       //lastSeen = 'i';
       //digitalWrite(ledVerde, HIGH);
       //Serial.println(digitIn);
@@ -141,7 +159,7 @@ char gol (Porteria p, char lastP) {
 
 
     } else {  //Centro
-      motoresRobot.movimientoLinealCorregido(0, velocidades, change, imu.isRight());
+      motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
       //digitalWrite(ledVerde, LOW);
       //digitalWrite(ledRojo, LOW);
       Serial.println("Adelante");
@@ -178,7 +196,8 @@ void actualizarPorterias() {
 //Buscar y moverse según la posición de la pelota
 int buscar(int last) {
   
-  int change = correccionesImu();
+  gyro.readValues();
+  int change = pid.calcularError(0, gyro.getYaw(), velocidades);
   aroIR.actualizarDatos();
   double angulo = aroIR.getAngulo();
 
@@ -191,29 +210,29 @@ int buscar(int last) {
   //Pelota Adelante 
   if ((abs(angulo) <= 30)) {
     Serial.println("directo");
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, imu.isRight());
+    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
 
   //Pelota Adelante diagonal
   } else if (abs(angulo) < 45) {
     angulo += (angulo > 0) ? 25 : -25;
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, imu.isRight());
+    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
 
   //Pelota Adelante a los lados
   } else if (abs(angulo) < 80) {
     Serial.println("casi directoo");
     angulo += (angulo > 0) ? 40 : -40;
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, imu.isRight());
+    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
 
   //Pelota a los lados
   } else if (abs(angulo) < 120) {
     Serial.println("Atras");
     motoresRobot.setAllMotorSpeed(velocidades);
-    motoresRobot.movimientoLinealCorregido(180, velocidades, change, imu.isRight());
+    motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
 
   //Pelota atrás diagonal
   } else {
     Serial.println("Diagonal");
-    motoresRobot.movimientoLinealCorregido(last * 120, velocidades, change, imu.isRight());
+    motoresRobot.movimientoLinealCorregido(last * 120, velocidades, change, gyro.isRight());
     Serial.println(last * 120);
   }
 
@@ -297,19 +316,24 @@ int seeker(int dirSeeker, int last) {
 void tests() {
   //ultrasonicos.calcularDatos();
   //Serial.println(ultrasonicos.getAngulo(20,20));
-  aroIR.actualizarDatos();
-  double angulo = aroIR.getAngulo();
-  Serial.println(aroIR.getStrength());
-  Serial.println(angulo);
+//  aroIR.actualizarDatos();
+//  double angulo = aroIR.getAngulo();
+//  Serial.println(aroIR.getStrength());
+//  Serial.println(angulo);
   //
   //double str = aroIR.getStrength();
   // Serial.println(str);
-  // motoresRobot.movimientoLinealCorregido(45,velocidades,correccionesImu(), imu.isRight());
+  
+ // imu.readValues();
+  //Serial.println(imu.getYaw());
+ // int change = pid.calcularError(0, imu.getYaw(), velocidades);
+   //motoresRobot.movimientoLinealCorregido(45,velocidades,correccionesImu(), imu.isRight());
+  // motoresRobot.movimientoLineal(45,velocidades);
   //motoresRobot.apagarMotores();
   //correccionesImu();
 
   motoresRobot.setAllMotorSpeed(velocidades);
-  //    motoresRobot.giroH();
+      motoresRobot.giroH();
   //    delay(1000);
   ////    motoresRobot.apagarMotores();
   ////    delay(1000);
