@@ -6,6 +6,7 @@
 #include "Imu.h"
 #include "PID.h"
 #include "AroIR.h"
+#include "Color.h"
 //#include "BNO.h"
 
 
@@ -23,7 +24,7 @@ PID pid;
 Motores motoresRobot(2, 29, 27, 3, 23, 25, 4, 22, 24);
 
 
-//Color color;
+Color color;
 //Adafruit_BNO055 bno;
 Imu gyro;
 
@@ -42,7 +43,7 @@ enum Estados {
   nada
 };
 
-Estados estado = buscarPelota;
+Estados estado = linea;
 
 //SETUP------------------------------------------------------
 void setup() {
@@ -54,7 +55,7 @@ void setup() {
   pid.setKP(0.4);
   gyro.iniciar();
   aroIR.iniciar();
-  //color.iniciar();
+  color.iniciar();
 
 }
 
@@ -67,7 +68,8 @@ void loop() {
     
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
-    estado = hasPelota;
+    estado = inLinea()? linea: hasPelota;
+    estado = linea;
   }
 
   //Revisar si se tiene posesión de la pelota
@@ -93,12 +95,28 @@ void loop() {
       tests();
   }
 
-  estado = buscarPelota;
+  estado = linea;
 
 }
 
 
 //-------------------------- Funciones de estados --------------------------------------------------
+
+
+bool inLinea(){
+  double angle = color.checkForLinea();
+  Serial.println(angle);
+  int change = correccionesImu();
+  
+  if (angle == -1){
+    motoresRobot.movimientoLineal(0,velocidades);
+    return false;
+  } else {
+    motoresRobot.movimientoLinealCorregido(angle,velocidades,change,gyro.isRight());
+  }
+  return true;
+  
+}
 
 //---------------------------------------IMU
 //Devolver el error a corregir
