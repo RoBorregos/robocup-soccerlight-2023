@@ -221,7 +221,13 @@ class Motores {
       delay(1000);
     }
 
-    void motor1Mover() {
+    void mover1() {
+      motor1.motorAdelante();
+    }
+    void mover2() {
+      motor2.motorAdelante();
+    }
+    void mover3() {
       motor3.motorAdelante();
     }
 

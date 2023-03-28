@@ -100,6 +100,7 @@ class Imu {
 
           if (yaw > 180) {
             yaw = -180 + (yaw - 180);
+            yaw = yaw*-1;
           }
 
           yaw = yaw1;

@@ -1,23 +1,29 @@
 class AroIR {
 
   private:
-    double angulo = 0.0;
-    double strength = 0.0;
+    double angulo = 1.0;
+    double strength = 1.0;
 
 
   public:
     AroIR() {
-      Serial3.begin(115200);
+    }
+
+    void iniciar() {
+      Serial2.begin(115200);
+
     }
 
 
     //Leer datos del aro IR
     void actualizarDatos() {
-      if (Serial3.available()) {
-        String input = Serial3.readStringUntil('\n');
+      if (Serial2.available()) {
+        Serial2.println("serial1");
+        String input = Serial2.readStringUntil('\n');
+       
         if (input[0] == 'a') {
           angulo = input.substring(2, input.length()).toDouble();
-          angulo -= 90;
+         // angulo += 180;
         }
         else
           strength = input.substring(2, input.length()).toDouble();
