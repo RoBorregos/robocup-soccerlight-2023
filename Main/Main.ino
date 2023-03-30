@@ -55,7 +55,7 @@ enum Estados {
   nada
 };
 
-Estados estado = hasPelota;
+Estados estado = nada;
 
 //SETUP------------------------------------------------------
 void setup() {
@@ -132,7 +132,7 @@ void loop() {
       tests();
   }
 
-  estado = hasPelota;
+  estado = nada;
 
 }
 
@@ -545,8 +545,8 @@ void tests() {
   //ARO-IRRRR________________________________
 //     aroIR.actualizarDatos();
 //     double angulo = aroIR.getAngulo();
-     //Serial.println(angulo);
-//     Serial.println(aroIR.getStrength());
+//     Serial.println(angulo);
+     //Serial.println(aroIR.getStrength());
 
    
   //CAMARA____________________________________
@@ -558,11 +558,11 @@ void tests() {
   
 
   //IMU______________________________________
-     gyro.readValues();
-    Serial.println(gyro.getYaw());
+//     gyro.readValues();
+//    Serial.println(gyro.getYaw());
 
-  int change = correccionesImu();
-  motoresRobot.giro(change, gyro.isRight());
+//  int change = correccionesImu();
+//  motoresRobot.giro(change, gyro.isRight());
 
 
   //MOTORES GIRO______________________________
@@ -578,12 +578,12 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-//     motoresRobot.setAllMotorSpeed(velocidades);
-//     motoresRobot.mover1();
-//     delay(1000);
-//     motoresRobot.mover2();
-//     delay(1000);
-//     motoresRobot.mover3();
+     motoresRobot.setAllMotorSpeed(velocidades);
+     motoresRobot.mover1();
+     delay(1000);
+     motoresRobot.mover2();
+     delay(1000);
+     motoresRobot.mover3();
 //  
   //   motoresRobot.giroH();
 
