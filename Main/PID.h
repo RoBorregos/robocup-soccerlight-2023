@@ -5,7 +5,7 @@ class PID {
     double kD;
     double error;
     double errorPrev;
-    const int minToMove = 100;
+    const int minToMove = 110;
 
 
   public:
@@ -24,8 +24,8 @@ class PID {
     int calcularError(int objetivo, int cur, int velocidad) {
       error = abs(objetivo - cur);
       if (error <= 5) return 0;
-      error = min(kP * error, 60);
-      error = map(error, 0, 60, minToMove, 255);
+      error = min(kP * error, 70);
+      error = map(error, 0, 70, minToMove, 255);
 
       return error;
     }

@@ -100,9 +100,10 @@ class Imu {
 
           if (yaw > 180) {
             yaw = -180 + (yaw - 180);
-            yaw = yaw*-1;
+            //yaw = yaw*-1;
           }
-
+          
+          right = (yaw > 0) ? true : false;
           yaw = yaw1;
           pitch = pitch1;
           roll = roll1;
