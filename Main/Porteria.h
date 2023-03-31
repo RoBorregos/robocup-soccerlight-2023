@@ -19,6 +19,7 @@ class Porteria {
     //Almacenar los datos de la cámara
     void actualizar(String str) {
       if (str.length() == 0) {
+        x = -1;
         return;
       }
       

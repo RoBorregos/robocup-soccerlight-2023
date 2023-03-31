@@ -18,9 +18,9 @@
 //Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 #include "Imu.h"
-//#include "BNO.h"
+#include "BNO.h"
 
-Imu gyro;
+BNO gyro;
 
 
 //Variables
@@ -39,8 +39,8 @@ bool timeFlag = true;
 //Motores motoresRobot(8, 41, 27, 7, 25, 24, 6, 23, 22);
 //Motores motoresRobot(2, 29, 27, 3, 23, 25, 4, 22, 24);
 
-//Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
-Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32); //robot imu
+Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
+//Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32); //robot imu
 
 unsigned long ms = 0;
 unsigned long ms2 = 0;
@@ -66,7 +66,7 @@ enum Estados {
   nada
 };
 
-Estados estado = buscarPelota;
+Estados estado = linea;
 
 
 //SETUP------------------------------------------------------
@@ -104,7 +104,7 @@ void setup() {
 //Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
-Serial.println("O");
+//Serial.println("O");
 //  oled.clearDisplay();
 //  oled.setCursor(0, 10);        // position to display
 //  oled.print("Imu: "); 
@@ -115,13 +115,14 @@ Serial.println("O");
   if (estado == linea) {
      ms2 = millis();
     estado = inLinea()? linea: hasPelota;
-   // estado = linea;
+    //estado = linea;
   }
 
   //Revisar si se tiene posesión de la pelota
   if (estado == hasPelota) {    
     estado = (isLimit()) ? golPorteria : buscarPelota;
-    
+    //gyro.readValues();
+
     //estado = hasPelota;
     // estado = nada;
   }
@@ -135,10 +136,12 @@ Serial.println("O");
 
   //Ir a la portería con la pelota
   if (estado == golPorteria) {
-       ms = millis();
+       //ms = millis();
        actualizarPorterias();
-       Serial.println(porteriaAzul.getX());
-       lastP = gol(porteriaAzul.getX(), lastP);
+       int x1 = porteriaAzul.getX();
+       //Serial.println(x1);
+       lastP = gol(x1, lastP);
+       
 //     if(!timeFlag){
 //      timeFlag = true;
 //      ms = millis();
@@ -156,7 +159,7 @@ Serial.println("O");
       tests();
   }
 
-  estado = buscarPelota;
+  estado = linea;
 
 }
 
@@ -234,15 +237,16 @@ char gol(int px, char lastP) {
   //Serial.println(p.x);
   
  // while((millis() - ms) < 1000){
-    gyro.readValues();
+  
     int change = correccionesImu();
+    bool r = gyro.isRight();
    
-    Serial.println(change);
+    //Serial.println(change);
   
     //Si no ve la portería
     if (px == -1) {
       if (change > 0)
-        motoresRobot.giro(change, gyro.isRight());
+        motoresRobot.giro(change, r);
       else
         motoresRobot.apagarMotores();
   
@@ -251,20 +255,20 @@ char gol(int px, char lastP) {
   
     else {
       if (px > 220) { //Derecha
-        motoresRobot.movimientoLinealCorregido(45, velocidades, change, gyro.isRight());
+        motoresRobot.movimientoLinealCorregido(45, velocidades, change, r);
     
         Serial.println("der");
         lastP  = 'd';
   
   
       } else if (px < 100) {  //Izquierda
-        motoresRobot.movimientoLinealCorregido(-45, velocidades, change, gyro.isRight());
+        motoresRobot.movimientoLinealCorregido(-45, velocidades, change, r);
         Serial.println("izq");
         lastP = 'i';
   
   
       } else {  //Centro
-        motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+        motoresRobot.movimientoLinealCorregido(0, velocidades, change, r);
        
         Serial.println("Adelante");
   
@@ -278,8 +282,11 @@ char gol(int px, char lastP) {
 }
 
 bool isLimit(){
-  Serial.println(digitalRead(limitSwitch));
-  return (digitalRead(limitSwitch) == 1 || digitalRead(limitSwitch2) == 1) ? true : false;
+  //Serial.println(digitalRead(limitSwitch));
+  if (digitalRead(limitSwitch) == 1 || digitalRead(limitSwitch2) == 1) {
+    return true;
+  }
+  return false;
 }
 
 
@@ -466,10 +473,16 @@ bool inLinea(){
     return false;
   } else {
 
+  while((millis() - ms2) < 500) {
+        gyro.readValues();
+        motoresRobot.movimientoLinealCorregido(angle1,190,correccionesImu(),gyro.isRight());
+     }
+
+
     //if (millis() - time_ms > 500) {
 //        time_ms = millis();
        // motoresRobot.movimientoLineal(angle1, velocidades);
-            motoresRobot.movimientoLinealCorregido(angle1,velocidades,change,gyro.isRight());
+        // motoresRobot.movimientoLinealCorregido(angle1,velocidades,change,gyro.isRight());
 
     //}
   }
@@ -503,7 +516,7 @@ bool hasPosesion() {
   double str = aroIR.getStrength();
   double angulo = aroIR.getAngulo();
 
-  Serial.println(angulo);
+  //Serial.println(angulo);
 
   if ((angulo >= -20 && angulo <= 20) && (str < 21)) {
     Serial.println("true");
@@ -581,14 +594,14 @@ void tests() {
     
   
   //ARO-IRRRR________________________________
-     aroIR.actualizarDatos();
-     double angulo = aroIR.getAngulo();
-     Serial.println(angulo);
+//     aroIR.actualizarDatos();
+//     double angulo = aroIR.getAngulo();
+//     Serial.println(angulo);
 //     Serial.println(aroIR.getStrength());
 
    
   //CAMARA____________________________________
- //    actualizarPorterias(); 
+  //   actualizarPorterias(); 
 //     Serial.println("po");
 //     Serial.println(porteriaAzul.x);
 //     Serial.println(porteriaAmarilla.x);
@@ -598,22 +611,13 @@ void tests() {
   //IMU______________________________________
 //     gyro.readValues();
 //    Serial.println(gyro.getYaw());
-//  int change = correccionesImu();
+ // int change = correccionesImu();
 //
 //  motoresRobot.setAllMotorSpeed(velocidades);
 //  motoresRobot.giro(change, gyro.isRight());
 
 
-  //MOTORES GIRO______________________________
-  //   motoresRobot.setAllMotorSpeed(velocidades);
-  //   motoresRobot.giroH();
-  //   delay(1000);
-  //   motoresRobot.apagarMotores();
-  //   delay(1000);
-  //   motoresRobot.giroAH();
-  //   delay(1000);
-  //   motoresRobot.apagarMotores();
-  //   delay(1000);
+
 
 
   //MOTORESS INDIVIDUAL______________________________________
@@ -626,12 +630,25 @@ void tests() {
 ////  
   //   motoresRobot.giroH();
 
+  
+
 
 //LIMIT SWITCH
 //  if (digitalRead(limitSwitch) == 1 || digitalRead(limitSwitch2) == 1)
 //    Serial.println("1");
  // Serial.println(digitalRead(limitSwitch2));
 
+ 
+  //MOTORES GIRO______________________________
+  //   motoresRobot.setAllMotorSpeed(velocidades);
+  //   motoresRobot.giroH();
+  //   delay(1000);
+  //   motoresRobot.apagarMotores();
+  //   delay(1000);
+  //   motoresRobot.giroAH();
+  //   delay(1000);
+  //   motoresRobot.apagarMotores();
+  //   delay(1000);
 
   //MOVIMIENTOLINEALCORREGIDO___________________
 //    int change = correccionesImu();
