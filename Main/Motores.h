@@ -222,13 +222,13 @@ class Motores {
     }
 
     void mover1() {
-      motor1.motorAdelante();
+      motor1.motorAtras();
     }
     void mover2() {
-      motor2.motorAdelante();
+      motor2.motorAtras();
     }
     void mover3() {
-      motor3.motorAdelante();
+      motor3.motorAtras();
     }
 
 

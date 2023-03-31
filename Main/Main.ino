@@ -16,13 +16,13 @@
 
 Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-//#include "Imu.h"
-#include "BNO.h"
+#include "Imu.h"
+//#include "BNO.h"
 
 
 //Variables
 bool posesion = true;
-int velocidades = 220;
+int velocidades = 180;
 String input = "";
 char lastP = "i";
 int lastSeen = 1;
@@ -33,7 +33,8 @@ AroIR aroIR;
 PID pid;
 //Motores motoresRobot(8, 41, 27, 7, 25, 24, 6, 23, 22);
 //Motores motoresRobot(2, 29, 27, 3, 23, 25, 4, 22, 24);
-Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);
+//Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
+Motores motoresRobot(2, 26, 28, 3, 24, 22, 4, 32, 30);
 
 unsigned long ms = 0;
 unsigned long ms2 = 0;
@@ -42,7 +43,7 @@ unsigned long ms2 = 0;
 
 Color color;
 //Adafruit_BNO055 bno;
-BNO gyro;
+Imu gyro;
 
 //Porterias
 Porteria porteriaAzul;
@@ -59,13 +60,13 @@ enum Estados {
   nada
 };
 
-Estados estado = linea;
+Estados estado = nada;
 
 //SETUP------------------------------------------------------
 void setup() {
   Serial.begin(9600);
   Serial3.begin(9600);
-  pinMode(limitSwitch, OUTPUT);
+  pinMode(limitSwitch, INPUT);
   
   //oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 
@@ -95,7 +96,7 @@ void setup() {
 //Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
-
+Serial.println("O");
 //  oled.clearDisplay();
 //  oled.setCursor(0, 10);        // position to display
 //  oled.print("Imu: "); 
@@ -135,7 +136,7 @@ void loop() {
       tests();
   }
 
-  estado = linea;
+  estado = nada;
 
 }
 
@@ -408,7 +409,7 @@ void actualizarPorterias() {
  
     if (Serial3.available()) {
       input =  Serial3.readStringUntil('\n');
-            Serial.println(input);
+            //Serial.println(input);
 
       //Serial.println(input);
       if (input[0] == '0')
@@ -566,7 +567,7 @@ void tests() {
      aroIR.actualizarDatos();
      double angulo = aroIR.getAngulo();
      Serial.println(angulo);
-//     Serial.println(aroIR.getStrength());
+     Serial.println(aroIR.getStrength());
 
    
   //CAMARA____________________________________
@@ -580,8 +581,8 @@ void tests() {
   //IMU______________________________________
 //     gyro.readValues();
 //    Serial.println(gyro.getYaw());
-
 //  int change = correccionesImu();
+//  motoresRobot.setAllMotorSpeed(velocidades);
 //  motoresRobot.giro(change, gyro.isRight());
 
 
@@ -598,18 +599,18 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-//     motoresRobot.setAllMotorSpeed(velocidades);
-//     motoresRobot.mover1();
-//     delay(1000);
-//     motoresRobot.mover2();
-//     delay(1000);
-//     motoresRobot.mover3();
-//  
+     motoresRobot.setAllMotorSpeed(velocidades);
+     motoresRobot.mover1();
+     delay(1000);
+     motoresRobot.mover2();
+     delay(1000);
+     motoresRobot.mover3();
+////  
   //   motoresRobot.giroH();
 
 
   //MOVIMIENTOLINEALCORREGIDO___________________
-//    int change = correccionesImu();
+   // int change = correccionesImu();
 //    motoresRobot.movimientoLineal(0,velocidades);
 //    motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
   
