@@ -3,7 +3,7 @@ class Color {
   private:
     const int pinLED = 52;
     const int pinBoton = 7;
-    const int sig[3] = {A0, A1, A2}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
+    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
     const int sC[3] = {8, 13, 53}; // pines de 'control' ABC
     const int sB[3] = {9, 11, 50};
     const int sA[3] = {10, 12, 51};
@@ -16,7 +16,7 @@ class Color {
     // int fotoMaxV[3][8] = {{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0}};
     // int fotoMinB[3][8] = {{100,100,100,100,100,100,100,100},{100,100,100,100,100,100,100,100},{100,100,100,100,100,100,100,100}};
     // int fotoMaxB[3][8] = {{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0}};
-    double angulo[3][8] = {{271.2, 279.6, 287.8, 296.3, 307.6, 315.7, 323.8, 332.3}, {212.7, 205.8, 195.2, 180, 180, 167, 156, 149}, {88.8, 80.4, 72.2, 63.7, 52.4, 36.2, 27.7, 44.3}};
+    double angulo[3][8] = {{271.2, 279.6, 287.8, 296.3, 307.6, 315.7, 323.8, 332.3}, {212.7, 205.8, 195.2, 180, 180, 167, 156, 149}, {44.3, 27.7, 36.2, 54.2, 63.7, 88.8, 72.2, 80.4}};
 
     int lectura(int ft, int placa) {  // 1: derecha (1,3,4)
       switch (ft) {
@@ -103,6 +103,7 @@ class Color {
         }
       }
       foto[1][5] = 100;
+      foto[1][1] = 7999;
       Serial.println("Calibración lista");
 
     }
@@ -112,10 +113,17 @@ class Color {
     double checkForLinea() {
       double degree = 0;
       double count = 0;
+      bool check = false;
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 8; j++) {
           int lec = lectura(j, i);
           if (lec >= 2.5 * foto[i][j]) {
+            if (i == 2 && j == 0 && check == true){
+              return 0;
+            }
+            else if (i == 0 && j == 7){
+              check = true;
+            }
             degree += angulo[i][j];
             count++;
           }

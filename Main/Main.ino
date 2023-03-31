@@ -27,14 +27,18 @@ String input = "";
 char lastP = "i";
 int lastSeen = 1;
 bool flag = false;
-int limitSwitch = 45;
+int limitSwitch = 35;
 //Objetos
 AroIR aroIR;
 PID pid;
 //Motores motoresRobot(8, 41, 27, 7, 25, 24, 6, 23, 22);
-Motores motoresRobot(2, 29, 27, 3, 23, 25, 4, 22, 24);
+//Motores motoresRobot(2, 29, 27, 3, 23, 25, 4, 22, 24);
+Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);
 
 unsigned long ms = 0;
+unsigned long ms2 = 0;
+
+
 
 Color color;
 //Adafruit_BNO055 bno;
@@ -55,7 +59,7 @@ enum Estados {
   nada
 };
 
-Estados estado = nada;
+Estados estado = linea;
 
 //SETUP------------------------------------------------------
 void setup() {
@@ -63,15 +67,15 @@ void setup() {
   Serial3.begin(9600);
   pinMode(limitSwitch, OUTPUT);
   
-  oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  //oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 
-  oled.clearDisplay(); // clear display
-
-  oled.setTextSize(1);          // text size
-  oled.setTextColor(WHITE);     // text color
-  oled.setCursor(0, 10);        // position to display
-  oled.println("Hello World!"); // text to display
-  oled.display();               // show on OLED
+//  //oled.clearDisplay(); // clear display
+//
+//  oled.setTextSize(1);          // text size
+//  oled.setTextColor(WHITE);     // text color
+//  oled.setCursor(0, 10);        // position to display
+//  oled.println("Hello World!"); // text to display
+//  oled.display();               // show on OLED
 
   
 
@@ -81,6 +85,7 @@ void setup() {
   gyro.iniciar();
   aroIR.iniciar();
   color.iniciar();
+  color.calibrar();
   aroIR.actualizarDatos();
 
 
@@ -91,16 +96,17 @@ void setup() {
 //LOOP-------------------------------------------------------
 void loop() {
 
-  oled.clearDisplay();
-  oled.setCursor(0, 10);        // position to display
-  oled.print("Imu: "); 
-  oled.print(gyro.getYaw()); // text to display
-  oled.display();    
+//  oled.clearDisplay();
+//  oled.setCursor(0, 10);        // position to display
+//  oled.print("Imu: "); 
+//  oled.print(gyro.getYaw()); // text to display
+//  oled.display();    
     
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
+     ms2 = millis();
     estado = inLinea()? linea: hasPelota;
-    estado = linea;
+    //estado = linea;
   }
 
   //Revisar si se tiene posesión de la pelota
@@ -113,9 +119,6 @@ void loop() {
 
   //Buscar la pelota
   if (estado == buscarPelota) {
-//    if (flag) 
-//      estado = golPorteria;
-//    else 
       lastSeen = buscar(lastSeen);
     
   }
@@ -132,7 +135,7 @@ void loop() {
       tests();
   }
 
-  estado = nada;
+  estado = linea;
 
 }
 
@@ -265,21 +268,26 @@ bool isLimit(){
   return (digitalRead(limitSwitch) == 1) ? true : false;
 }
 
+
 //-------------------------------------ARO IR
 //Buscar y moverse según la posición de la pelota
 int buscar(int last) {
+     aroIR.actualizarDatos();
+     double angulo = aroIR.getAngulo();
+     Serial.println(angulo);
 
   
   int change = correccionesImu();
-  aroIR.actualizarDatos();
-  double angulo = aroIR.getAngulo();
-  Serial.println(angulo);
+  
+//  aroIR.actualizarDatos();
+//  double angulo = aroIR.getAngulo();
+//  Serial.println(angulo);
   //Serial.println(aroIR.getStrength());
 
-  oled.setCursor(0, 20);        // position to display
-  oled.print("Angulo IR: "); 
-  oled.print(angulo); // text to display
-  oled.display();               // show on OLED
+//  oled.setCursor(0, 20);        // position to display
+//  oled.print("Angulo IR: "); 
+//  oled.print(angulo); // text to display
+//  oled.display();               // show on OLED
 
 
 
@@ -290,11 +298,6 @@ int buscar(int last) {
     return;
   }
 
-//    if (((angulo >= -20 && angulo <= 20) && (aroIR.getStrength() < 31))) {
-//      actualizarPorterias();
-//      gol(porteriaAzul,lastP); 
-//    return;
-//  } 
 
    //Pelota Adelante
   if ((abs(angulo) <= 30)) {
@@ -421,25 +424,42 @@ void actualizarPorterias() {
 
 
 bool inLinea(){
-  
-  double angle = color.checkForLinea();
-  Serial.println(angle);
-  int change = correccionesImu();
-  
-  if (angle == -1){
-   // motoresRobot.apagarMotores();
-    //motoresRobot.movimientoLineal(0,velocidades);
-    return false;
-  } else {
+  //motoresRobot.movimientoLineal(0,0);
 
-    //if (millis() - time_ms > 500) {
-//        time_ms = millis();
-        motoresRobot.movimientoLineal(angle, velocidades);
-            motoresRobot.movimientoLinealCorregido(angle,velocidades,change,gyro.isRight());
-
-    //}
+  double degree = color.checkForLinea();
+  Serial.println(degree);
+  if (degree != -1){
+     while((millis() - ms2) < 850) {
+        gyro.readValues();
+        motoresRobot.movimientoLinealCorregido(degree,200,correccionesImu(),gyro.isRight());
+     }
+     //return true;
   }
-  return true;
+
+  return false;
+  
+  //delay(1);
+
+
+//  
+//  double angle1 = color.checkForLinea();
+//  Serial.println(angle1);
+//  int change = correccionesImu();
+//  
+//  if (angle1 == -1){
+//   // motoresRobot.apagarMotores();
+//    //motoresRobot.movimientoLineal(0,velocidades);
+//    return false;
+//  } else {
+//
+//    //if (millis() - time_ms > 500) {
+////        time_ms = millis();
+//       // motoresRobot.movimientoLineal(angle1, velocidades);
+//            motoresRobot.movimientoLinealCorregido(angle1,velocidades,change,gyro.isRight());
+//
+//    //}
+//  }
+//  return true;
   
 }
 
@@ -543,10 +563,10 @@ void tests() {
     
   
   //ARO-IRRRR________________________________
-//     aroIR.actualizarDatos();
-//     double angulo = aroIR.getAngulo();
-//     Serial.println(angulo);
-     //Serial.println(aroIR.getStrength());
+     aroIR.actualizarDatos();
+     double angulo = aroIR.getAngulo();
+     Serial.println(angulo);
+//     Serial.println(aroIR.getStrength());
 
    
   //CAMARA____________________________________
@@ -578,12 +598,12 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-     motoresRobot.setAllMotorSpeed(velocidades);
-     motoresRobot.mover1();
-     delay(1000);
-     motoresRobot.mover2();
-     delay(1000);
-     motoresRobot.mover3();
+//     motoresRobot.setAllMotorSpeed(velocidades);
+//     motoresRobot.mover1();
+//     delay(1000);
+//     motoresRobot.mover2();
+//     delay(1000);
+//     motoresRobot.mover3();
 //  
   //   motoresRobot.giroH();
 
