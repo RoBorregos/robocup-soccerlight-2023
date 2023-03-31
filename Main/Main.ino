@@ -7,17 +7,20 @@
 #include "PID.h"
 #include "AroIR.h"
 #include "Color.h"
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 
-#define SCREEN_WIDTH 128 // OLED display width,  in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+//#include <Wire.h>
+//#include <Adafruit_GFX.h>
+//#include <Adafruit_SSD1306.h>
+//
+//#define SCREEN_WIDTH 128 // OLED display width,  in pixels
+//#define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+//Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 #include "Imu.h"
 //#include "BNO.h"
+
+Imu gyro;
 
 
 //Variables
@@ -28,13 +31,16 @@ char lastP = "i";
 int lastSeen = 1;
 bool flag = false;
 int limitSwitch = 35;
+int limitSwitch2 = 6;
 //Objetos
 AroIR aroIR;
 PID pid;
+bool timeFlag = true;
 //Motores motoresRobot(8, 41, 27, 7, 25, 24, 6, 23, 22);
 //Motores motoresRobot(2, 29, 27, 3, 23, 25, 4, 22, 24);
+
 //Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
-Motores motoresRobot(2, 26, 28, 3, 24, 22, 4, 32, 30);
+Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32); //robot imu
 
 unsigned long ms = 0;
 unsigned long ms2 = 0;
@@ -43,12 +49,12 @@ unsigned long ms2 = 0;
 
 Color color;
 //Adafruit_BNO055 bno;
-Imu gyro;
+
 
 //Porterias
 Porteria porteriaAzul;
 Porteria porteriaAmarilla;
-Porteria porterias[] = {porteriaAmarilla, porteriaAzul};
+//Porteria porterias[] = {porteriaAmarilla, porteriaAzul};
 int indexColor = 1;
 
 //Estados del robot
@@ -60,14 +66,16 @@ enum Estados {
   nada
 };
 
-Estados estado = nada;
+Estados estado = buscarPelota;
+
 
 //SETUP------------------------------------------------------
 void setup() {
   Serial.begin(9600);
   Serial3.begin(9600);
   pinMode(limitSwitch, INPUT);
-  
+  pinMode(limitSwitch2, INPUT);
+
   //oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 
 //  //oled.clearDisplay(); // clear display
@@ -107,7 +115,7 @@ Serial.println("O");
   if (estado == linea) {
      ms2 = millis();
     estado = inLinea()? linea: hasPelota;
-    //estado = linea;
+   // estado = linea;
   }
 
   //Revisar si se tiene posesión de la pelota
@@ -124,11 +132,23 @@ Serial.println("O");
     
   }
 
+
   //Ir a la portería con la pelota
   if (estado == golPorteria) {
-        ms = millis();
+       ms = millis();
        actualizarPorterias();
-       lastP = gol(porteriaAzul, lastP);
+       Serial.println(porteriaAzul.getX());
+       lastP = gol(porteriaAzul.getX(), lastP);
+//     if(!timeFlag){
+//      timeFlag = true;
+//      ms = millis();
+//    }
+//    if(millis() - ms < 1000){
+//      lastP = gol(porteriaAzul.getX(), lastP);
+//    else {
+//      estado=hasPelota;
+//      timeFlag = false;
+//    }
   }
 
   //Pruebas
@@ -136,7 +156,7 @@ Serial.println("O");
       tests();
   }
 
-  estado = nada;
+  estado = buscarPelota;
 
 }
 
@@ -206,59 +226,52 @@ Serial.println("O");
 //}
 
 
-char gol(Porteria p, char lastP) {
+char gol(int px, char lastP) {
 //  oled.setCursor(0, 22);        // position to display
 //  oled.print("Porteria: "); 
 //  oled.print(p.x); // text to display
 //  oled.display(); 
   //Serial.println(p.x);
   
-  while((millis() - ms) < 1000){
-  gyro.readValues();
-  int change = correccionesImu();
-  bool r = gyro.isRight();
-  Serial.println(change);
-
-
-
-  //Si no ve la portería
-  if (p.x == -1) {
-    if (change > 0)
-      motoresRobot.giro(change, r);
-    else
-      motoresRobot.apagarMotores();
-
-    Serial.println("Nothing yet");
-  }
-
-  else {
-    if (p.x > 220) { //Derecha
-      motoresRobot.movimientoLinealCorregido(45, velocidades, change, gyro.isRight());
-      // digitalWrite(ledRojo, HIGH);
-      //Serial.println(digitIn);
-      Serial.println("der");
-      lastP  = 'd';
-
-
-    } else if (p.x < 100) {  //Izquierda
-      motoresRobot.movimientoLinealCorregido(-45, velocidades, change, gyro.isRight());
-      //lastSeen = 'i';
-      //digitalWrite(ledVerde, HIGH);
-      //Serial.println(digitIn);
-      Serial.println("izq");
-      lastP = 'i';
-
-
-    } else {  //Centro
-      motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
-      //digitalWrite(ledVerde, LOW);
-      //digitalWrite(ledRojo, LOW);
-      Serial.println("Adelante");
-
+ // while((millis() - ms) < 1000){
+    gyro.readValues();
+    int change = correccionesImu();
+   
+    Serial.println(change);
+  
+    //Si no ve la portería
+    if (px == -1) {
+      if (change > 0)
+        motoresRobot.giro(change, gyro.isRight());
+      else
+        motoresRobot.apagarMotores();
+  
+      Serial.println("Nothing yet");
     }
-
-  }
-  }
+  
+    else {
+      if (px > 220) { //Derecha
+        motoresRobot.movimientoLinealCorregido(45, velocidades, change, gyro.isRight());
+    
+        Serial.println("der");
+        lastP  = 'd';
+  
+  
+      } else if (px < 100) {  //Izquierda
+        motoresRobot.movimientoLinealCorregido(-45, velocidades, change, gyro.isRight());
+        Serial.println("izq");
+        lastP = 'i';
+  
+  
+      } else {  //Centro
+        motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+       
+        Serial.println("Adelante");
+  
+      }
+  
+    }
+ // }
 
   return lastP;
 
@@ -266,7 +279,7 @@ char gol(Porteria p, char lastP) {
 
 bool isLimit(){
   Serial.println(digitalRead(limitSwitch));
-  return (digitalRead(limitSwitch) == 1) ? true : false;
+  return (digitalRead(limitSwitch) == 1 || digitalRead(limitSwitch2) == 1) ? true : false;
 }
 
 
@@ -279,11 +292,7 @@ int buscar(int last) {
 
   
   int change = correccionesImu();
-  
-//  aroIR.actualizarDatos();
-//  double angulo = aroIR.getAngulo();
-//  Serial.println(angulo);
-  //Serial.println(aroIR.getStrength());
+ 
 
 //  oled.setCursor(0, 20);        // position to display
 //  oled.print("Angulo IR: "); 
@@ -408,14 +417,14 @@ int buscar(int last) {
 void actualizarPorterias() {
  
     if (Serial3.available()) {
-      input =  Serial3.readStringUntil('\n');
-            //Serial.println(input);
+      String input1 =  Serial3.readStringUntil('\n');
+            //Serial.println(input1);
 
       //Serial.println(input);
-      if (input[0] == '0')
-        porteriaAmarilla.actualizar(input);
+      if (input1[0] == '0')
+        porteriaAmarilla.actualizar(input1);
       else
-        porteriaAzul.actualizar(input);
+        porteriaAzul.actualizar(input1);
     }
     //actualizarPorterias();
     //gol(porteriaAzul, lastP);
@@ -427,40 +436,44 @@ void actualizarPorterias() {
 bool inLinea(){
   //motoresRobot.movimientoLineal(0,0);
 
-  double degree = color.checkForLinea();
-  Serial.println(degree);
-  if (degree != -1){
-     while((millis() - ms2) < 850) {
-        gyro.readValues();
-        motoresRobot.movimientoLinealCorregido(degree,200,correccionesImu(),gyro.isRight());
-     }
-     //return true;
-  }
-
-  return false;
+//  double degree = color.checkForLinea();
+//  Serial.println(degree);
+//  if (degree == -1.0) {
+//    return false;
+//  } 
+//  
+//  else{ 
+//     //while((millis() - ms2) < 500) {
+//        gyro.readValues();
+//        motoresRobot.movimientoLinealCorregido(degree,190,correccionesImu(),gyro.isRight());
+//     //}
+//     //return true;
+//  }
+//
+//  return true;
   
   //delay(1);
 
 
-//  
-//  double angle1 = color.checkForLinea();
-//  Serial.println(angle1);
-//  int change = correccionesImu();
-//  
-//  if (angle1 == -1){
-//   // motoresRobot.apagarMotores();
-//    //motoresRobot.movimientoLineal(0,velocidades);
-//    return false;
-//  } else {
-//
-//    //if (millis() - time_ms > 500) {
-////        time_ms = millis();
-//       // motoresRobot.movimientoLineal(angle1, velocidades);
-//            motoresRobot.movimientoLinealCorregido(angle1,velocidades,change,gyro.isRight());
-//
-//    //}
-//  }
-//  return true;
+  
+  double angle1 = color.checkForLinea();
+  Serial.println(angle1);
+  int change = correccionesImu();
+  
+  if (angle1 == -1){
+   // motoresRobot.apagarMotores();
+    //motoresRobot.movimientoLineal(0,velocidades);
+    return false;
+  } else {
+
+    //if (millis() - time_ms > 500) {
+//        time_ms = millis();
+       // motoresRobot.movimientoLineal(angle1, velocidades);
+            motoresRobot.movimientoLinealCorregido(angle1,velocidades,change,gyro.isRight());
+
+    //}
+  }
+  return true;
   
 }
 
@@ -552,6 +565,10 @@ int seeker(int dirSeeker, int last) {
 
 //Para el estado de pruebas
 void tests() {
+//   actualizarPorterias();
+//       Serial.println(porteriaAzul.getX());
+
+       
 //  Serial.println("Cam");
 //if (Serial3.available()) {
 //        Serial.println("serial1");
@@ -567,11 +584,11 @@ void tests() {
      aroIR.actualizarDatos();
      double angulo = aroIR.getAngulo();
      Serial.println(angulo);
-     Serial.println(aroIR.getStrength());
+//     Serial.println(aroIR.getStrength());
 
    
   //CAMARA____________________________________
-//     actualizarPorterias(); 
+ //    actualizarPorterias(); 
 //     Serial.println("po");
 //     Serial.println(porteriaAzul.x);
 //     Serial.println(porteriaAmarilla.x);
@@ -582,6 +599,7 @@ void tests() {
 //     gyro.readValues();
 //    Serial.println(gyro.getYaw());
 //  int change = correccionesImu();
+//
 //  motoresRobot.setAllMotorSpeed(velocidades);
 //  motoresRobot.giro(change, gyro.isRight());
 
@@ -599,19 +617,25 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-     motoresRobot.setAllMotorSpeed(velocidades);
-     motoresRobot.mover1();
-     delay(1000);
-     motoresRobot.mover2();
-     delay(1000);
-     motoresRobot.mover3();
+//     motoresRobot.setAllMotorSpeed(velocidades);
+//     motoresRobot.mover1();
+//     delay(1000);
+//     motoresRobot.mover2();
+//     delay(1000);
+//     motoresRobot.mover3();
 ////  
   //   motoresRobot.giroH();
 
 
+//LIMIT SWITCH
+//  if (digitalRead(limitSwitch) == 1 || digitalRead(limitSwitch2) == 1)
+//    Serial.println("1");
+ // Serial.println(digitalRead(limitSwitch2));
+
+
   //MOVIMIENTOLINEALCORREGIDO___________________
-   // int change = correccionesImu();
-//    motoresRobot.movimientoLineal(0,velocidades);
+//    int change = correccionesImu();
+//    //motoresRobot.movimientoLineal(0,velocidades);
 //    motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
-  
+//  
 }

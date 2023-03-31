@@ -1,28 +1,31 @@
 class Porteria {
-  public:
-    int color;
-    int x;
-    int y;
-    int w;
-    int h;
-    int area;
+  private:
+    int color = -1;
+    int x = -1;
+    int y = -1;
+    int w = -1;
+    int h = -1;
+    int area = -1;
 
     //Default
-    Porteria() {
-      color = -1;
-      x = -1;
-      y = -1;
-      w = -1;
-      h = -1;
+ 
+
+
+    public:
+    
+   Porteria() {
     }
-
-
+    
     //Almacenar los datos de la cámara
     void actualizar(String str) {
+      if (str.length() == 0) {
+        return;
+      }
+      
       int arr[5];
       String data = "";
       int index = 0;
-      Porteria p;
+      //Porteria p;
 
 
       for (int i = 0; i < str.length(); i++) {
@@ -44,5 +47,13 @@ class Porteria {
 
       }
 
+    }
+
+    void setX(int xs){
+      x = xs;
+    }
+
+    int getX() {
+      return x;
     }
 };
