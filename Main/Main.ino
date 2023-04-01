@@ -18,9 +18,9 @@
 //Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 #include "Imu.h"
-#include "BNO.h"
+//#include "BNO.h"
 
-BNO gyro;
+Imu gyro;
 
 
 //Variables
@@ -39,8 +39,8 @@ bool timeFlag = true;
 //Motores motoresRobot(8, 41, 27, 7, 25, 24, 6, 23, 22);
 //Motores motoresRobot(2, 29, 27, 3, 23, 25, 4, 22, 24);
 
-Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
-//Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32); //robot imu
+//Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
+Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32); //robot imu
 
 unsigned long ms = 0;
 unsigned long ms2 = 0;
@@ -66,7 +66,7 @@ enum Estados {
   nada
 };
 
-Estados estado = linea;
+Estados estado = buscarPelota;
 
 
 //SETUP------------------------------------------------------
@@ -114,7 +114,7 @@ void loop() {
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
      ms2 = millis();
-    estado = inLinea()? linea: hasPelota;
+    estado = inLinea()? linea: buscarPelota;
     //estado = linea;
   }
 
@@ -136,9 +136,9 @@ void loop() {
 
   //Ir a la portería con la pelota
   if (estado == golPorteria) {
-       //ms = millis();
+       ms = millis();
        actualizarPorterias();
-       int x1 = porteriaAzul.getX();
+       int x1 = porteriaAmarilla.getX();
        //Serial.println(x1);
        lastP = gol(x1, lastP);
        
@@ -159,7 +159,7 @@ void loop() {
       tests();
   }
 
-  estado = linea;
+  estado = buscarPelota;
 
 }
 
@@ -234,9 +234,9 @@ char gol(int px, char lastP) {
 //  oled.print("Porteria: "); 
 //  oled.print(p.x); // text to display
 //  oled.display(); 
-  //Serial.println(p.x);
+ // Serial.println("gol");
   
- // while((millis() - ms) < 1000){
+ // while((millis() - ms) < 800){
   
     int change = correccionesImu();
     bool r = gyro.isRight();
@@ -245,10 +245,12 @@ char gol(int px, char lastP) {
   
     //Si no ve la portería
     if (px == -1) {
-      if (change > 0)
-        motoresRobot.giro(change, r);
-      else
-        motoresRobot.apagarMotores();
+//      if (change > 0)
+//        motoresRobot.giro(change, r);
+//      else
+//        motoresRobot.apagarMotores();
+
+    motoresRobot.movimientoLinealCorregido(0,velocidades,change,r);
   
       Serial.println("Nothing yet");
     }
@@ -275,7 +277,7 @@ char gol(int px, char lastP) {
       }
   
     }
- // }
+  //}
 
   return lastP;
 
@@ -283,7 +285,7 @@ char gol(int px, char lastP) {
 
 bool isLimit(){
   //Serial.println(digitalRead(limitSwitch));
-  if (digitalRead(limitSwitch) == 1 || digitalRead(limitSwitch2) == 1) {
+  if (digitalRead(limitSwitch) == 1) {
     return true;
   }
   return false;
@@ -323,7 +325,7 @@ int buscar(int last) {
 
     //Pelota Adelante diagonal
   } else if (abs(angulo) < 45) {
-    angulo += (angulo > 0) ? 15 : -15;
+    angulo += (angulo > 0) ? 20 : -20;
     motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
 
     //Pelota Adelante a los lados
@@ -333,7 +335,7 @@ int buscar(int last) {
     motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
 
     //Pelota a los lados
-  } else if (abs(angulo) < 120) {
+  } else if (abs(angulo) < 130) {
     Serial.println("Atras");
     motoresRobot.setAllMotorSpeed(velocidades);
     motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
@@ -341,8 +343,8 @@ int buscar(int last) {
     //Pelota atrás diagonal
   } else {
     Serial.println("Diagonal");
-    motoresRobot.movimientoLinealCorregido(last * 120, velocidades, change, gyro.isRight());
-    Serial.println(last * 120);
+    motoresRobot.movimientoLinealCorregido(last * 140, velocidades, change, gyro.isRight());
+    Serial.println(last * 140);
   }
 
   //Actualizar el último lado en que se vió la pelota
@@ -472,6 +474,7 @@ bool inLinea(){
     //motoresRobot.movimientoLineal(0,velocidades);
     return false;
   } else {
+  Serial.println(angle1);
 
   while((millis() - ms2) < 500) {
         gyro.readValues();
@@ -579,7 +582,7 @@ int seeker(int dirSeeker, int last) {
 //Para el estado de pruebas
 void tests() {
 //   actualizarPorterias();
-//       Serial.println(porteriaAzul.getX());
+//      Serial.println(porteriaAzul.getX());
 
        
 //  Serial.println("Cam");
@@ -596,7 +599,7 @@ void tests() {
   //ARO-IRRRR________________________________
 //     aroIR.actualizarDatos();
 //     double angulo = aroIR.getAngulo();
-//     Serial.println(angulo);
+////     Serial.println(angulo);
 //     Serial.println(aroIR.getStrength());
 
    
@@ -634,9 +637,9 @@ void tests() {
 
 
 //LIMIT SWITCH
-//  if (digitalRead(limitSwitch) == 1 || digitalRead(limitSwitch2) == 1)
-//    Serial.println("1");
- // Serial.println(digitalRead(limitSwitch2));
+  if (digitalRead(limitSwitch) == 1 || digitalRead(limitSwitch2) == 1)
+    Serial.println("1");
+  Serial.println(digitalRead(limitSwitch2));
 
  
   //MOTORES GIRO______________________________
