@@ -127,7 +127,7 @@ class Color {
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 8; j++) {
           int lec = lectura(j, i);
-          if (lec >= 2 * foto[i][j]) {
+          if (lec >= 2.5 * foto[i][j]) {
             if (i == 2 && j == 0 && check == true){
               return 0;
             }

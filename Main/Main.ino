@@ -58,6 +58,8 @@ void setup() {
   Serial.begin(9600);
   Serial3.begin(9600);
   Serial3.setTimeout(100);
+  Serial.setTimeout(100);
+
   pinMode(limitSwitch, INPUT);
   pinMode(limitSwitch2, INPUT);
 
@@ -83,8 +85,14 @@ void loop() {
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
     ms2 = millis();
-    estado = inLinea() ? linea : hasPelota;
-   // estado = linea;
+     double angle1 = color.checkForLinea();
+    Serial.println(angle1);
+    
+    if (angle1 != -1)
+     salirLinea(angle1);
+     
+    estado = hasPelota;
+
   }
 
   //Revisar si se tiene posesión de la pelota
@@ -135,7 +143,7 @@ void buscar() {
   
   //Serial.println(aroIR.getStrength());
   
-  Serial.println(angulo);
+ // Serial.println(angulo);
 
    if (aroIR.getStrength() == 0) {
     motoresRobot.apagarMotores();
@@ -170,72 +178,18 @@ void buscar() {
 
 
 
-int buscar(int last) {
-
-  aroIR.actualizarDatos();
-  double angulo = aroIR.getAngulo();
-  Serial.println(angulo);
-
-  int change = correccionesImu();
-
-
-  //Si no se está viendo la pelota
-  if (aroIR.getStrength() == 0) {
-    motoresRobot.apagarMotores();
-    return;
-  }
-
-
-  //Pelota Adelante
-  if ((abs(angulo) <= 30)) {
-    Serial.println("directo");
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
-
-    //Pelota Adelante diagonal
-  } else if (abs(angulo) < 45) {
-    angulo += (angulo > 0) ? 20 : -20;
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
-
-    //Pelota Adelante a los lados
-  } else if (abs(angulo) < 85) {
-    Serial.println("casi directoo");
-    angulo += (angulo > 0) ? 25 : -25;
-    motoresRobot.movimientoLinealCorregido(angulo, velocidades, change, gyro.isRight());
-
-    //Pelota a los lados
-  } else if (abs(angulo) < 130) {
-    Serial.println("Atras");
-    motoresRobot.setAllMotorSpeed(velocidades);
-    motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
-
-    //Pelota atrás diagonal
-  } else {
-    Serial.println("Diagonal");
-    motoresRobot.movimientoLinealCorregido(last * 140, velocidades, change, gyro.isRight());
-    Serial.println(last * 140);
-  }
-
-  //Actualizar el último lado en que se vió la pelota
-  if (angulo > 0)
-    last = -1;
-  else
-    last = 1;
-
-  return last;
-
-}
 
 
 //---------------------------------------Porterias
 
 void gol(int px) {
 
-   while((millis() - ms) < 800){
+   while((millis() - ms) < 500){
 
       int change = correccionesImu();
       bool r = gyro.isRight();
     
-      Serial.println(px);
+     // Serial.println(px);
      
     
       //Si no ve la portería
@@ -277,7 +231,7 @@ void gol(int px) {
 //---------------------------------------IMU
 //Devolver el error a corregir
 int correccionesImu() {
-  actualizarPorterias();
+  //actualizarPorterias();
   gyro.readValues();
   int change = pid.calcularError(0, gyro.getYaw(), velocidades);
 
@@ -297,7 +251,7 @@ int correccionesImuTarget(int target) {
   error = 1.3 * error;
   error = min(error,255);
   error = map(error, 0, 255, 110, 255);
-  Serial.println(error);
+  //Serial.println(error);
   return error;
 }
 
@@ -315,7 +269,7 @@ bool inLinea() {
     return false;
 
   } else {
-    Serial.println(angle1);
+    //Serial.println(angle1);
 
     while ((millis() - ms2) < 500) {
       gyro.readValues();
@@ -325,6 +279,17 @@ bool inLinea() {
   }
   return true;
 
+}
+
+void salirLinea(int angleC) {
+  //double angleC = color.checkForLinea();
+  int change = correccionesImu();
+  
+   while ((millis() - ms2) < 500) {
+      gyro.readValues();
+      motoresRobot.movimientoLinealCorregido(angleC, 190, change, gyro.isRight());
+   }
+    
 }
 
 

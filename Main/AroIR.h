@@ -14,7 +14,7 @@ class AroIR {
 
     void iniciar() {
       Serial2.begin(115200);
-
+      Serial2.setTimeout(100);
     }
 
 
