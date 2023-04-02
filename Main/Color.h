@@ -7,17 +7,17 @@ class Color {
     //colores no buenos --> subir proporción
 
     //ROBOT BNO
-    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
-    const int sC[3] = {8, 13, 53}; // pines de 'control' ABC
-    const int sB[3] = {9, 11, 50}; //robot bno
-    const int sA[3] = {10, 12, 51};
+//    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
+//    const int sC[3] = {8, 13, 53}; // pines de 'control' ABC
+//    const int sB[3] = {9, 11, 50}; //robot bno
+//    const int sA[3] = {10, 12, 51};
 
 //     
     //ROBOT IMU
-//    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
-//    const int sC[3] = {8, 12, 53}; // pines de 'control' ABC
-//    const int sB[3] = {9, 11, 49}; //robot imu
-//    const int sA[3] = {10, 13, 51};
+    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
+    const int sC[3] = {8, 12, 53}; // pines de 'control' ABC
+    const int sB[3] = {9, 11, 49}; //robot imu
+    const int sA[3] = {10, 13, 51};
 
       
     int foto[3][8] = {{0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}};

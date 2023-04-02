@@ -8,13 +8,13 @@
 
 
 
-//#include "Imu.h"
-#include "BNO.h"
-BNO gyro;
+#include "Imu.h"
+//#include "BNO.h"
+Imu gyro;
 
 
-Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
-//Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32); //robot imu
+//Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
+Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32); //robot imu
 //COLOR!!
 
 //PORTERIA!!
