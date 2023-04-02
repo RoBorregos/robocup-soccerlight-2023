@@ -3,14 +3,17 @@ class Color {
   private:
     const int pinLED = 52;
     const int pinBoton = 7;
+    int proportion = 4; //BNO
+    //colores no buenos --> subir proporción
 
-    
+    //ROBOT BNO
     const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
     const int sC[3] = {8, 13, 53}; // pines de 'control' ABC
     const int sB[3] = {9, 11, 50}; //robot bno
     const int sA[3] = {10, 12, 51};
 
-     
+//     
+    //ROBOT IMU
 //    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
 //    const int sC[3] = {8, 12, 53}; // pines de 'control' ABC
 //    const int sB[3] = {9, 11, 49}; //robot imu
@@ -107,6 +110,7 @@ class Color {
         for (int j = 0; j < 8; j++) {
           int suma = 0;
           for (int k = 0; k < 100; k++) {
+            if (i == 1 && j == 5) break;
             suma += lectura(j, i);
           }
           foto[i][j] = suma / 100;
@@ -124,14 +128,16 @@ class Color {
       double degree = 0;
       double count = 0;
       bool check = false;
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 8; j++) {
           int lec = lectura(j, i);
-          if (lec >= 2.5 * foto[i][j]) {
+          if (i == 1 && j == 5) break;
+          if (lec >= proportion * foto[i][j]) {
             if (i == 2 && j == 0 && check == true){
               return 0;
             }
             else if (i == 0 && j == 7){
+           
               check = true;
             }
             degree += angulo[i][j];
@@ -139,7 +145,7 @@ class Color {
           }
         }
       }
-      if (count > 0) {
+      if (count > 1) {
         return degree / count;
       }
       else {
@@ -149,24 +155,32 @@ class Color {
 
 
     bool checkForLineaBool() {
+      int count = 0;
       for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 3; j++) {
           if (lectura(i, j) >= fotoMinB[j][i] && lectura(i, j) <= fotoMaxB[j][i]) {
-            return true;
+            count++;
           }
         }
+      }
+      if (count > 2) {
+        return true;
       }
       return false;
     }
 
     bool checkForLineaBool2() {
+      int count = 0;
       for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 3; j++) {
           int lec = lectura(i,j);
-          if (lec >= 2.5*foto[i][j]) {
-            return true;
+          if (lec >= proportion*foto[i][j]) {
+            count++;
           }
         }
+      }
+      if (count > 1){
+        return true;
       }
       return false;
     }

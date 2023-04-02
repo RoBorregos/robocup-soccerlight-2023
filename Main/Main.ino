@@ -15,7 +15,9 @@ BNO gyro;
 
 Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24); //robot bno
 //Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32); //robot imu
+//COLOR!!
 
+//PORTERIA!!
 
 
 //Variables
@@ -29,6 +31,8 @@ int limitSwitch2 = 6;
 unsigned long ms = 0;
 unsigned long ms2 = 0;
 int last = 1;
+int led = 37;
+double angle1 = -1;
 
 
 //Objetos
@@ -62,7 +66,7 @@ void setup() {
 
   pinMode(limitSwitch, INPUT);
   pinMode(limitSwitch2, INPUT);
-
+  pinMode(led, OUTPUT);
 
   //Iniciar objetos
   motoresRobot.iniciar();
@@ -82,17 +86,27 @@ void setup() {
 void loop() {
 
 
+   
+
+    //estado = hasPelota;
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
     ms2 = millis();
-     double angle1 = color.checkForLinea();
-    Serial.println(angle1);
+    angle1 = color.checkForLinea();
     
-    if (angle1 != -1)
-     salirLinea(angle1);
-     
-    estado = hasPelota;
+    if (angle1 != -1) {
+     Serial.println(angle1);
 
+     salirLinea(angle1);
+     digitalWrite(led, HIGH);
+    } else{
+     digitalWrite(led, LOW);
+          Serial.println("nada");
+
+    }
+
+     estado = hasPelota;
+//
   }
 
   //Revisar si se tiene posesión de la pelota
@@ -257,29 +271,29 @@ int correccionesImuTarget(int target) {
 
 
     
-
-bool inLinea() {
-
-  double angle1 = color.checkForLinea();
-  Serial.println(angle1);
-  int change = correccionesImu();
-
-  if (angle1 == -1) {
-
-    return false;
-
-  } else {
-    //Serial.println(angle1);
-
-    while ((millis() - ms2) < 500) {
-      gyro.readValues();
-      motoresRobot.movimientoLinealCorregido(angle1, 190, correccionesImu(), gyro.isRight());
-    }
-
-  }
-  return true;
-
-}
+//
+//bool inLinea() {
+//
+//  double angle1 = color.checkForLinea();
+//  Serial.println(angle1);
+//  int change = correccionesImu();
+//
+//  if (angle1 == -1) {
+//
+//    return false;
+//
+//  } else {
+//    //Serial.println(angle1);
+//
+//    while ((millis() - ms2) < 500) {
+//      gyro.readValues();
+//      motoresRobot.movimientoLinealCorregido(angle1, 190, correccionesImu(), gyro.isRight());
+//    }
+//
+//  }
+//  return true;
+//
+//}
 
 void salirLinea(int angleC) {
   //double angleC = color.checkForLinea();
