@@ -5,6 +5,7 @@ class AroIR {
   private:
     double angulo = 1.0;
     double strength = 1.0;
+    double offset = 0.0;
 
 
   public:
@@ -25,7 +26,7 @@ class AroIR {
        
         if (input[0] == 'a') {
           angulo = input.substring(2, input.length()).toDouble();
-         // angulo += 180;
+          angulo += offset;
         }
         else
           strength = input.substring(2, input.length()).toDouble();

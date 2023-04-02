@@ -6,6 +6,7 @@ class PID {
     double error;
     double errorPrev;
     const int minToMove = 110;
+    bool r = false;
 
 
   public:
@@ -28,6 +29,14 @@ class PID {
       error = map(error, 0, 70, minToMove, 255);
 
       return error;
+    }
+
+    void setR(bool r) {
+      this->r = r;
+    }
+
+    bool getR() {
+      return r;
     }
 
 

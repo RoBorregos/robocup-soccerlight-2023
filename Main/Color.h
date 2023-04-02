@@ -5,16 +5,16 @@ class Color {
     const int pinBoton = 7;
 
     
-//    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
-//    const int sC[3] = {8, 13, 53}; // pines de 'control' ABC
-//    const int sB[3] = {9, 11, 50}; //robot bno
-//    const int sA[3] = {10, 12, 51};
+    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
+    const int sC[3] = {8, 13, 53}; // pines de 'control' ABC
+    const int sB[3] = {9, 11, 50}; //robot bno
+    const int sA[3] = {10, 12, 51};
 
      
-    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
-    const int sC[3] = {8, 12, 53}; // pines de 'control' ABC
-    const int sB[3] = {9, 11, 49}; //robot imu
-    const int sA[3] = {10, 13, 51};
+//    const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
+//    const int sC[3] = {8, 12, 53}; // pines de 'control' ABC
+//    const int sB[3] = {9, 11, 49}; //robot imu
+//    const int sA[3] = {10, 13, 51};
 
       
     int foto[3][8] = {{0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}};
@@ -90,7 +90,7 @@ class Color {
     Color() {}
 
     void iniciar() {
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 2.5; i++) {
         pinMode(sC[i], OUTPUT);
         pinMode(sB[i], OUTPUT);
         pinMode(sA[i], OUTPUT);

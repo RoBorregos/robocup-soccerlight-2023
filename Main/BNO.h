@@ -26,8 +26,8 @@ class BNO {
       bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
       yaw = (double)orientationData.orientation.x;
       yaw = (yaw > 180) ? -1*(360-yaw) : yaw;
-      yaw *= -1;
-      right = (yaw > 0) ? true : false;
+      //yaw *= -1;
+      right = (yaw < 0) ? true : false;
 
      // right = (yaw < 180) ? true : false;
     }
