@@ -1,0 +1,7 @@
+{
+    "sketch": "Main/Main.ino",
+    "configuration": "cpu=atmega2560",
+    "board": "arduino:avr:mega",
+    "programmer": "avrispmkii",
+    "port": "/dev/tty.usbmodem111201"
+}

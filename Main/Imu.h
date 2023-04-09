@@ -1,9 +1,9 @@
 #include "ICM_20948.h" // Click here to get the library: http://librarymanager/All#SparkFun_ICM_20948_IMU
 
 ICM_20948_I2C myICM; // Otherwise create an ICM_20948_I2C object
- #define WIRE_PORT Wire // Your desired Wire port.      
- #define AD0_VAL 1
-      
+#define WIRE_PORT Wire // Your desired Wire port.      
+#define AD0_VAL 1
+
 class Imu {
   private:
     double yaw;
@@ -12,7 +12,7 @@ class Imu {
     bool right = true;
 
   public:
-    Imu() {    
+    Imu() {
     }
 
     void iniciar() {
@@ -28,7 +28,7 @@ class Imu {
 
         if (myICM.status != ICM_20948_Stat_Ok)
         {
-    
+
         }
         else
         {
@@ -55,7 +55,7 @@ class Imu {
       success &= (myICM.resetFIFO() == ICM_20948_Stat_Ok);
 
       // Check success
-      if (success){
+      if (success) {
       } else {
         while (1)
           Serial.println("fail") ; // Do nothing more
@@ -98,15 +98,21 @@ class Imu {
           double t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
           double yaw1 = atan2(t3, t4) * 180.0 / PI;
 
+          yaw = yaw1;
+          pitch = pitch1;
+          roll = roll1;
+          
           if (yaw > 180) {
             yaw = -180 + (yaw - 180);
             //yaw = yaw*-1;
           }
           
+          if (offset > 0) {
+                  yaw = (yaw > 0) ? (180-yaw)*-1 : (-180-yaw)*-1;
+          } 
+                
           right = (yaw > 0) ? true : false;
-          yaw = yaw1;
-          pitch = pitch1;
-          roll = roll1;
+          
 
         }
       }
@@ -114,7 +120,7 @@ class Imu {
 
     //Getters
     double getYaw() {
-      right = (yaw > 0) ? true : false;
+      //right = (yaw > 0) ? true : false;
       return yaw;
     }
 
@@ -130,5 +136,8 @@ class Imu {
       return pitch;
     }
 
+    void setOffset(double off) {
+      offset = off;
+    }
 
 };

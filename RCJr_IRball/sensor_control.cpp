@@ -14,22 +14,22 @@ void setAllSensorPinsInput(void) {
  digitalRead()で一般化されていないため、ハードウェア依存の実装
  */
 bool getSensorPin(uint8_t pin) {
-//    switch(pin) {
-//        case 0:   return PINB&(1<<2);
-//        case 1:   return PINB&(1<<1);
-//        case 2:   return PIND&(1<<5);
-//        case 3:   return PIND&(1<<6);
-//        case 4:   return PIND&(1<<7);
-//        case 5:   return PINB&(1<<0);
-//        case 6:   return PIND&(1<<4);
-//        case 7:   return PIND&(1<<2);
-//        case 8:   return PIND&(1<<3);
-//        case 9:   return PINC&(1<<3);
-//        case 10:  return PINB&(1<<4);
-//        case 11:  return PINB&(1<<3);
-//    }
+    switch(pin) {
+        case 0:   return PINC&(1<<0);
+        case 1:   return PIND&(1<<7);
+        case 2:   return PINC&(1<<2);
+        case 3:   return PIND&(1<<5);
+        case 4:   return PINC&(1<<3);
+        case 5:   return PINB&(1<<2);
+        case 6:   return PIND&(1<<2);
+        case 7:   return PINB&(1<<1);
+        case 8:   return PIND&(1<<6);
+        case 9:   return PINB&(1<<0);
+        case 10:  return PINC&(1<<1);
+        case 11:  return PIND&(1<<3);
+    }
 
-    return digitalRead(SensorPins[pin]);
+   // return digitalRead(SensorPins[pin]);
 }
 
 sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit) {
@@ -41,6 +41,9 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
         pulseWidth[i] = 0;
     }
 
+//Todos 
+
+
     // do-whileで時間(833us)を監視しながらセンサの読み込み
     const unsigned long startTime_us = micros();
     do {
@@ -50,6 +53,20 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
             }
         }
     } while((micros() - startTime_us) < timeLimit);
+
+
+//        for (int i = 0; i < IR_NUM; i++) {
+//         unsigned long startTime_us = micros();
+//
+//          do {
+//            if(getSensorPin(i) == false) {
+//                pulseWidth[i] += deltaPulseWidth;
+//            }
+//            
+//          } while((micros() - startTime_us) < timeLimit); 
+//        }
+
+        
 
     // ベクトル計算のみでセンシングを行うのであれば以下の実装は不要
     sensorInfo.activeSensors    = 0; // ボールに反応しているセンサの個数

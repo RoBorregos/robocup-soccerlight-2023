@@ -58,4 +58,8 @@ class Porteria {
     int getX() {
       return x;
     }
+
+    int getColor() {
+      return color;
+    }
 };

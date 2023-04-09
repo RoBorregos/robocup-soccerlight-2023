@@ -8,6 +8,8 @@ class BNO {
     double yaw;
     bool right = true;
     Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
+    double offset = 0;
+    double mag = 0;
 
   public:
     BNO() {
@@ -23,17 +25,37 @@ class BNO {
 
     void readValues() {
       sensors_event_t orientationData;
-      bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+      sensors_event_t magnetometerData;
+      
+      bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_QUATERNION);
+      bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+
+      mag = (double)magnetometerData.magnetic.y;
+      
       yaw = (double)orientationData.orientation.x;
       yaw = (yaw > 180) ? -1*(360-yaw) : yaw;
       //yaw *= -1;
+
+      if (offset > 0) {
+        yaw = (yaw > 0) ? (180-yaw)*-1 : (-180-yaw)*-1;
+      }
+      
       right = (yaw < 0) ? true : false;
 
-     // right = (yaw < 180) ? true : false;
+
     }
+
     
     double getYaw(){
       return yaw;
+    }
+
+    double getMag() {
+      return mag;
+    }
+
+    void setOffset(double off) {
+      offset = off;
     }
 
     bool isRight() {

@@ -1,4 +1,9 @@
-#include "Arduino.h"
+//#include "Arduino.h"
+#include "SingleEMAFilterLib.h"
+
+    SingleEMAFilter<int> filterAngulo(0.6);
+    SingleEMAFilter<int> filterStr(0.6);
+
 
 class AroIR {
 
@@ -6,6 +11,7 @@ class AroIR {
     double angulo = 1.0;
     double strength = 1.0;
     double offset = 0.0;
+
 
 
   public:
@@ -27,9 +33,12 @@ class AroIR {
         if (input[0] == 'a') {
           angulo = input.substring(2, input.length()).toDouble();
           angulo += offset;
+          filterAngulo.AddValue(angulo);
         }
-        else
+        else {
           strength = input.substring(2, input.length()).toDouble();
+          filterStr.AddValue(strength);
+        }
       }
     }
 
@@ -37,6 +46,15 @@ class AroIR {
     //Getters
     double getAngulo() {
       return angulo;
+    }
+
+    double getHighPass(){
+      return filterAngulo.GetHighPass();
+
+    }
+
+    double getLowPass()  {
+      return filterAngulo.GetLowPass();
     }
 
     double getStrength() {

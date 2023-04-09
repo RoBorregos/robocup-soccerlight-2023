@@ -32,7 +32,7 @@ void loop() {
     vectorRTWithSma.radius  = smaForRadius.updateData(vectorRT.radius);
 
     // 50ms周期でシリアルプリント
-    if (millis() - time_ms > 500) {
+    if (millis() - time_ms > 50) {
         time_ms = millis();
 //        
 //        //serialPrintAllPusleWidth(pulseWidth, &sensorInfo);
