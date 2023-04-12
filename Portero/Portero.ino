@@ -70,9 +70,9 @@ enum Lados {
 };
 
 
-Lados atacar = azul;
+Lados atacar = amarillo;
 
-Estados estado = inPorteria;
+Estados estado = linea;
 
 
 
@@ -80,7 +80,7 @@ Estados estado = inPorteria;
 void setup() {
   Serial.begin(9600);
   Serial3.begin(9600);
-  Serial3.setTimeout(100);
+  Serial3.setTimeout(50);
   Serial.setTimeout(100);
 
   pinMode(limitSwitch, INPUT);
@@ -105,7 +105,7 @@ void setup() {
   actualizarPorterias();
 
   //Verificar si se debe voltear
-  if ((atacar == amarillo && porteriaAzul.getX() != -1) || (atacar == azul && porteriaAmarilla.getColor() == 1)) {
+  if ((atacar == azul && porteriaAzul.getX() != -1) || (atacar == amarillo && porteriaAmarilla.getColor() == 1)) {
     gyro.setOffset(180);
     digitalWrite(led, HIGH);
   }
@@ -129,61 +129,44 @@ void loop() {
     angle1 = color.checkForLinea();
 
     if (angle1 != -1) {
-      Serial.println(angle1);
-
+      //Serial.println(angle1);
       salirLinea(angle1);
       digitalWrite(led, HIGH);
+      
     } else {
       digitalWrite(led, LOW);
       Serial.println("nada");
+      estado = inPorteria;
 
     }
 
-     estado = inPorteria;
+
+     
     
   }
 
   if (estado == inPorteria) {
     actualizarPorterias();
-    int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-    int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
+
+    int x1 = (atacar == azul) ? porteriaAmarilla.getX() : porteriaAzul.getX();
+    int y1 = (atacar == azul) ? porteriaAmarilla.getY() : porteriaAzul.getY();
 //    Serial.print("x: ");
 //    Serial.println(x1);
 //    Serial.print("y: ");
 //    Serial.println(y1);
 
-  
-    estado = (buscarPorteria(x1,10)) ? hasPelota : inPorteria;
-    estado = inPorteria;
-  }
-  
-  //Revisar si se tiene posesión de la pelota
-  if (estado == hasPelota) {
-    estado = (isLimit()) ? golPorteria : buscarPelota;
+    buscarPorteria(x1,y1);
+    //estado = (buscarPorteria(x1,y1)) ? linea : inPorteria;
+    //estado = inPorteria;
   }
 
-  //Buscar la pelota
-  if (estado == buscarPelota) {
-//    buscar();
-  }
-
-
-  //Ir a la portería con la pelota
-  if (estado == golPorteria) {
-    ms = millis();
-    //actualizarPorterias();
-    
-    int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-    //gol(x1);
-
-  }
 
   //Pruebas
   if (estado == nada) {
     tests();
   }
 
-  estado = inPorteria;
+  estado = linea;
 
 
 }

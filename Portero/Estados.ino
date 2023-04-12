@@ -1,32 +1,43 @@
 
 //------------------------------------------------------------------------------------ Funciones de estados -------------------------------------------------------------------------------------
 
-bool buscarPorteria(int x1, int y1){
+void buscarPorteria(int x1, int y1){
+
+    
   int change = correccionesImu();
+        Serial.println(y1);
+
   if (y1 >= 110) {
     motoresRobot.apagarMotores();
-    return true;
+    //return true;
   //} else if (y1 >= 90) {
     //motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
 
   } else {
+
+    if (x1 == -1){
+        motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+
+    }
     int error = x1 - 160;
-    Serial.println(x1);
+//    Serial.print("x: ");
+//    Serial.println(x1);
     
     double kP = 0.375;
 
 
-    if (abs(error) < 20) {
-         motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
+    if (abs(error) < 10) {
+      //Serial.println("back");
+      motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
     } else {
-      int ang = (error > 0)? 180 - (error*kP) : -180 + (error*kP);
+      int ang = (error > 0)? 180 - (error*kP) : -180 - (error*kP);
       ang *= -1;
       //Serial.println(ang);
       motoresRobot.movimientoLinealCorregido(ang, velocidades, change, gyro.isRight());
     }
 
   }
-  return false;
+  //return false;
 }
 
 //void desplazamiento() {
@@ -84,11 +95,13 @@ void actualizarPorterias() {
     String input1 =  Serial3.readStringUntil('\n');
     //Serial.println(input1);
 
-    //Serial.println(input);
-    if (input1[0] == '0')
-      porteriaAmarilla.actualizar(input1);
-    else
-      porteriaAzul.actualizar(input1);
+    if(input1.length() > 8) {
+      if (input1[0] == '0')
+        porteriaAmarilla.actualizar(input1);
+      else  
+        porteriaAzul.actualizar(input1);
+    }
+    
   }
 
 } 
@@ -126,11 +139,11 @@ bool isLimit() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
-  //     actualizarPorterias();
-  //        Serial.println(porteriaAzul.getX());
+       actualizarPorterias();
+       Serial.println(porteriaAzul.getX());
 
-
-   // Serial.println("Cam");
+//
+//    Serial.println("Cam");
 //  if (Serial3.available()) {
 //          //Serial.println("serial1");
 //           input = Serial3.readStringUntil('\n');
@@ -178,12 +191,12 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-       motoresRobot.setAllMotorSpeed(velocidades);
-       motoresRobot.mover1();
-       delay(1000);
-       motoresRobot.mover2();
-       delay(1000);
-       motoresRobot.mover3();
+//       motoresRobot.setAllMotorSpeed(velocidades);
+//       motoresRobot.mover1();
+//       delay(1000);
+//       motoresRobot.mover2();
+//       delay(1000);
+//       motoresRobot.mover3();
   //
   //   motoresRobot.giroH();
 
