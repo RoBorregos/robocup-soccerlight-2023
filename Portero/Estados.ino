@@ -2,16 +2,18 @@
 //------------------------------------------------------------------------------------ Funciones de estados -------------------------------------------------------------------------------------
 
 bool buscarPorteria(int x1, int y1){
-  if (y1 >= 100) {
-    //motoresRobot.apagarMotores();
+  int change = correccionesImu();
+  if (y1 >= 110) {
+    motoresRobot.apagarMotores();
     return true;
-  } else if (y1 >= 80) {
-    motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
+  //} else if (y1 >= 90) {
+    //motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
 
   } else {
     int error = x1 - 160;
-    int change = correccionesImu();
-    int kP = 0.375;
+    Serial.println(x1);
+    
+    double kP = 0.375;
 
 
     if (abs(error) < 20) {
@@ -19,6 +21,7 @@ bool buscarPorteria(int x1, int y1){
     } else {
       int ang = (error > 0)? 180 - (error*kP) : -180 + (error*kP);
       ang *= -1;
+      //Serial.println(ang);
       motoresRobot.movimientoLinealCorregido(ang, velocidades, change, gyro.isRight());
     }
 
@@ -26,23 +29,23 @@ bool buscarPorteria(int x1, int y1){
   return false;
 }
 
-void desplazamiento() {
-  int change = correccionesImu();
-  aroIR.actualizarDatos();
-  double angulo = aroIR.getAngulo();
-
-  //Serial.println(aroIR.getStrength());
-
-  // Serial.println(angulo);
-
-  if (aroIR.getStrength() == 0) {
-    motoresRobot.apagarMotores();
-    return;
-  }
-
-
-  motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
-}
+//void desplazamiento() {
+//  int change = correccionesImu();
+//  aroIR.actualizarDatos();
+//  double angulo = aroIR.getAngulo();
+//
+//  //Serial.println(aroIR.getStrength());
+//
+//  // Serial.println(angulo);
+//
+//  if (aroIR.getStrength() == 0) {
+//    motoresRobot.apagarMotores();
+//    return;
+//  }
+//
+//
+//  motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+//}
 
 
 

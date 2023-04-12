@@ -72,7 +72,7 @@ enum Lados {
 
 Lados atacar = azul;
 
-Estados estado = nada;
+Estados estado = inPorteria;
 
 
 
@@ -149,12 +149,12 @@ void loop() {
     int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
 //    Serial.print("x: ");
 //    Serial.println(x1);
-    Serial.print("y: ");
-    Serial.println(y1);
+//    Serial.print("y: ");
+//    Serial.println(y1);
 
   
     estado = (buscarPorteria(x1,10)) ? hasPelota : inPorteria;
-    estado = linea;
+    estado = inPorteria;
   }
   
   //Revisar si se tiene posesión de la pelota
@@ -174,7 +174,7 @@ void loop() {
     //actualizarPorterias();
     
     int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-    gol(x1);
+    //gol(x1);
 
   }
 
@@ -183,7 +183,7 @@ void loop() {
     tests();
   }
 
-  estado = nada;
+  estado = inPorteria;
 
 
 }
