@@ -31,5 +31,6 @@ bool getSensorPin(uint8_t pin);
 sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit);
 vectorXY_t calcVectorXYFromPulseWidth(float *pulseWidth);
 vectorRT_t calcRTfromXY(vectorXY_t *vectorXY_p);
+//int getMaxSensot(float *pulseWidth);
 
 #endif
