@@ -223,8 +223,8 @@ bool isLimit() {
 void actualizarPorterias() {
 
 
-  if (Serial3.available()) {
-    String input1 =  Serial3.readStringUntil('\n');
+  if (Serial2.available()) {
+    String input1 =  Serial2.readStringUntil('\n');
     //Serial.println(input1);
 
     //Serial.println(input);
@@ -245,28 +245,30 @@ void actualizarPorterias() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
-  //     actualizarPorterias();
-  //        Serial.println(porteriaAzul.getX());
+    //  actualizarPorterias();
+    //   Serial.println(porteriaAzul.getX());
 
 
   //  Serial.println("Cam");
-  //if (Serial3.available()) {
+  // if (Serial2.available()) {
   //        Serial.println("serial1");
-  //         input = Serial3.readStringUntil('\n');
+  //         input = Serial2.readStringUntil('\n');
   //        Serial.println(input);
-  //
+  
   //    }
 
   //Serial.println(hasPosesion());
 
 
   //ARO-IRRRR________________________________
-//         aroIR.actualizarDatos();
+        aroIR.actualizarDatos();
+
+        double angulo = aroIR.getAngulo();
+        Serial.println(angulo);
+//  //     Serial.println(aroIR.getStrength());
+
 //         double high = aroIR.getHighPass();
 //         double low = aroIR.getLowPass();
-//         double angulo = aroIR.getAngulo();
-//         Serial.println(angulo);
-//  //     Serial.println(aroIR.getStrength());
 //
 //    Serial.print(angulo);
 //    Serial.print(",\t\t");
@@ -282,10 +284,10 @@ void tests() {
 
 
   //IMU______________________________________
-         gyro.readValues();
-       // Serial.println(gyro.getYaw());
+        //  gyro.readValues();
+        // Serial.println(gyro.getYaw());
 
-       Serial.println(gyro.getMag());
+      // Serial.println(gyro.getMag());
 
   //    int change = correccionesImuTarget(-40);
   //    motoresRobot.setAllMotorSpeed(velocidades);
@@ -297,12 +299,12 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-//       motoresRobot.setAllMotorSpeed(velocidades);
-//       motoresRobot.mover1();
-//       delay(1000);
-//       motoresRobot.mover2();
-//       delay(1000);
-//       motoresRobot.mover3();
+      // motoresRobot.setAllMotorSpeed(velocidades);
+      // motoresRobot.mover1();
+      // delay(1000);
+      // motoresRobot.mover2();
+      // delay(1000);
+      // motoresRobot.mover3();
   ////
   //   motoresRobot.giroH();
 
@@ -331,7 +333,7 @@ void tests() {
   //      int change = correccionesImu();
   //      //motoresRobot.movimientoLineal(0,velocidades);
   //      motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
-  //
+  // //
 
   //SEEKER
 //  InfraredResult InfraredBall = InfraredSeeker::ReadAC(); 

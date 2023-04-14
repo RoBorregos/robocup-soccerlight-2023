@@ -9,10 +9,10 @@
 #include <HTInfraredSeeker.h>
 //#include "Constantes.h"
 
-int dirSeeker;
-int dirGrados;
-int strSeeker;
-int lastSeen = 1;
+// int dirSeeker;
+// int dirGrados;
+// int strSeeker;
+// int lastSeen = 1;
 
 
 //Selección de giroscopio
@@ -22,7 +22,9 @@ int lastSeen = 1;
 //Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32);  //robot imu
 //
 #include "BNO.h"
-Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);    //robot bno
+//Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);    //robot bno
+//Motores motoresRobot(4, 30, 29, 5, 28, 27, 6, 26, 25);    //robot bno
+Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
 
 BNO gyro;
 
@@ -33,7 +35,7 @@ BNO gyro;
 
 //Variables
 bool posesion = true;
-int velocidades = 180;
+int velocidades = 70;
 String input = "";
 char lastP = "i";
 //int lastSeen = 1;
@@ -70,15 +72,15 @@ enum Lados {
 
 
 Lados atacar = amarillo;
-Estados estado = nada;
+Estados estado;
 
 
 
 //SETUP------------------------------------------------------
 void setup() {
   Serial.begin(9600);
-  Serial3.begin(9600);
-  Serial3.setTimeout(100);
+  Serial2.begin(9600);
+  Serial2.setTimeout(100);
   Serial.setTimeout(100);
 
   pinMode(limitSwitch, INPUT);
@@ -90,13 +92,14 @@ void setup() {
 
   //Iniciar objetos
   motoresRobot.iniciar();
-  pid.setKP(0.3);
+  pid.setKP(0.2);
+  pid.setMinToMove(20);
   gyro.iniciar();
   aroIR.iniciar();
   color.iniciar();
   aroIR.actualizarDatos();
   color.calibrar();
-  InfraredSeeker::Initialize();
+  //InfraredSeeker::Initialize();
 
   //Capturar los valores de la cámara (2 veces pq una sola falla jaja)
   actualizarPorterias();
@@ -116,7 +119,7 @@ void setup() {
 void loop() {
 
 
-
+  estado = nada;
 
   //estado = hasPelota;
   //Verificar si está en la línea y moverse si es necesario

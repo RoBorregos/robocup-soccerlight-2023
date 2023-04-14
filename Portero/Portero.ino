@@ -1,13 +1,13 @@
-#include <ICM_20948.h>
+//#include <ICM_20948.h>
 
 //Librerías
-//#include <ICM_20948.h>
+#include <ICM_20948.h>
 #include "AroIR.h"
 #include "Color.h"
 #include "Motores.h"
 #include "PID.h"
 #include "Porteria.h"
-#include <HTInfraredSeeker.h>
+//#include <HTInfraredSeeker.h>
 
 int dirSeeker;
 int dirGrados;
@@ -18,13 +18,13 @@ int lastSeen = 1;
 //Selección de giroscopio
 //Se debe descomentar lo que se va a usar y comentar lo contrario
 //
-//#include "Imu.h"  
+#include "Imu.h"  
 //Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32);  //robot imu
 //
-#include "BNO.h"
+//#include "BNO.h"
 Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);    //robot bno
 
-BNO gyro;
+Imu gyro;
 
 //También se deben cambiar los pines de COLOR.h!!
 
@@ -50,7 +50,7 @@ double angle1 = -1;
 
 
 //Objetos
-//AroIR aroIR;
+AroIR aroIR;
 PID pid;
 Color color;
 Porteria porteriaAzul;
@@ -98,9 +98,9 @@ void setup() {
   motoresRobot.iniciar();
   pid.setKP(0.3);
   gyro.iniciar();
-  //aroIR.iniciar();
+  aroIR.iniciar();
   color.iniciar();
-  //aroIR.actualizarDatos();
+  aroIR.actualizarDatos();
   color.calibrar();
   //InfraredSeeker::Initialize();
 
@@ -129,7 +129,7 @@ void loop() {
 
 
 
-  estado = inPorteria;
+  estado = nada;
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
     angle1 = color.checkForLinea();
@@ -167,7 +167,7 @@ void loop() {
     tests();
   }
 
-  estado = inPorteria;
+  estado = nada;
 
 
 }

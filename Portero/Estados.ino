@@ -200,7 +200,7 @@ void actualizarPorterias2(int col) {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
-     actualizarPorterias();
+ //    actualizarPorterias();
 //       Serial.println(porteriaAzul.getX());
 
 //Serial3.write("1");
@@ -237,12 +237,13 @@ void tests() {
 
 
   //ARO-IRRRR________________________________
-//         aroIR.actualizarDatos();
+         aroIR.actualizarDatos();
+        double angulo = aroIR.getAngulo();
+        Serial.println(angulo);
+//  //     Serial.println(aroIR.getStrength());
+
 //         double high = aroIR.getHighPass();
 //         double low = aroIR.getLowPass();
-//         double angulo = aroIR.getAngulo();
-//         Serial.println(angulo);
-//  //     Serial.println(aroIR.getStrength());
 //
 //    Serial.print(angulo);
 //    Serial.print(",\t\t");
