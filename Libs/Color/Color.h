@@ -7,13 +7,14 @@
       const int pinLED = 52;
       const int pinBoton = 7;
       int proportion = 2.5; //BNO
+      double anguloF[3] = {60, 180.0, 300.0};
 
   
       //ROBOT BNO
-      const int sig[3] = {A0, A1, A15}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
-      const int sC[3] = {8, 13, 53}; // pines de 'control' ABC
-      const int sB[3] = {9, 11, 50}; //robot bno
-      const int sA[3] = {10, 12, 51};
+      const int sig[3] = {A1, A0, A2}; // pines signal: DERECHA, PRINCIPAL, IZQUIERDA
+      const int sC[3] = {46, 47, 43}; // pines de 'control' ABC
+      const int sB[3] = {45, 48, 42}; //robot bno
+      const int sA[3] = {44, 49, 41};
   
    
       //ROBOT IMU
@@ -50,6 +51,7 @@
       void calibrar();
       double checkForLinea();
       bool checkForLineaBool();
+      double checkForLineaPlaca();
  
 
   };
