@@ -5,7 +5,7 @@ void buscarPorteria(int x1, int y1){
 
     
   int change = correccionesImu();
-        Serial.println(y1);
+  //Serial.println(x1);
 
   if (y1 >= 110) {
     motoresRobot.apagarMotores();
@@ -30,6 +30,8 @@ void buscarPorteria(int x1, int y1){
       //Serial.println("back");
       motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
     } else {
+      digitalWrite(led2, HIGH);
+
       int ang = (error > 0)? 180 - (error*kP) : -180 - (error*kP);
       ang *= -1;
       //Serial.println(ang);
@@ -37,6 +39,8 @@ void buscarPorteria(int x1, int y1){
     }
 
   }
+   digitalWrite(led2, LOW);
+
   //return false;
 }
 
@@ -91,28 +95,55 @@ int correccionesImuTarget(int target) {
 //Obtener y almacenar los datos de la cámara
 void actualizarPorterias() {
 
+
   if (Serial3.available()) {
     String input1 =  Serial3.readStringUntil('\n');
     //Serial.println(input1);
 
-    if(input1.length() > 8) {
-      if (input1[0] == '0')
-        porteriaAmarilla.actualizar(input1);
-      else  
-        porteriaAzul.actualizar(input1);
-    }
-    
+    //Serial.println(input);
+    if (input1[0] == '0')
+      porteriaAmarilla.actualizar(input1);
+    else
+      porteriaAzul.actualizar(input1);
   }
 
-} 
+}
+
 
 void salirLinea(int angleC) {
-  int change = correccionesImu();
+  
   ms2 = millis();
 
   while ((millis() - ms2) < 500) {
-    gyro.readValues();
-    motoresRobot.movimientoLinealCorregido(angleC, 190, change, gyro.isRight());
+    int change = correccionesImu();
+    aroIR.actualizarDatos();
+    double angulo = aroIR.getAngulo();
+
+    if (aroIR.getStrength() == 0) {
+      motoresRobot.apagarMotores();
+      return;
+    }
+
+    int result = -1000;
+
+  if (abs(angulo) <= 20) {
+    result = 0;
+  } else if (abs(angulo) <= 60) {
+    result = (angulo > 0) ? 70 : -70;
+  } else if (abs(angulo) <= 75) {
+    result = (angulo > 0) ? 80 : -80;
+  } else if (abs(angulo) <= 90) {
+    result = (angulo > 0) ? 90 : -90;
+  } else {
+    result = angulo;
+  }
+
+   if (result == -1000) 
+    motoresRobot.apagarMotores();
+  else 
+    motoresRobot.movimientoLinealCorregido(result, velocidades, change, gyro.isRight());
+
+    
   }
 
 }
@@ -130,7 +161,37 @@ bool isLimit() {
 
 
 
+void actualizarPorterias2(int col) {
+  
+  //Serial.println(col);
+  if (col == 1)
+    Serial3.write("1");
+  else 
+    Serial3.write("0");
 
+  int ms3 = millis();
+
+  while ((millis() - ms3) < 50) {
+    
+  }
+
+  if (Serial3.available()) { 
+    input =  Serial3.readStringUntil('\n');
+    Serial.println(input);
+
+//    if (input[0] == '0')
+//      porteriaAmarilla.actualizar(input);
+//
+//    else if (input[0] == '1')
+//      porteriaAzul.actualizar(input);
+
+    
+  }
+//  while(Serial3.available()) {
+//    Serial.read();
+//  }
+
+} 
 
 
 
@@ -139,8 +200,29 @@ bool isLimit() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
-       actualizarPorterias();
-       Serial.println(porteriaAzul.getX());
+     actualizarPorterias();
+//       Serial.println(porteriaAzul.getX());
+
+//Serial3.write("1");
+//
+//int ms3 = millis();
+//
+//  while ((millis() - ms3) < 10) {
+//    
+//  }
+////Serial3.write("i");
+////delay(700);
+////
+//  if (Serial3.available()) {
+//          //Serial.println("serial1");
+//           input = Serial3.readStringUntil('\n');
+//          //Serial.println(input);
+//          porteriaAzul.actualizar(input);
+//  
+//      }
+    //  Serial.println(porteriaAzul.getX());
+
+      
 
 //
 //    Serial.println("Cam");

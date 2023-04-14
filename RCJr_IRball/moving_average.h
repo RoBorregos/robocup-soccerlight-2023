@@ -1,10 +1,10 @@
 #ifndef __MOVING_AVERAGE__
 #define __MOVING_AVERAGE__
 
-#include "SingleEMAFilterLib.h"
-
-SingleEMAFilter<int> filterAngulo(0.6);
-SingleEMAFilter<int> filterStr(0.6);
+//#include "SingleEMAFilterLib.h"
+//
+//SingleEMAFilter<int> filterAngulo(0.6);
+//SingleEMAFilter<int> filterStr(0.6);
 
 class MovingAverage {
 private:

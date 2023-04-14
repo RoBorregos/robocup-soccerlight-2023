@@ -26,7 +26,7 @@ void loop() {
     vectorRT_t      vectorRTWithSma;    // 移動平均を適用させた極座標系ベクトル
 
     sensorInfo  = getAllSensorPulseWidth(pulseWidth, T_MODEA);
-    Serial.println(sensorInfo.maxSensorNumber);
+    //Serial.println(sensorInfo.maxSensorNumber);
 
     vectorXY    = calcVectorXYFromPulseWidth(pulseWidth);
     vectorRT    = calcRTfromXY(&vectorXY);
@@ -48,8 +48,8 @@ void loop() {
 //        Serial.print(millis());
 //        Serial.print("\n");
 
-      //  printAngulo(&vectorRTWithSma);
-      //  printRadio(&vectorRTWithSma);
+        printAngulo(&vectorRTWithSma);
+        printRadio(&vectorRTWithSma);
     }
 }
 

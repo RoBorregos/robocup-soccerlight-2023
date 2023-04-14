@@ -222,6 +222,7 @@ bool isLimit() {
 //Obtener y almacenar los datos de la cámara
 void actualizarPorterias() {
 
+
   if (Serial3.available()) {
     String input1 =  Serial3.readStringUntil('\n');
     //Serial.println(input1);

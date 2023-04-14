@@ -33,7 +33,7 @@ BNO gyro;
 
 //Variables
 bool posesion = true;
-int velocidades = 180;
+int velocidades = 190;
 String input = "";
 char lastP = "i";
 //int lastSeen = 1;
@@ -43,7 +43,10 @@ unsigned long ms = 0;
 unsigned long ms2 = 0;
 int last = 1;
 int led = 37;
+int led2 = 39;
+
 double angle1 = -1;
+
 
 
 //Objetos
@@ -70,9 +73,8 @@ enum Lados {
 };
 
 
-Lados atacar = amarillo;
-
-Estados estado = linea;
+Lados atacar = azul;
+Estados estado;
 
 
 
@@ -80,12 +82,14 @@ Estados estado = linea;
 void setup() {
   Serial.begin(9600);
   Serial3.begin(9600);
-  Serial3.setTimeout(50);
+  Serial3.setTimeout(100);
   Serial.setTimeout(100);
 
   pinMode(limitSwitch, INPUT);
   pinMode(limitSwitch2, INPUT);
   pinMode(led, OUTPUT);
+  pinMode(led2, OUTPUT);
+
   
   //Delay para la cámara
   delay(1500);
@@ -101,14 +105,17 @@ void setup() {
   //InfraredSeeker::Initialize();
 
   //Capturar los valores de la cámara (2 veces pq una sola falla jaja)
-  actualizarPorterias();
-  actualizarPorterias();
+  // actualizarPorterias2(0);
+  // actualizarPorterias2(1);
+  // actualizarPorterias();
+  // actualizarPorterias();
+
 
   //Verificar si se debe voltear
-  if ((atacar == azul && porteriaAzul.getX() != -1) || (atacar == amarillo && porteriaAmarilla.getColor() == 1)) {
-    gyro.setOffset(180);
-    digitalWrite(led, HIGH);
-  }
+  // if ((atacar == amarillo && porteriaAmarilla.getX() != -1) || (atacar == amarillo && porteriaAmarilla.getColor() == 1)) {
+  //   gyro.setOffset(180);
+  //   digitalWrite(led, HIGH);
+  // }
 
   Serial.println("SETUP DONE");
 
@@ -122,8 +129,7 @@ void loop() {
 
 
 
-
-  //estado = hasPelota;
+  estado = inPorteria;
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
     angle1 = color.checkForLinea();
@@ -138,26 +144,21 @@ void loop() {
       Serial.println("nada");
       estado = inPorteria;
 
+
     }
 
-
-     
-    
+ 
   }
 
   if (estado == inPorteria) {
+    //Serial.println("inPorteria");
     actualizarPorterias();
+     int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
+     int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
 
-    int x1 = (atacar == azul) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-    int y1 = (atacar == azul) ? porteriaAmarilla.getY() : porteriaAzul.getY();
-//    Serial.print("x: ");
-//    Serial.println(x1);
-//    Serial.print("y: ");
-//    Serial.println(y1);
 
     buscarPorteria(x1,y1);
     //estado = (buscarPorteria(x1,y1)) ? linea : inPorteria;
-    //estado = inPorteria;
   }
 
 
@@ -166,7 +167,7 @@ void loop() {
     tests();
   }
 
-  estado = linea;
+  estado = inPorteria;
 
 
 }

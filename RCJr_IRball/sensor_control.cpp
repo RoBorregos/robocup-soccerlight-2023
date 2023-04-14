@@ -47,26 +47,26 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
 
 
      //do-whileで時間(833us)を監視しながらセンサの読み込み
-//    const unsigned long startTime_us = micros();
-//    do {
-//        for (int i = 0; i < IR_NUM; i++) {
-//            if(getSensorPin(i) == false) {
-//                pulseWidth[i] += deltaPulseWidth;
-//            }
-//        }
-//    } while((micros() - startTime_us) < timeLimit);
-
-
-  //Usando otro deltaPulsewidth
-        const unsigned long startTime_us = micros();
+    const unsigned long startTime_us = micros();
     do {
         for (int i = 0; i < IR_NUM; i++) {
             if(getSensorPin(i) == false) {
                 pulseWidth[i] += deltaPulseWidth;
-                //pulseWidth[i] += int(micros() - startTime_us);
             }
         }
     } while((micros() - startTime_us) < timeLimit);
+
+
+  //Usando otro deltaPulsewidth
+//        const unsigned long startTime_us = micros();
+//    do {
+//        for (int i = 0; i < IR_NUM; i++) {
+//            if(getSensorPin(i) == false) {
+//                pulseWidth[i] += deltaPulseWidth;
+//                //pulseWidth[i] += int(micros() - startTime_us);
+//            }
+//        }
+//    } while((micros() - startTime_us) < timeLimit);
 
 
 //        for (int i = 0; i < IR_NUM; i++) {

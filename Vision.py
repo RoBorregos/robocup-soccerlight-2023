@@ -4,8 +4,8 @@ import sensor, image, time, math, pyb, utime
 from pyb import UART
 
 #Thresholds (LAB)
-amarillo = (52, 98, -26, 14, 12, 71)     #Amarillo
-azul = (21, 60, -6, 35, -74, -28)        #Azul
+amarillo = (52, 98, -26, 26, 12, 71)     #Amarillo
+azul = (21, 72, -6, 35, -74, -28)        #Azul
 
 
 blue_led = pyb.LED(3)
@@ -68,8 +68,14 @@ while(True):
     img = sensor.snapshot()
     #red_led.off()
 
-    detectar_porteria(amarillo, 'a')
-    detectar_porteria(azul, 'b')
+    if (uart.any() > 0):
+        in = uart.readchar()
+        if (in == "0"):
+            detectar_porteria(amarillo, 'a')
+            detectar_porteria(azul, 'b')
+
+
+
 
 
 
