@@ -70,7 +70,7 @@ void Color::iniciar() {
 void Color::calibrar() {
 
   for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 8; j++) {
+    for (int j = 0; j < 4; j++) {
       int suma = 0;
       for (int k = 0; k < 100; k++) {
         suma += lectura(j, i);
@@ -91,7 +91,7 @@ double Color::checkForLinea() {
   double count = 0;
   bool check = false;
   for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 8; j++) {
+    for (int j = 0; j < 4; j++) {
       int lec = lectura(j, i);
       if (lec - foto[i][j] >= 35) {
         if (i == 2 && j == 0 && check == true) {
@@ -115,7 +115,7 @@ double Color::checkForLinea() {
 
 
 bool Color::checkForLineaBool() {
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 3; j++) {
       if (lectura(i, j) >= fotoMinB[j][i] && lectura(i, j) <= fotoMaxB[j][i]) {
         return true;
@@ -124,3 +124,22 @@ bool Color::checkForLineaBool() {
   }
   return false;
 }
+
+double checkForLineaPlaca(){
+      double degree = 0;
+      int count = 0;
+      for (int i=0; i<4; i++){
+        for (int j=0; j<3; j++){
+          if (lectura(i,j) >= 2.3*foto[j][i]){
+            degree += anguloF[j];
+            count++;
+          }
+        }
+      }
+      if (count > 0){
+      double promedio = degree / count;
+      return promedio;
+      }
+      else { return -1; }
+      
+    }
