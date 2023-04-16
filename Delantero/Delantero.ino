@@ -35,17 +35,18 @@ BNO gyro;
 
 //Variables
 bool posesion = true;
-int velocidades = 70;
+int velocidades = 110;
 String input = "";
 char lastP = "i";
 //int lastSeen = 1;
-int limitSwitch = 35;
-int limitSwitch2 = 6;
+int limitSwitch = 40;
+int limitSwitch2 = 40;
 unsigned long ms = 0;
 unsigned long ms2 = 0;
 int last = 1;
 int led = 37;
 double angle1 = -1;
+int atacarE = 1;
 
 
 //Objetos
@@ -71,7 +72,7 @@ enum Lados {
 };
 
 
-Lados atacar = amarillo;
+Lados atacar = azul;
 Estados estado;
 
 
@@ -83,9 +84,12 @@ void setup() {
   Serial2.setTimeout(100);
   Serial.setTimeout(100);
 
-  pinMode(limitSwitch, INPUT);
-  pinMode(limitSwitch2, INPUT);
-  pinMode(led, OUTPUT);
+  Serial3.begin(115200);
+  Serial3.setTimeout(100);
+
+  pinMode(limitSwitch, OUTPUT);
+  // pinMode(limitSwitch2, INPUT);
+  // pinMode(led, OUTPUT);
   
   //Delay para la cámara
   delay(1500);
@@ -93,7 +97,7 @@ void setup() {
   //Iniciar objetos
   motoresRobot.iniciar();
   pid.setKP(0.2);
-  pid.setMinToMove(20);
+  pid.setMinToMove(30);
   gyro.iniciar();
   aroIR.iniciar();
   color.iniciar();
@@ -117,27 +121,29 @@ void setup() {
 //Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
+  
 
 
-  estado = nada;
+  estado = linea;
+
 
   //estado = hasPelota;
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
-    angle1 = color.checkForLinea();
+    angle1 = color.checkForLineaPlaca();
 
     if (angle1 != -1) {
-      Serial.println(angle1);
+     // Serial.println(angle1);
 
       salirLinea(angle1);
-      digitalWrite(led, HIGH);
+      //digitalWrite(led, HIGH);
     } else {
-      digitalWrite(led, LOW);
-      Serial.println("nada");
+      //digitalWrite(led, LOW);
+     // Serial.println("nada");
+     estado = buscarPelota;
 
     }
 
-     estado = buscarPelota;
     
   }
 
@@ -157,16 +163,19 @@ void loop() {
     ms = millis();
     actualizarPorterias();    
     int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-    gol(x1);
+    int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
+    //Serial.println(y1);
+    gol(x1,y1);
 
   }
 
   //Pruebas
   if (estado == nada) {
-    tests();
+//    Serial.println(digitalRead(limitSwitch));
+   tests();
   }
 
-  estado = nada;
+  //estado = golPorteria;
 
 }
 

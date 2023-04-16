@@ -1,7 +1,7 @@
 //#include <ICM_20948.h>
 
 //Librerías
-#include <ICM_20948.h>
+//#include <ICM_20948.h>
 #include "AroIR.h"
 #include "Color.h"
 #include "Motores.h"
@@ -81,8 +81,8 @@ Estados estado;
 //SETUP------------------------------------------------------
 void setup() {
   Serial.begin(9600);
-  Serial3.begin(9600);
-  Serial3.setTimeout(100);
+  Serial2.begin(9600);
+  Serial2.setTimeout(100);
   Serial.setTimeout(100);
 
   pinMode(limitSwitch, INPUT);
@@ -142,7 +142,7 @@ void loop() {
     } else {
       digitalWrite(led, LOW);
       Serial.println("nada");
-      estado = inPorteria;
+     // estado = inPorteria;
 
 
     }
@@ -156,7 +156,7 @@ void loop() {
      int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
      int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
 
-
+    
     buscarPorteria(x1,y1);
     //estado = (buscarPorteria(x1,y1)) ? linea : inPorteria;
   }

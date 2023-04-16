@@ -101,9 +101,9 @@ void actualizarPorterias() {
     //Serial.println(input1);
 
     //Serial.println(input);
-    if (input1[0] == '0')
+    if (input1[0] == 'a')
       porteriaAmarilla.actualizar(input1);
-    else
+    else if (input1[0] == 'b')
       porteriaAzul.actualizar(input1);
   }
 
@@ -111,10 +111,10 @@ void actualizarPorterias() {
 
 
 void salirLinea(int angleC) {
-  
+  Serial.println("salir linea");
   ms2 = millis();
 
-  while ((millis() - ms2) < 500) {
+  while ((millis() - ms2) < 700) {
     int change = correccionesImu();
     aroIR.actualizarDatos();
     double angulo = aroIR.getAngulo();
@@ -128,8 +128,10 @@ void salirLinea(int angleC) {
 
   if (abs(angulo) <= 20) {
     result = 0;
+    Serial.println("adelante");
   } else if (abs(angulo) <= 60) {
     result = (angulo > 0) ? 70 : -70;
+    Serial.println("60");
   } else if (abs(angulo) <= 75) {
     result = (angulo > 0) ? 80 : -80;
   } else if (abs(angulo) <= 90) {
@@ -230,16 +232,16 @@ void tests() {
 //          //Serial.println("serial1");
 //           input = Serial3.readStringUntil('\n');
 //          Serial.println(input);
-//  
+ 
 //      }
 
   //Serial.println(hasPosesion());
 
 
   //ARO-IRRRR________________________________
-         aroIR.actualizarDatos();
-        double angulo = aroIR.getAngulo();
-        Serial.println(angulo);
+        //  aroIR.actualizarDatos();
+        // double angulo = aroIR.getAngulo();
+        // Serial.println(angulo);
 //  //     Serial.println(aroIR.getStrength());
 
 //         double high = aroIR.getHighPass();
@@ -259,8 +261,8 @@ void tests() {
 
 
   //IMU______________________________________
-  //       gyro.readValues();
-       // Serial.println(gyro.getYaw());
+      //   gyro.readValues();
+      //  Serial.println(gyro.getYaw());
 
 //       Serial.println(gyro.getMag());
 
@@ -305,9 +307,9 @@ void tests() {
   //   delay(1000);
 
   //MOVIMIENTOLINEALCORREGIDO___________________
-  //      int change = correccionesImu();
-  //      //motoresRobot.movimientoLineal(0,velocidades);
-  //      motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+       int change = correccionesImu();
+  //     //motoresRobot.movimientoLineal(0,velocidades);
+        motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
   //
 
   //SEEKER

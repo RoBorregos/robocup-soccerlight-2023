@@ -4,7 +4,7 @@ import sensor, image, time, math, pyb, utime
 from pyb import UART
 
 #Thresholds (LAB)
-amarillo = (52, 98, -26, 26, 12, 71)     #Amarillo
+amarillo = ((51, 81, -34, 4, 15, 84))     #Amarillo
 azul = (21, 72, -6, 35, -74, -28)        #Azul
 
 
@@ -31,11 +31,7 @@ def detectar_porteria(color, tag):
     h = -1
     w = -1
 
-    if tag == 'a':
-        index = 0
 
-    else:
-        index = 1
 
 
     for blob in img.find_blobs([color], pixels_threshold=200, area_threshold=300, merge=True):
@@ -59,20 +55,25 @@ def detectar_porteria(color, tag):
 
             area = max(blob.area(), area)
 
-    uart.write(f"{index},{x},{y},{w},{h}\n")
-    print(f"{index},{x},{y},{w},{h}\n")
+    uart.write(f"{tag},{x},{y},{w},{h}\n")
+    print(f"{tag},{x},{y},{w},{h}\n")
 
 #Loop
 while(True):
     clock.tick()
     img = sensor.snapshot()
+    detectar_porteria(amarillo, 'a')
+    detectar_porteria(azul, 'b')
     #red_led.off()
 
-    if (uart.any() > 0):
-        in = uart.readchar()
-        if (in == "0"):
-            detectar_porteria(amarillo, 'a')
-            detectar_porteria(azul, 'b')
+    #if (uart.any() > 0):
+        #txt = uart.readline()
+        #if (txt == b'0'):
+            #detectar_porteria(amarillo, 'a')
+        #elif (txt == b'1'):
+            #detectar_porteria(azul, 'b')
+
+
 
 
 
