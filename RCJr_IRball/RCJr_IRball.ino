@@ -31,19 +31,27 @@ void loop() {
 
     vectorRTWithSma.theta   = smaForTheta.updateData(vectorRT.theta);
     vectorRTWithSma.radius  = smaForRadius.updateData(vectorRT.radius);
-        //Serial.println(sensorInfo.maxSensorNumber);
+//        Serial.print("a ");
+   //     Serial.println(vectorRT.radius);
+        //Serial.print("w ");
+      //  Serial.println(sensorInfo.maxPulseWidth);
+
 
 
     // 50ms周期でシリアルプリント
     if (millis() - time_ms > 50) {
         time_ms = millis();
-//        
+
 //        //serialPrintAllPusleWidth(pulseWidth, &sensorInfo);
 //        //Serial.print("\t");
 //        serialPrintVectorXY(&vectorXY);
 //        Serial.print("\t");
-        printAngulo(&vectorRTWithSma);
-        printRadio(&vectorRTWithSma);
+      printAngulo(&vectorRTWithSma);
+      Serial.print("r ");
+      Serial.print(sensorInfo.avgPulseWidth);
+      Serial.print("\n");
+
+     //  printRadio(&vectorRTWithSma);
 //        Serial.print("\t");
 //        Serial.print(millis());
       //  Serial.print("\n"); 

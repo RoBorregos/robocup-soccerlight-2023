@@ -7,6 +7,7 @@
 #include "PID.h"
 #include "Porteria.h"
 #include <HTInfraredSeeker.h>
+#include "Dribbler.h"
 //#include "Constantes.h"
 
 // int dirSeeker;
@@ -37,7 +38,7 @@ BNO gyro;
 bool posesion = true;
 int velocidades = 110;
 String input = "";
-char lastP = "i";
+int lastP = 1;
 //int lastSeen = 1;
 int limitSwitch = 40;
 int limitSwitch2 = 40;
@@ -55,6 +56,7 @@ PID pid;
 Color color;
 Porteria porteriaAzul;
 Porteria porteriaAmarilla;
+Dribbler dribbler(7);
 
 
 //Estados del robot
@@ -103,6 +105,7 @@ void setup() {
   color.iniciar();
   aroIR.actualizarDatos();
   color.calibrar();
+  dribbler.iniciar();
   //InfraredSeeker::Initialize();
 
   //Capturar los valores de la cámara (2 veces pq una sola falla jaja)
@@ -133,14 +136,14 @@ void loop() {
     angle1 = color.checkForLineaPlaca();
 
     if (angle1 != -1) {
-     // Serial.println(angle1);
+    Serial.println("lineaa");
 
       salirLinea(angle1);
       //digitalWrite(led, HIGH);
     } else {
       //digitalWrite(led, LOW);
-     // Serial.println("nada");
-     estado = buscarPelota;
+    //Serial.println("nada");
+     estado = golPorteria;
 
     }
 
@@ -149,7 +152,7 @@ void loop() {
 
   //Revisar si se tiene posesión de la pelota
   if (estado == hasPelota) {
-    estado = (isLimit()) ? golPorteria : buscarPelota;
+    estado = (hasP()) ? golPorteria : buscarPelota;
   }
 
   //Buscar la pelota
@@ -164,7 +167,6 @@ void loop() {
     actualizarPorterias();    
     int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
     int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
-    //Serial.println(y1);
     gol(x1,y1);
 
   }

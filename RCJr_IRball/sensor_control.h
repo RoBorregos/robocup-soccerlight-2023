@@ -14,6 +14,7 @@ typedef struct {
     int activeSensors;      // 反応したセンサの個数
     int maxPulseWidth;      // 最大のセンサ値
     int maxSensorNumber;    // 最大の値を観測したセンサの番号
+    int avgPulseWidth;
 } sensorInfo_t;
 
 typedef struct {

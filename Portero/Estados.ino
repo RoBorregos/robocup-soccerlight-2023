@@ -133,6 +133,8 @@ void salirLinea(int angleC) {
     result = (angulo > 0) ? 70 : -70;
     Serial.println("60");
   } else if (abs(angulo) <= 75) {
+        Serial.println("75");
+
     result = (angulo > 0) ? 80 : -80;
   } else if (abs(angulo) <= 90) {
     result = (angulo > 0) ? 90 : -90;
@@ -276,12 +278,12 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-//       motoresRobot.setAllMotorSpeed(velocidades);
-//       motoresRobot.mover1();
-//       delay(1000);
-//       motoresRobot.mover2();
-//       delay(1000);
-//       motoresRobot.mover3();
+      // motoresRobot.setAllMotorSpeed(velocidades);
+      // motoresRobot.mover1();
+      // delay(1000);
+      // motoresRobot.mover2();
+      // delay(1000);
+      // motoresRobot.mover3();
   //
   //   motoresRobot.giroH();
 
@@ -307,10 +309,10 @@ void tests() {
   //   delay(1000);
 
   //MOVIMIENTOLINEALCORREGIDO___________________
-       int change = correccionesImu();
-  //     //motoresRobot.movimientoLineal(0,velocidades);
-        motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
-  //
+  //      int change = correccionesImu();
+  // //     //motoresRobot.movimientoLineal(0,velocidades);
+  //       motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+  // //
 
   //SEEKER
 //  InfraredResult InfraredBall = InfraredSeeker::ReadAC(); 

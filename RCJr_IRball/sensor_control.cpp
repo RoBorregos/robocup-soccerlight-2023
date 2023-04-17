@@ -41,6 +41,7 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
     }
 
 //Todos 
+    
 
 
     // do-whileで時間(833us)を監視しながらセンサの読み込み
@@ -71,15 +72,20 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
     sensorInfo.activeSensors    = 0; // ボールに反応しているセンサの個数
     sensorInfo.maxPulseWidth     = 0; // 一番反応の強いセンサのパルス幅
     sensorInfo.maxSensorNumber  = 0; // 一番反応の強いセンサの番号
+    sensorInfo.avgPulseWidth = 0;
+    
     for(int i = 0; i < IR_NUM; i++) {
         if(pulseWidth[i] > 0) {
             sensorInfo.activeSensors += 1;
+            sensorInfo.avgPulseWidth += pulseWidth[i];
         }
         if(pulseWidth[i] > sensorInfo.maxPulseWidth) {
             sensorInfo.maxPulseWidth = pulseWidth[i];
             sensorInfo.maxSensorNumber = i;
         }
     }
+
+  //  sensorInfo.avgPulseWidth = sensorInfo.avgPulseWidth/sensorInfo.activeSensors;
 
     return sensorInfo;
 }

@@ -4,103 +4,46 @@ void buscar() {
   int change = correccionesImu();
   aroIR.actualizarDatos();
   double angulo = aroIR.getAngulo();
+  double str = aroIR.getStrength();
+
 
   //Serial.println(aroIR.getStrength());
 
-   Serial.println(angulo);
+  Serial.println(angulo);
 
-  if (aroIR.getStrength() == 0) {
+
+  if (str == 0) {
     motoresRobot.apagarMotores();
     return;
-  }
-
-
-  if (abs(angulo) <= 20) {
-    motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
-  } else if (abs(angulo) <= 60) {
-    int v = (angulo > 0) ? 90 : -90;
-    motoresRobot.movimientoLinealCorregido(v, velocidades, change, gyro.isRight());
-  } else if (abs(angulo) <= 75) {
-    int v = (angulo > 0) ? 120 : -120;
-    motoresRobot.movimientoLinealCorregido(v, velocidades, change, gyro.isRight());
-  } else if (abs(angulo) <= 90) {
-    int v = (angulo > 0) ? 135 : -135;
-    motoresRobot.movimientoLinealCorregido(v, velocidades, change, gyro.isRight());
-  } else if (abs(angulo) <= 240) {
-    motoresRobot.movimientoLinealCorregido(180, velocidades, change, gyro.isRight());
+  } else if (str > 75 && abs(angulo) <= 90) {
+    dribbler.prender();
   } else {
-    motoresRobot.movimientoLinealCorregido(last * 140, velocidades, change, gyro.isRight());
-  }
-
-
-  if (angulo > 0)
-    last = 1;
-  else
-    last = -1;
-
-}
-
-
-void buscarSeeker() {
-  InfraredResult InfraredBall = InfraredSeeker::ReadAC(); 
-  int anguloSeeker = InfraredBall.Direction;
-  int strSeeker = InfraredBall.Strength;
-
-  Serial.println(strSeeker);
-    
-  int change = correccionesImu();
-  aroIR.actualizarDatos();
- // double angulo = aroIR.getLowPass();
-  double angulo = aroIR.getAngulo();
-//
-//  //Serial.println(aroIR.getStrength());
-//
- // Serial.println(angulo);
-//
-  if (aroIR.getStrength() == 0) {
-    motoresRobot.apagarMotores();
-    return;
+    dribbler.apagar();
   }
 
   int result = -1000;
-
-  if (abs(angulo) <= 20) {
-    result = 0;
-  } else if (abs(angulo) <= 60) {
-    result = (angulo > 0) ? 90 : -90;
-  } else if (abs(angulo) <= 75) {
-    result = (angulo > 0) ? 120 : -120;
-  } else if (abs(angulo) <= 90) {
-    result = (angulo > 0) ? 135 : -135;
-  } else if (abs(angulo) <= 240) {
-    result = 180;
-  } else {
-    result = last * 140;
-  }
-
   
-//    if (abs(angulo) <= 18) {
-//      result = 0;
-//    } else if (abs(angulo) <= 40) {
-//      result = (angulo > 0) ? 80 : -80;
-//    } else if (abs(angulo) <= 60) {
-//      result = (angulo > 0) ? 90 : -90;
-//    } else if (abs(angulo) <= 75) {
-//      result = (angulo > 0) ? 120 : -120;
-//    } else if (abs(angulo) <= 90) {
-//      result = (angulo > 0) ? 135 : -135;
-//    } else if (abs(angulo) <= 110) {
-//      result = 180;
-//    } else {
-//      result = last*120;
-//      //result = -1000;
-//    } 
-    
-    if (strSeeker > 5 && strSeeker < 30) {
-    double prop = map(strSeeker, 1, 40, 0.7, 1);
-    if (!(abs(angulo) <= 18 || abs(angulo) >= 90 && abs(angulo) <= 110))
-       result = result*prop;
+
+    if (abs(angulo) <= 20) {
+      result = 0;
+    } else if (abs(angulo) <= 60) {
+      result = (angulo > 0) ? 90 : -90;
+    } else if (abs(angulo) <= 75) {
+      result = (angulo > 0) ? 120 : -120;
+    } else if (abs(angulo) <= 90) {
+      result = (angulo > 0) ? 135 : -135;
+    } else if (abs(angulo) <= 240) {
+      result = 180;
+    } else {
+      result = last*140;
+    }
+
+  if (str < 30 && result <= 90) {
+    result = result * 0.7;
+  } else if (str < 50 && result <= 90) {
+    result = result * 0.8;
   }
+  
 
   if (result == -1000) 
     motoresRobot.apagarMotores();
@@ -118,86 +61,94 @@ void buscarSeeker() {
 
 
 
-
 //---------------------------------------Porterias
 
 void gol(int px,int y1) {
-  
+ int change = correccionesImu();
+
+Serial.print("GOL\t\t");
+// Si no ve la porteria 
 if (px == -1) {
-    motoresRobot.apagarMotores();
-    return;
+    motoresRobot.movimientoLinealCorregido(170*lastP, velocidades, change, gyro.isRight());
+  } else if (px < 10 || px > 310){
+    motoresRobot.movimientoLinealCorregido(150*lastP, velocidades, change, gyro.isRight());
+  } else {
+    atacarGol(px,y1);
   }
- while ((millis() - ms) < 400) {
+
+
+ if (px < 160) {
+    lastP = -1;
+  } else {
+    lastP = 1;
+  }
+ 
+}
+
+void atacarGol(int px,int y1) {
+
+ // while ((millis() - ms) < 400) {
+    //Serial.print("GOL\t\t");
+
+  //Si está muy cercca -> movimientos de gol
+  // if (y1 > 120) {
+  //   dribbler.apagar();
+  // }
+
   if (y1 > 110 && atacarE < 100) {
     atacarE++;
      
     int change = correccionesImu();
     bool r = gyro.isRight();
 
-    // Serial.println(px);
-
-
-    //Si no ve la portería
-    if (px == -1) {
-      motoresRobot.movimientoLinealCorregido(0, velocidades, change, r);
-
-      Serial.println("Nothing yet");
-    }
-
-    else {
+    
       if (px > 200) { //Derecha
         int change = correccionesImuTarget(40);
-        motoresRobot.setAllMotorSpeed(velocidades);
         motoresRobot.movimientoLinealCorregido(0, velocidades, change, pid.getR());
-
         Serial.println("der");
 
 
-      } else if (px < 80) {  //Izquierda
+      } else if (px < 120) {  //Izquierda
         int change = correccionesImuTarget(-40);
-        motoresRobot.setAllMotorSpeed(velocidades);
         motoresRobot.movimientoLinealCorregido(0, velocidades, change, pid.getR());
         Serial.println("izq");
 
 
       } else {  //Centro
         motoresRobot.movimientoLinealCorregido(0, velocidades, change, r);
-
         Serial.println("Adelante");
 
       }
 
-    }
- // }
-  } else {
+
+    } else {
+
+    //Moverse a la porteria
     int change = correccionesImu();
     int error = px - 160;
-//    Serial.print("x: ");
-//    Serial.println(x1);
-    
     double kP = 0.375;
-
 
     if (abs(error) < 25) {
       Serial.println("forward");
       motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+    
     } else {
-      //digitalWrite(led2, HIGH);
-
       int ang = (error > 0)? (error*kP) : (error*kP);
-      //ang *= -1;
-      Serial.println(ang);
+      Serial.println("Move");
       motoresRobot.movimientoLinealCorregido(ang, velocidades, change, gyro.isRight());
+    
     }
+
     if (y1 <= 100)
     atacarE = 0;
 
-  
   }
 
+ 
   
- }
+// }
 }
+
 
 void golV2(int px,int y1) {
 if (px == -1) {
@@ -324,6 +275,17 @@ bool isLimit() {
   return false;
 }
 
+bool hasP() {
+  aroIR.actualizarDatos();
+  double angulo = aroIR.getAngulo();
+
+  if (aroIR.getStrength() > 85 && abs(angulo) < 20) {
+    return true;
+  }
+  return false;
+
+}
+
 
 
 //Obtener y almacenar los datos de la cámara
@@ -352,6 +314,7 @@ void actualizarPorterias() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
+
     //  actualizarPorterias();
     //   Serial.println(porteriaAzul.getX());
 
@@ -374,10 +337,13 @@ void tests() {
 
 
   //ARO-IRRRR________________________________
-        // aroIR.actualizarDatos();
+        aroIR.actualizarDatos();
 
-        // double angulo = aroIR.getAngulo();
-        // Serial.println(angulo);
+        double angulo = aroIR.getAngulo();
+        Serial.print(angulo);
+        Serial.print("\t\t");
+        Serial.println(aroIR.getStrength());
+
     //     Serial.println("SSSS");
 
     //     if (Serial2.available()) {
@@ -387,7 +353,6 @@ void tests() {
     //  }
 
 
-//  //     Serial.println(aroIR.getStrength());
 
 //         double high = aroIR.getHighPass();
 //         double low = aroIR.getLowPass();
@@ -436,7 +401,7 @@ void tests() {
   //LIMIT SWITCH
   //Serial.println(digitalRead(limitSwitch));
     
-    Serial.println(isLimit());
+   // Serial.println(isLimit());
 
 
   //MOTORES GIRO______________________________

@@ -73,7 +73,7 @@ enum Lados {
 };
 
 
-Lados atacar = azul;
+Lados atacar = amarillo;
 Estados estado;
 
 
@@ -97,11 +97,13 @@ void setup() {
   //Iniciar objetos
   motoresRobot.iniciar();
   pid.setKP(0.3);
+  pid.setAngle(70);
   gyro.iniciar();
   aroIR.iniciar();
   color.iniciar();
   aroIR.actualizarDatos();
   color.calibrar();
+
   //InfraredSeeker::Initialize();
 
   //Capturar los valores de la cámara (2 veces pq una sola falla jaja)
@@ -129,7 +131,7 @@ void loop() {
 
 
 
-  estado = nada;
+  estado = linea;
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
     angle1 = color.checkForLinea();
@@ -142,7 +144,7 @@ void loop() {
     } else {
       digitalWrite(led, LOW);
       Serial.println("nada");
-     // estado = inPorteria;
+      estado = inPorteria;
 
 
     }
@@ -156,7 +158,7 @@ void loop() {
      int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
      int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
 
-    
+    //motoresRobot.apagarMotores();
     buscarPorteria(x1,y1);
     //estado = (buscarPorteria(x1,y1)) ? linea : inPorteria;
   }
@@ -167,7 +169,6 @@ void loop() {
     tests();
   }
 
-  estado = nada;
 
 
 }
