@@ -15,7 +15,7 @@ void buscar() {
   if (str == 0) {
     motoresRobot.apagarMotores();
     return;
-  } else if (str > 75 && abs(angulo) <= 90) {
+  } else if (str > 78 && abs(angulo) <= 90) {
     dribbler.prender();
   } else {
     dribbler.apagar();
@@ -26,7 +26,7 @@ void buscar() {
 
     if (abs(angulo) <= 20) {
       result = 0;
-    } else if (abs(angulo) <= 60) {
+    } else if (abs(angulo) <= 50) {
       result = (angulo > 0) ? 90 : -90;
     } else if (abs(angulo) <= 75) {
       result = (angulo > 0) ? 120 : -120;
@@ -91,9 +91,9 @@ void atacarGol(int px,int y1) {
     //Serial.print("GOL\t\t");
 
   //Si está muy cercca -> movimientos de gol
-  // if (y1 > 120) {
-  //   dribbler.apagar();
-  // }
+  if (y1 > 120) {
+    dribbler.apagar();
+  }
 
   if (y1 > 110 && atacarE < 100) {
     atacarE++;
@@ -275,6 +275,13 @@ bool isLimit() {
   return false;
 }
 
+bool hasPosesion() {
+  if (analogRead(analogo) < 5) {
+    return true;
+  }
+  return false;
+}
+
 bool hasP() {
   aroIR.actualizarDatos();
   double angulo = aroIR.getAngulo();
@@ -314,6 +321,7 @@ void actualizarPorterias() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
+  Serial.println(analogRead(analogo));
 
     //  actualizarPorterias();
     //   Serial.println(porteriaAzul.getX());
@@ -337,12 +345,12 @@ void tests() {
 
 
   //ARO-IRRRR________________________________
-        aroIR.actualizarDatos();
+        // aroIR.actualizarDatos();
 
-        double angulo = aroIR.getAngulo();
-        Serial.print(angulo);
-        Serial.print("\t\t");
-        Serial.println(aroIR.getStrength());
+        // double angulo = aroIR.getAngulo();
+        // Serial.print(angulo);
+        // Serial.print("\t\t");
+        // Serial.println(aroIR.getStrength());
 
     //     Serial.println("SSSS");
 

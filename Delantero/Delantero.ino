@@ -8,12 +8,7 @@
 #include "Porteria.h"
 #include <HTInfraredSeeker.h>
 #include "Dribbler.h"
-//#include "Constantes.h"
 
-// int dirSeeker;
-// int dirGrados;
-// int strSeeker;
-// int lastSeen = 1;
 
 
 //Selección de giroscopio
@@ -45,9 +40,10 @@ int limitSwitch2 = 40;
 unsigned long ms = 0;
 unsigned long ms2 = 0;
 int last = 1;
-int led = 37;
+int led = 9;
 double angle1 = -1;
 int atacarE = 1;
+int analogo = A4;
 
 
 //Objetos
@@ -90,6 +86,7 @@ void setup() {
   Serial3.setTimeout(100);
 
   pinMode(limitSwitch, OUTPUT);
+  pinMode(analogo, INPUT);
   // pinMode(limitSwitch2, INPUT);
   // pinMode(led, OUTPUT);
   
@@ -113,9 +110,9 @@ void setup() {
   actualizarPorterias();
 
   //Verificar si se debe voltear
-  if ((atacar == amarillo && porteriaAzul.getX() != -1) || (atacar == azul && porteriaAmarilla.getColor() == 1)) {
+  if ((atacar == amarillo && porteriaAzul.getX() != -1) || (atacar == azul && porteriaAmarilla.getX() != -1)) {
     gyro.setOffset(180);
-    digitalWrite(led, HIGH);
+    //digitalWrite(led, HIGH);
   }
 
 }
@@ -143,7 +140,7 @@ void loop() {
     } else {
       //digitalWrite(led, LOW);
     //Serial.println("nada");
-     estado = golPorteria;
+     estado = hasPelota;
 
     }
 
@@ -152,17 +149,19 @@ void loop() {
 
   //Revisar si se tiene posesión de la pelota
   if (estado == hasPelota) {
-    estado = (hasP()) ? golPorteria : buscarPelota;
+    estado = (hasPosesion()) ? golPorteria : buscarPelota;
   }
 
   //Buscar la pelota
   if (estado == buscarPelota) {
+    digitalWrite(led, LOW);
     buscar();
   }
 
 
   //Ir a la portería con la pelota
   if (estado == golPorteria) {
+    digitalWrite(led, HIGH);
     ms = millis();
     actualizarPorterias();    
     int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
@@ -173,11 +172,9 @@ void loop() {
 
   //Pruebas
   if (estado == nada) {
-//    Serial.println(digitalRead(limitSwitch));
    tests();
   }
 
-  //estado = golPorteria;
 
 }
 
