@@ -229,13 +229,13 @@ void tests() {
       
 
 //
-//    Serial.println("Cam");
-//  if (Serial3.available()) {
-//          //Serial.println("serial1");
-//           input = Serial3.readStringUntil('\n');
-//          Serial.println(input);
+    Serial.println("Cam");
+ if (Serial3.available()) {
+         //Serial.println("serial1");
+          input = Serial3.readStringUntil('\n');
+         Serial.println(input);
  
-//      }
+     }
 
   //Serial.println(hasPosesion());
 

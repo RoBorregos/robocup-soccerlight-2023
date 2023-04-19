@@ -8,8 +8,9 @@ class PID {
     double kD;
     double error;
     double errorPrev;
-    const int minToMove = 110;
+    int minToMove = 110;
     bool r = false;
+    double angle = 90;
 
 
   public:
@@ -20,6 +21,9 @@ class PID {
     int calcularError(int objetivo, int cur, int velocidad);
     void setR(bool r);
     bool getR();
+    void setMinToMove(int min);
+    int getMinToMove();
+    void setAngle(double angle);
 
 
 };

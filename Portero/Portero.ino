@@ -9,11 +9,6 @@
 #include "Porteria.h"
 //#include <HTInfraredSeeker.h>
 
-int dirSeeker;
-int dirGrados;
-int strSeeker;
-int lastSeen = 1;
-
 
 //Selección de giroscopio
 //Se debe descomentar lo que se va a usar y comentar lo contrario
@@ -22,27 +17,29 @@ int lastSeen = 1;
 //Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32);  //robot imu
 //
 //#include "BNO.h"
-Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);    //robot bno
+//Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);    //robot bno
+Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
+
 
 Imu gyro;
 
 //También se deben cambiar los pines de COLOR.h!!
 
 //Cambiar el color de la portería a la que se va a atacar
-
+int velocidades = 150;
+int velMin = 80;
 
 //Variables
 bool posesion = true;
-int velocidades = 190;
 String input = "";
-char lastP = "i";
+char lastP = 1;
 //int lastSeen = 1;
 int limitSwitch = 35;
 int limitSwitch2 = 6;
 unsigned long ms = 0;
 unsigned long ms2 = 0;
 int last = 1;
-int led = 37;
+int led = 9;
 int led2 = 39;
 
 double angle1 = -1;
@@ -86,9 +83,7 @@ void setup() {
   Serial.setTimeout(100);
 
   pinMode(limitSwitch, INPUT);
-  pinMode(limitSwitch2, INPUT);
   pinMode(led, OUTPUT);
-  pinMode(led2, OUTPUT);
 
   
   //Delay para la cámara
@@ -96,28 +91,30 @@ void setup() {
 
   //Iniciar objetos
   motoresRobot.iniciar();
-  pid.setKP(0.3);
-  pid.setAngle(70);
+
+
+    if (velocidades > 120) {
+    pid.setAngle(120);
+    pid.setKP(0.1);
+  }
+  pid.setKP(0.2);
+  pid.setMinToMove(40);
+
   gyro.iniciar();
   aroIR.iniciar();
   color.iniciar();
   aroIR.actualizarDatos();
   color.calibrar();
 
-  //InfraredSeeker::Initialize();
-
-  //Capturar los valores de la cámara (2 veces pq una sola falla jaja)
-  // actualizarPorterias2(0);
-  // actualizarPorterias2(1);
-  // actualizarPorterias();
-  // actualizarPorterias();
-
+   actualizarPorterias();
+  actualizarPorterias();
 
   //Verificar si se debe voltear
-  // if ((atacar == amarillo && porteriaAmarilla.getX() != -1) || (atacar == amarillo && porteriaAmarilla.getColor() == 1)) {
-  //   gyro.setOffset(180);
-  //   digitalWrite(led, HIGH);
-  // }
+  if ((atacar == amarillo && porteriaAmarilla.getX() != -1) || (atacar == azul && porteriaAzul.getX() != -1)) {
+    gyro.setOffset(180);
+    //digitalWrite(led, HIGH);
+  }
+
 
   Serial.println("SETUP DONE");
 
@@ -131,7 +128,7 @@ void loop() {
 
 
 
-  estado = linea;
+  estado = nada;
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
     angle1 = color.checkForLinea();
@@ -155,8 +152,8 @@ void loop() {
   if (estado == inPorteria) {
     //Serial.println("inPorteria");
     actualizarPorterias();
-     int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-     int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
+     int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
+     int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
 
     //motoresRobot.apagarMotores();
     buscarPorteria(x1,y1);

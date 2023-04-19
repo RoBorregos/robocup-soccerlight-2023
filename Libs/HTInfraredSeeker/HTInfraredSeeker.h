@@ -6,7 +6,7 @@
 #ifndef HTInfraredSeeker_h
 	#define HTInfraredSeeker_h
 	#include "Arduino.h"
-    
+
 	struct InfraredResult
 	{
 	  byte Direction;

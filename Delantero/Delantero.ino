@@ -1,12 +1,12 @@
 
 //Librerías
-#include <ICM_20948.h>
+//#include <ICM_20948.h>
 #include "AroIR.h"
 #include "Color.h"
 #include "Motores.h"
 #include "PID.h"
 #include "Porteria.h"
-#include <HTInfraredSeeker.h>
+//#include <HTInfraredSeeker.h>
 #include "Dribbler.h"
 
 
@@ -91,6 +91,8 @@ void setup() {
 
   pinMode(limitSwitch, OUTPUT);
   pinMode(analogo, INPUT);
+    pinMode(led, OUTPUT);
+
   // pinMode(limitSwitch2, INPUT);
   // pinMode(led, OUTPUT);
   
@@ -105,7 +107,7 @@ void setup() {
   }
 
   pid.setKP(0.2);
-  pid.setMinToMove(30);
+  pid.setMinToMove(40);
   gyro.iniciar();
   aroIR.iniciar();
   color.iniciar();

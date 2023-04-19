@@ -6,19 +6,18 @@ Porteria::Porteria() {
 
 //Almacenar los datos de la cámara
 void Porteria::actualizar(String str) {
-  x = -1;
-  if (str.length() == 0) {
-    x = -1;
-    return;
-  }
+  //x = -1;
+  // if (str.length() == 0) {
+  //   x = -1;
+  //   return;
+  // }
 
-  int arr[5];
+  int arr[4];
   String data = "";
   int index = 0;
   //Porteria p;
 
-
-  for (int i = 0; i < str.length(); i++) {
+  for (int i = 2; i < str.length() && index < 4; i++) {
 
     if (!(str[i] == ',')) {
       data += str[i];
@@ -27,11 +26,10 @@ void Porteria::actualizar(String str) {
       data = "";
     }
 
-    color = arr[0];
-    x = arr[1];
-    y = arr[2];
-    h = arr[3];
-    w = arr[4];
+    x = arr[0];
+    y = arr[1];
+    h = arr[2];
+    w = arr[3];
 
     area = w * h;
 

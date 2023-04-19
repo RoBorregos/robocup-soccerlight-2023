@@ -2,6 +2,8 @@
 #include "Imu.h"
 
 Imu::Imu() {
+   // ICM_20948_I2C myICM; // Otherwise create an ICM_20948_I2C object
+
 }
 
 void Imu::iniciar() {
@@ -90,10 +92,10 @@ void Imu::readValues() {
       yaw = yaw1;
       pitch = pitch1;
       roll = roll1;
+//      yaw = yaw*-1;
 
       if (yaw > 180) {
         yaw = -180 + (yaw - 180);
-        //yaw = yaw*-1;
       }
 
       if (offset > 0) {
