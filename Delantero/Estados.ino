@@ -9,13 +9,13 @@ void buscar() {
 
   //Serial.println(aroIR.getStrength());
 
-  Serial.println(angulo);
+  //Serial.println(angulo);
 
 
   if (str == 0) {
     motoresRobot.apagarMotores();
     return;
-  } else if (str > 78 && abs(angulo) <= 90) {
+  } else if (str > 80 && abs(angulo) <= 90) {
     dribbler.prender();
   } else {
     dribbler.apagar();
@@ -38,17 +38,39 @@ void buscar() {
       result = last*140;
     }
 
-  if (str < 30 && result <= 90) {
-    result = result * 0.7;
-  } else if (str < 50 && result <= 90) {
-    result = result * 0.8;
-  }
+  
+  if (str < 30) {
+    if (result <= 90)
+      result = result * 0.7;
+    else if (result <= 180)
+      result = (angulo > 0) ? result * 0.85: result * -0.85;
+    
+  } else if (str < 50) {
+    if (result <= 90)
+      result = result * 0.7;
+    else if (result <= 180)
+      result = (angulo > 0) ? result * 0.95: result * -0.95;
+  } 
+
+  double distancia = map(str, 10,100, 0, 10);
+ // double val = 1 - pow(EULER,(0.9*(distancia-10)));
+  double val = 1.087 + 1/((distancia-11.5));
+  int velNuevas = velocidades * val;
+  velNuevas = max(velMin, velNuevas);
+
+   Serial.print("factor: ");
+  Serial.println(distancia);
+
+  // Serial.print("velocidad: ");
+  // Serial.println(velNuevas);
+
+  
   
 
   if (result == -1000) 
     motoresRobot.apagarMotores();
   else 
-    motoresRobot.movimientoLinealCorregido(result, velocidades, change, gyro.isRight());
+    motoresRobot.movimientoLinealCorregido(result, velNuevas, change, gyro.isRight());
 
 
   if (angulo > 0)
@@ -91,7 +113,7 @@ void atacarGol(int px,int y1) {
     //Serial.print("GOL\t\t");
 
   //Si está muy cercca -> movimientos de gol
-  if (y1 > 120) {
+  if (y1 > 100) {
     dribbler.apagar();
   }
 
@@ -276,7 +298,12 @@ bool isLimit() {
 }
 
 bool hasPosesion() {
-  if (analogRead(analogo) < 5) {
+  aroIR.actualizarDatos();
+  double angulo = aroIR.getAngulo();
+    // Serial.print(analogRead(analogo));
+
+
+  if (analogRead(analogo) < 600 && abs(angulo) < 40) {
     return true;
   }
   return false;
@@ -285,6 +312,8 @@ bool hasPosesion() {
 bool hasP() {
   aroIR.actualizarDatos();
   double angulo = aroIR.getAngulo();
+   Serial.print(analogRead(analogo));
+
 
   if (aroIR.getStrength() > 85 && abs(angulo) < 20) {
     return true;
@@ -321,7 +350,9 @@ void actualizarPorterias() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
-  Serial.println(analogRead(analogo));
+ Serial.print(analogRead(analogo));
+ Serial.print("\t\t");
+ Serial.println(hasPosesion());
 
     //  actualizarPorterias();
     //   Serial.println(porteriaAzul.getX());
@@ -336,7 +367,7 @@ void tests() {
   //    }
 
 //  if (Serial3.available()) {
-//          Serial.println("serial1");
+//          //Serial.println("serial1");
 //           input = Serial3.readStringUntil('\n');
 //          Serial.println(input);
   
@@ -345,12 +376,12 @@ void tests() {
 
 
   //ARO-IRRRR________________________________
-        // aroIR.actualizarDatos();
+      //  aroIR.actualizarDatos();
 
         // double angulo = aroIR.getAngulo();
-        // Serial.print(angulo);
-        // Serial.print("\t\t");
-        // Serial.println(aroIR.getStrength());
+        // //Serial.print(angulo);
+        // // Serial.print("\t\t");
+        //  Serial.println(aroIR.getStrength());
 
     //     Serial.println("SSSS");
 

@@ -30,8 +30,10 @@ BNO gyro;
 
 
 //Variables
-bool posesion = true;
-int velocidades = 110;
+int velocidades = 150;
+int velMin = 80;
+
+
 String input = "";
 int lastP = 1;
 //int lastSeen = 1;
@@ -44,6 +46,8 @@ int led = 9;
 double angle1 = -1;
 int atacarE = 1;
 int analogo = A4;
+bool posesion = true;
+
 
 
 //Objetos
@@ -95,6 +99,11 @@ void setup() {
 
   //Iniciar objetos
   motoresRobot.iniciar();
+  if (velocidades > 120) {
+    pid.setAngle(120);
+    pid.setKP(0.1);
+  }
+
   pid.setKP(0.2);
   pid.setMinToMove(30);
   gyro.iniciar();
@@ -122,7 +131,6 @@ void setup() {
 //LOOP-------------------------------------------------------
 void loop() {
   
-
 
   estado = linea;
 
