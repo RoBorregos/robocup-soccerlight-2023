@@ -8,19 +8,22 @@ void setup() {
   esc.attach(7); // attach the ESC signal wire to pin 9
   delay(2000);
   esc.writeMicroseconds(700); // set the motor speed to minimum
-  delay(2000); // wait for 3 seconds
+  delay(1500); // wait for 3 seconds
 }
 
 void loop() {
+
 /*
-  for (int i = 500; i < 1200; i+=5) {
+  for (int i = 700; i < 900; i+=5) {
     esc.writeMicroseconds(i);
-    delay(100);
+    delay(500);
     Serial.println(i);
   }
   */
-    esc.writeMicroseconds(850);
+  
+    esc.writeMicroseconds(780);
     delay(50);
+    
     
   /*for (int i = 800; i <= 1500; i++) { // increase the motor speed from min to max
     esc.writeMicroseconds(i);
