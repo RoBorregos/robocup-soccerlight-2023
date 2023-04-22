@@ -2,7 +2,7 @@
   #define AroIR_h
   #include "Arduino.h"
   
-  #include "SingleEMAFilterLib.h"
+  //#include "SingleEMAFilterLib.h"
   
 //  SingleEMAFilter<int> filterAngulo(0.6);
 //  SingleEMAFilter<int> filterStr(0.6);
@@ -19,11 +19,14 @@
     public:
       AroIR();
       void iniciar();
+      void iniciar2();
       void actualizarDatos();
+      void actualizarDatos2();
       double getAngulo();
       double getHighPass();
       double getLowPass();
       double getStrength();
+      double cutString1(String str);
   
   };
   

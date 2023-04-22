@@ -93,7 +93,7 @@ double Color::checkForLinea() {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) {
       int lec = lectura(j, i);
-      if (lec - foto[i][j] >= 35) {
+      if (lec - foto[i][j] >= 25) {
         if (i == 2 && j == 0 && check == true) {
           return 0;
         }
@@ -125,22 +125,73 @@ bool Color::checkForLineaBool() {
   return false;
 }
 
+double Color::getValor(int placa, int foto) {
+  return (lectura(foto, placa));
+}
+
 double Color::checkForLineaPlaca(){
+
       double degree = 0;
       int count = 0;
       for (int i=0; i<4; i++){
         for (int j=0; j<3; j++){
-          if (lectura(i,j) - foto[j][i] >= 22){
+          if (lectura(i,j) - foto[j][i] >= 60){ //15
             degree += anguloF[j];
             count++;
+            
           }
         }
       }
+
+     
+
       if (count > 0){
+
       double promedio = degree / count;
       return promedio;
       }
       else { return -1; }
+
+
+      
+    }
+
+    double Color::checkForLineaPlaca2(){
+      bool placas1[] = {false, false, false};
+
+      double degree = 0;
+      int count = 0;
+      for (int i=0; i<4; i++){
+        for (int j=0; j<3; j++){
+          if (lectura(i,j) - foto[j][i] >= 60){ //15
+            placas1[j] = true;
+            count++;
+            
+          }
+        }
+      }
+
+
+      if (count > 0){
+         for (int i=0; i<3; i++){
+        if (placas1[i] == true){
+          degree += anguloF2[i];
+        }
+      }
+      return degree;
+      }
+      else { return -1; }
+
+    /*
+      180 placa de adelante
+      60 placa de izquierda
+      -60 placa de derecha
+      0 placas de atras
+      120 adelante y derecha
+      240 adelante e izquierda
+    
+    
+    */
       
     }
 
