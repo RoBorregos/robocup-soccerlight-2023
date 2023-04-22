@@ -10,6 +10,7 @@
 //#include <HTInfraredSeeker.h>
 
 
+
 //Selección de giroscopio
 //Se debe descomentar lo que se va a usar y comentar lo contrario
 //
@@ -18,7 +19,8 @@
 //
 //#include "BNO.h"
 //Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);    //robot bno
-Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
+Motores motoresRobot(5, 28, 27, 6, 26, 25, 4, 30, 29);    //robot imu
+//Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
 
 
 Imu gyro;
@@ -26,7 +28,7 @@ Imu gyro;
 //También se deben cambiar los pines de COLOR.h!!
 
 //Cambiar el color de la portería a la que se va a atacar
-int velocidades = 150;
+int velocidades = 90;
 int velMin = 80;
 
 //Variables
@@ -43,6 +45,11 @@ int led = 9;
 int led2 = 39;
 
 double angle1 = -1;
+bool flagAdelante = false;
+
+int trigPin = 10;
+int echoPin = 36;
+
 
 
 
@@ -57,10 +64,13 @@ Porteria porteriaAmarilla;
 //Estados del robot
 enum Estados {
   linea,
+  inicio,
   inPorteria,
   buscarPelota,
   hasPelota,
   golPorteria,
+  salir,
+  regresar,
   nada
 };
 
@@ -70,13 +80,14 @@ enum Lados {
 };
 
 
-Lados atacar = amarillo;
+Lados atacar = azul;
 Estados estado;
 
 
 
 //SETUP------------------------------------------------------
 void setup() {
+
   Serial.begin(9600);
   Serial2.begin(9600);
   Serial2.setTimeout(100);
@@ -93,27 +104,37 @@ void setup() {
   motoresRobot.iniciar();
 
 
-    if (velocidades > 120) {
+  gyro.iniciar();
+
+  //AROOO
+  aroIR.iniciar2();
+  aroIR.actualizarDatos2();
+  //  aroIR.iniciar();
+  // aroIR.actualizarDatos();
+
+
+  pid.setKP(0.1);
+  pid.setMinToMove(40);
+
+
+
+  color.iniciar();
+  color.calibrar();
+
+  if (velocidades > 120) {
     pid.setAngle(120);
     pid.setKP(0.1);
   }
-  pid.setKP(0.2);
-  pid.setMinToMove(40);
 
-  gyro.iniciar();
-  aroIR.iniciar();
-  color.iniciar();
-  aroIR.actualizarDatos();
-  color.calibrar();
-
-   actualizarPorterias();
+  actualizarPorterias();
   actualizarPorterias();
 
   //Verificar si se debe voltear
-  if ((atacar == amarillo && porteriaAmarilla.getX() != -1) || (atacar == azul && porteriaAzul.getX() != -1)) {
-    gyro.setOffset(180);
-    //digitalWrite(led, HIGH);
-  }
+  // if ((atacar == amarillo && porteriaAzul.getX() == -1) || (atacar == azul && porteriaAmarilla.getX() == -1)) {
+  //   gyro.setOffset(180);
+  //   //digitalWrite(led, HIGH);
+  //   Serial.println("Voltear");
+  // }
 
 
   Serial.println("SETUP DONE");
@@ -127,38 +148,92 @@ void setup() {
 void loop() {
 
 
-
   estado = nada;
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
-    angle1 = color.checkForLinea();
-
-    if (angle1 != -1) {
-      //Serial.println(angle1);
-      salirLinea(angle1);
+    angle1 = color.checkForLineaPlaca2();
+   
+     if (angle1 != -1) {
+      Serial.println(angle1);
       digitalWrite(led, HIGH);
       
+      if (angle1 == 0 || angle1 == 60 || angle1 == -60) {
+       flagAdelante = true;
+       //salirLinea(angle1, 200);
+
+      } else {
+        salirLinea(angle1, 500);
+
+      }
+
+
     } else {
       digitalWrite(led, LOW);
-      Serial.println("nada");
-      estado = inPorteria;
-
-
     }
 
- 
+    estado = inicio;
+
+
   }
 
-  if (estado == inPorteria) {
-    //Serial.println("inPorteria");
+  if (estado == inicio) {
     actualizarPorterias();
-     int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
-     int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
-
-    //motoresRobot.apagarMotores();
-    buscarPorteria(x1,y1);
-    //estado = (buscarPorteria(x1,y1)) ? linea : inPorteria;
+    int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();   
+    //Serial.println(y1);
+    estado = (flagAdelante && y1 > 95) ? salir : regresar;
+  
   }
+
+  if (estado == regresar) {
+    Serial.println("regresar");
+    buscarPorteria();
+    flagAdelante = false;
+
+  }
+
+  if (estado == salir) {
+    Serial.println("salir");
+    buscarB();
+  }
+
+  // if (estado == linea) {
+
+  //   angle1 = color.checkForLineaPlaca();
+  //   actualizarPorterias();
+  //    int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
+   
+  //   if (angle1 != -1) { //y1  > 97
+  //   //Serial.println(angle1);
+  //   digitalWrite(led, HIGH);
+  //    //buscarA(400);
+  //    buscarB();
+  //    // motoresRobot.apagarMotores();
+      
+  //   } else {
+  //     digitalWrite(led, LOW);
+  //     Serial.println("nada");
+  //     motoresRobot.apagarMotores();
+  //     //estado = inPorteria;
+
+  //   }
+
+ 
+  // }
+
+  // if (estado == buscarPelota) {
+  //   buscarB();
+  // }
+
+  // if (estado == inPorteria) {
+  //   //Serial.println("inPorteria");
+  //   actualizarPorterias();
+  //    int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
+  //    int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
+  //   //Serial.println(x1);
+  //   //motoresRobot.apagarMotores();
+  //   buscarPorteria(x1,y1);
+  //   //estado = (buscarPorteria(x1,y1)) ? linea : inPorteria;
+  // }
 
 
   //Pruebas

@@ -32,34 +32,34 @@ void buscar() {
       result = (angulo > 0) ? 120 : -120;
     } else if (abs(angulo) <= 90) {
       result = (angulo > 0) ? 135 : -135;
-    } else if (abs(angulo) <= 240) {
+    } else if (abs(angulo) <= 140) {
       result = 180;
     } else {
-      result = last*140;
+      result = (angulo > 0) ? -140 : 140;
     }
 
   
   if (str < 30) {
     if (result <= 90)
       result = result * 0.7;
-    else if (result <= 180)
-      result = (angulo > 0) ? result * 0.85: result * -0.85;
+    //else if (result <= 180)
+      //result = (angulo > 0) ? result * 0.85: result * -0.85;
     
   } else if (str < 50) {
     if (result <= 90)
       result = result * 0.7;
-    else if (result <= 180)
-      result = (angulo > 0) ? result * 0.95: result * -0.95;
+    //else if (result <= 180)
+      //result = (angulo > 0) ? result * 0.95: result * -0.95;
   } 
 
-  double distancia = map(str, 10,100, 0, 10);
- // double val = 1 - pow(EULER,(0.9*(distancia-10)));
-  double val = 1.087 + 1/((distancia-11.5));
-  int velNuevas = velocidades * val;
-  velNuevas = max(velMin, velNuevas);
+//   double distancia = map(str, 10,100, 0, 10);
+//  // double val = 1 - pow(EULER,(0.9*(distancia-10)));
+//   double val = 1.087 + 1/((distancia-11.5));
+//   int velNuevas = velocidades * val;
+//   velNuevas = max(velMin, velNuevas);
 
-   Serial.print("factor: ");
-  Serial.println(distancia);
+  //Serial.print("factor: ");
+  //Serial.println(distancia);
 
   // Serial.print("velocidad: ");
   // Serial.println(velNuevas);
@@ -70,7 +70,7 @@ void buscar() {
   if (result == -1000) 
     motoresRobot.apagarMotores();
   else 
-    motoresRobot.movimientoLinealCorregido(result, velNuevas, change, gyro.isRight());
+    motoresRobot.movimientoLinealCorregido(result - gyro.getYaw(), velocidades, change, gyro.isRight());
 
 
   if (angulo > 0)
@@ -84,6 +84,27 @@ void buscar() {
 
 
 //---------------------------------------Porterias
+
+long distanciaUltrasonico() {
+  digitalWrite(trigPin, HIGH);
+  unsigned long ms3 = micros();
+//    delayMicroseconds(10);      //Enviamos un pulso de 10us
+
+    while ((micros() - ms3) < 1) {
+    }
+
+    digitalWrite(trigPin, LOW);
+
+
+    long t1; //timepo que demora en llegar el eco
+    long d1; //distancia en centimetros
+    t1 = pulseIn(echoPin, HIGH); //obtenemos el ancho del pulso
+    d1 = t1 / 59;
+   // delay(100);
+
+   return d1;
+
+  }
 
 void gol(int px,int y1) {
  int change = correccionesImu();
@@ -117,6 +138,11 @@ void atacarGol(int px,int y1) {
     dribbler.apagar();
   }
 
+  if (y1 == -1) {
+    motoresRobot.movimientoLinealCorregido(180-gyro.getYaw(), velocidades, change, pid.getR());
+
+  }
+
   if (y1 > 110 && atacarE < 100) {
     atacarE++;
      
@@ -137,7 +163,7 @@ void atacarGol(int px,int y1) {
 
 
       } else {  //Centro
-        motoresRobot.movimientoLinealCorregido(0, velocidades, change, r);
+        motoresRobot.movimientoLinealCorregido(0-gyro.getYaw(), velocidades, change, r);
         Serial.println("Adelante");
 
       }
@@ -152,14 +178,29 @@ void atacarGol(int px,int y1) {
 
     if (abs(error) < 25) {
       Serial.println("forward");
-      motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+      motoresRobot.movimientoLinealCorregido(0 - gyro.getYaw(), velocidades, change, gyro.isRight());
     
     } else {
       int ang = (error > 0)? (error*kP) : (error*kP);
       Serial.println("Move");
-      motoresRobot.movimientoLinealCorregido(ang, velocidades, change, gyro.isRight());
+      motoresRobot.movimientoLinealCorregido(ang - gyro.getYaw(), velocidades, change, gyro.isRight());
     
     }
+
+    // int ang = 0;
+    // //Serial.println(x1);
+    // if (px == -1) {
+    //   ang = 180;
+    // } if (px < 60) {
+    //   ang = -45;
+    // } else if (px > (260)) {
+    //   ang = 45;
+    // } else {
+    //   ang = 0;
+    // }
+
+      //motoresRobot.movimientoLinealCorregido(ang - gyro.getYaw(), velocidades, change, gyro.isRight());
+
 
     if (y1 <= 100)
     atacarE = 0;
@@ -281,7 +322,7 @@ void salirLinea(int angleC) {
   int change = correccionesImu();
   ms2 = millis();
 
-  while ((millis() - ms2) < 500) {
+  while ((millis() - ms2) < 700) {
     gyro.readValues();
     motoresRobot.movimientoLinealCorregido(angleC, velocidades, change, gyro.isRight());
   }
@@ -303,7 +344,7 @@ bool hasPosesion() {
     // Serial.print(analogRead(analogo));
 
 
-  if (analogRead(analogo) < 600 && abs(angulo) < 40) {
+  if (filterAnalogo.GetLowPass() > 600 && abs(angulo) < 40) {
     return true;
   }
   return false;
@@ -315,11 +356,28 @@ bool hasP() {
    Serial.print(analogRead(analogo));
 
 
-  if (aroIR.getStrength() > 85 && abs(angulo) < 20) {
+  if (aroIR.getStrength() < 100 && abs(angulo) < 20) {
     return true;
   }
   return false;
 
+}
+
+int detector() {
+  int pulseWidth = 0;
+  int deltaPulseWidth = 5;
+
+    const unsigned long startTime_us = micros();
+    do {       
+      //Serial.println(analogRead(analogo));
+            filterAnalogo.AddValue(analogRead(analogo));
+            if(filterAnalogo.GetLowPass() > 600) {
+                pulseWidth += deltaPulseWidth;
+            }
+        
+    } while((micros() - startTime_us) < 833);
+
+    return pulseWidth;
 }
 
 
@@ -350,9 +408,21 @@ void actualizarPorterias() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
- Serial.print(analogRead(analogo));
+
+  //ULTRASONICO
+    //Serial.println(distanciaUltrasonico());
+
+  //Serial.println(detector());
+//   //ANALOGO
+// filterAnalogo.AddValue(analogRead(analogo));
+
+Serial.print(detector());
  Serial.print("\t\t");
  Serial.println(hasPosesion());
+//   Serial.print("\t\t");
+//  Serial.print(filterAnalogo.GetLowPass());
+//  Serial.print("\t\t");
+//  Serial.println(filterAnalogo.GetHighPass());
 
     //  actualizarPorterias();
     //   Serial.println(porteriaAzul.getX());

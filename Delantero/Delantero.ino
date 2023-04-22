@@ -9,6 +9,10 @@
 //#include <HTInfraredSeeker.h>
 #include "Dribbler.h"
 
+  #include "SingleEMAFilterLib.h"
+ SingleEMAFilter<int> filterAnalogo(0.6);
+
+
 
 
 //Selección de giroscopio
@@ -30,7 +34,7 @@ BNO gyro;
 
 
 //Variables
-int velocidades = 150;
+int velocidades = 140;
 int velMin = 80;
 
 
@@ -47,6 +51,10 @@ double angle1 = -1;
 int atacarE = 1;
 int analogo = A4;
 bool posesion = true;
+
+int trigPin = 36;
+int echoPin = 38;
+
 
 
 
@@ -81,30 +89,27 @@ Estados estado;
 
 //SETUP------------------------------------------------------
 void setup() {
+pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
   Serial.begin(9600);
+
   Serial2.begin(9600);
   Serial2.setTimeout(100);
-  Serial.setTimeout(100);
+ // Serial.setTimeout(100);
 
   Serial3.begin(115200);
   Serial3.setTimeout(100);
 
   pinMode(limitSwitch, OUTPUT);
   pinMode(analogo, INPUT);
-    pinMode(led, OUTPUT);
+  pinMode(led, OUTPUT);
 
-  // pinMode(limitSwitch2, INPUT);
-  // pinMode(led, OUTPUT);
+
   
   //Delay para la cámara
-  delay(1500);
+   delay(1600);
 
-  //Iniciar objetos
-  motoresRobot.iniciar();
-  if (velocidades > 120) {
-    pid.setAngle(120);
-    pid.setKP(0.1);
-  }
+  
 
   pid.setKP(0.2);
   pid.setMinToMove(40);
@@ -112,18 +117,27 @@ void setup() {
   aroIR.iniciar();
   color.iniciar();
   aroIR.actualizarDatos();
-  color.calibrar();
+ color.calibrar();
   dribbler.iniciar();
-  //InfraredSeeker::Initialize();
+ // InfraredSeeker::Initialize();
+
+  //Iniciar objetos
+  motoresRobot.iniciar();
+  if (velocidades > 120) {
+    pid.setAngle(120);
+    pid.setKP(0.09);
+  }
 
   //Capturar los valores de la cámara (2 veces pq una sola falla jaja)
   actualizarPorterias();
   actualizarPorterias();
-
+  actualizarPorterias();
+  Serial.println(porteriaAzul.getX());
   //Verificar si se debe voltear
   if ((atacar == amarillo && porteriaAzul.getX() != -1) || (atacar == azul && porteriaAmarilla.getX() != -1)) {
     gyro.setOffset(180);
-    //digitalWrite(led, HIGH);
+    digitalWrite(led, HIGH);
+    Serial.println("Voltear");
   }
 
 }
@@ -132,7 +146,7 @@ void setup() {
 //Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
-  
+
 
   estado = linea;
 
@@ -141,6 +155,10 @@ void loop() {
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
     angle1 = color.checkForLineaPlaca();
+    Serial.println(angle1);
+    if (distanciaUltrasonico() < 30) {
+      angle1 = 0;
+    }
 
     if (angle1 != -1) {
     Serial.println("lineaa");
@@ -149,7 +167,7 @@ void loop() {
       //digitalWrite(led, HIGH);
     } else {
       //digitalWrite(led, LOW);
-    //Serial.println("nada");
+    Serial.println("nada");
      estado = hasPelota;
 
     }
@@ -159,12 +177,15 @@ void loop() {
 
   //Revisar si se tiene posesión de la pelota
   if (estado == hasPelota) {
-    estado = (hasPosesion()) ? golPorteria : buscarPelota;
+    aroIR.actualizarDatos();
+
+    estado = (detector() > 15 && abs(aroIR.getAngulo()) < 20) ? golPorteria : buscarPelota;
   }
 
   //Buscar la pelota
   if (estado == buscarPelota) {
     digitalWrite(led, LOW);
+    Serial.println("buscar");
     buscar();
   }
 
