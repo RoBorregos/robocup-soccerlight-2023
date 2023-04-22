@@ -1,61 +1,24 @@
+// Delantero Robocup Soccer Lightweight 2023
 
 //Librerías
-//#include <ICM_20948.h>
 #include "AroIR.h"
 #include "Color.h"
 #include "Motores.h"
 #include "PID.h"
 #include "Porteria.h"
-//#include <HTInfraredSeeker.h>
 #include "Dribbler.h"
-
-  #include "SingleEMAFilterLib.h"
- SingleEMAFilter<int> filterAnalogo(0.6);
-
-
-
-
-//Selección de giroscopio
-//Se debe descomentar lo que se va a usar y comentar lo contrario
-//
-//#include "Imu.h"  
-//Motores motoresRobot(2, 28, 26, 3, 22, 24, 4, 30, 32);  //robot imu
-//
+#include "SingleEMAFilterLib.h"
 #include "BNO.h"
-//Motores motoresRobot(2, 23, 25, 3, 29, 27, 4, 22, 24);    //robot bno
-//Motores motoresRobot(4, 30, 29, 5, 28, 27, 6, 26, 25);    //robot bno
-Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
+#include "Constantes.h"
 
+SingleEMAFilter<int> filterAnalogo(0.6);
+Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
 BNO gyro;
 
-//También se deben cambiar los pines de COLOR.h!!
-
-//Cambiar el color de la portería a la que se va a atacar
-
-
 //Variables
-int velocidades = 140;
-int velMin = 80;
-
-
-String input = "";
 int lastP = 1;
-//int lastSeen = 1;
-int limitSwitch = 40;
-int limitSwitch2 = 40;
-unsigned long ms = 0;
-unsigned long ms2 = 0;
 int last = 1;
-int led = 9;
-double angle1 = -1;
 int atacarE = 1;
-int analogo = A4;
-bool posesion = true;
-
-int trigPin = 36;
-int echoPin = 38;
-
-
 
 
 //Objetos
@@ -66,80 +29,18 @@ Porteria porteriaAzul;
 Porteria porteriaAmarilla;
 Dribbler dribbler(7);
 
-
-//Estados del robot
-enum Estados {
-  linea,
-  buscarPelota,
-  hasPelota,
-  golPorteria,
-  nada
-};
-
-enum Lados {
-  amarillo = 0,
-  azul = 1
-};
-
-
-Lados atacar = azul;
-Estados estado;
+Constantes::Lados atacar = Constantes::azul;
+Constantes::Estados estado;
 
 
 
 //SETUP------------------------------------------------------
 void setup() {
-pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-  Serial.begin(9600);
 
-  Serial2.begin(9600);
-  Serial2.setTimeout(100);
- // Serial.setTimeout(100);
-
-  Serial3.begin(115200);
-  Serial3.setTimeout(100);
-
-  pinMode(limitSwitch, OUTPUT);
-  pinMode(analogo, INPUT);
-  pinMode(led, OUTPUT);
-
-
-  
-  //Delay para la cámara
-   delay(1600);
-
-  
-
-  pid.setKP(0.2);
-  pid.setMinToMove(40);
-  gyro.iniciar();
-  aroIR.iniciar();
-  color.iniciar();
-  aroIR.actualizarDatos();
- color.calibrar();
-  dribbler.iniciar();
- // InfraredSeeker::Initialize();
-
-  //Iniciar objetos
-  motoresRobot.iniciar();
-  if (velocidades > 120) {
-    pid.setAngle(120);
-    pid.setKP(0.09);
-  }
-
-  //Capturar los valores de la cámara (2 veces pq una sola falla jaja)
-  actualizarPorterias();
-  actualizarPorterias();
-  actualizarPorterias();
-  Serial.println(porteriaAzul.getX());
-  //Verificar si se debe voltear
-  if ((atacar == amarillo && porteriaAzul.getX() != -1) || (atacar == azul && porteriaAmarilla.getX() != -1)) {
-    gyro.setOffset(180);
-    digitalWrite(led, HIGH);
-    Serial.println("Voltear");
-  }
-
+  iniciarObjetos();
+  delay(1600);
+  voltear();  
+ 
 }
 
 
@@ -148,13 +49,12 @@ pinMode(trigPin, OUTPUT);
 void loop() {
 
 
-  estado = linea;
+  estado = Constantes::linea;
 
-
-  //estado = hasPelota;
   //Verificar si está en la línea y moverse si es necesario
-  if (estado == linea) {
-    angle1 = color.checkForLineaPlaca();
+  if (estado == Constantes::linea) {
+
+    int angle1 = color.checkForLineaPlaca();
     Serial.println(angle1);
     if (distanciaUltrasonico() < 30) {
       angle1 = 0;
@@ -168,41 +68,39 @@ void loop() {
     } else {
       //digitalWrite(led, LOW);
     Serial.println("nada");
-     estado = hasPelota;
+     estado = Constantes::hasPelota;
 
     }
-
-    
   }
 
   //Revisar si se tiene posesión de la pelota
-  if (estado == hasPelota) {
+  if (estado == Constantes::hasPelota) {
     aroIR.actualizarDatos();
 
-    estado = (detector() > 15 && abs(aroIR.getAngulo()) < 20) ? golPorteria : buscarPelota;
+    estado = (detector() > 15 && abs(aroIR.getAngulo()) < 20) ? Constantes::golPorteria : Constantes::buscarPelota;
   }
 
   //Buscar la pelota
-  if (estado == buscarPelota) {
-    digitalWrite(led, LOW);
+  if (estado == Constantes::buscarPelota) {
+    digitalWrite(Constantes::led, LOW);
     Serial.println("buscar");
     buscar();
   }
 
 
   //Ir a la portería con la pelota
-  if (estado == golPorteria) {
-    digitalWrite(led, HIGH);
-    ms = millis();
+  if (estado == Constantes::golPorteria) {
+    digitalWrite(Constantes::led, HIGH);
+    unsigned long ms = millis();
     actualizarPorterias();    
-    int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-    int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
+    int x1 = (atacar == Constantes::amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
+    int y1 = (atacar == Constantes::amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
     gol(x1,y1);
 
   }
 
   //Pruebas
-  if (estado == nada) {
+  if (estado == Constantes::nada) {
    tests();
   }
 
