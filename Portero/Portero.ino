@@ -36,12 +36,13 @@ Porteria porteriaAmarilla;
         azul = 1
     };    
 
-Lados atacar = azul;
+Lados atacar = amarillo;
 Estados estado;
 bool flagAdelante = false;
 
 
-
+ 
+ 
 //SETUP------------------------------------------------------
 void setup() {
   iniciarObjetos();
