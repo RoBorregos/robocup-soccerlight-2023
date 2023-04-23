@@ -6,9 +6,7 @@ void buscar() {
   double angulo = aroIR.getAngulo();
   double str = aroIR.getStrength();
 
-
   //Serial.println(aroIR.getStrength());
-
   //Serial.println(angulo);
 
 
@@ -85,26 +83,26 @@ void buscar() {
 
 //---------------------------------------Porterias
 
-long distanciaUltrasonico() {
-  digitalWrite(Constantes::trigPin, HIGH);
-  unsigned long ms3 = micros();
-//    delayMicroseconds(10);      //Enviamos un pulso de 10us
+// long distanciaUltrasonico() {
+//   digitalWrite(Constantes::trigPin, HIGH);
+//   unsigned long ms3 = micros();
+// //    delayMicroseconds(10);      //Enviamos un pulso de 10us
 
-    while ((micros() - ms3) < 1) {
-    }
+//     while ((micros() - ms3) < 1) {
+//     }
 
-    digitalWrite(Constantes::trigPin, LOW);
+//     digitalWrite(Constantes::trigPin, LOW);
 
 
-    long t1; //timepo que demora en llegar el eco
-    long d1; //distancia en centimetros
-    t1 = pulseIn(Constantes::echoPin, HIGH); //obtenemos el ancho del pulso
-    d1 = t1 / 59;
-   // delay(100);
+//     long t1; //timepo que demora en llegar el eco
+//     long d1; //distancia en centimetros
+//     t1 = pulseIn(Constantes::echoPin, HIGH); //obtenemos el ancho del pulso
+//     d1 = t1 / 59;
+//    // delay(100);
 
-   return d1;
+//    return d1;
 
-  }
+//   }
 
 void gol(int px,int y1) {
  int change = correccionesImu();
@@ -134,7 +132,7 @@ void atacarGol(int px,int y1) {
     //Serial.print("GOL\t\t");
 
   //Si está muy cercca -> movimientos de gol
-  if (y1 > 100) {
+  if (y1 > 95) {
     dribbler.apagar();
   }
 
@@ -310,11 +308,7 @@ void actualizarPorterias() {
 
 
 void iniciarObjetos() {
-  Serial3.begin(115200);
-  Serial3.setTimeout(100);
-  Serial.begin(9600);
-  Serial2.begin(9600);
-  Serial2.setTimeout(100);
+  
 
   pid.setKP(0.2);
   pid.setMinToMove(40);
@@ -325,10 +319,9 @@ void iniciarObjetos() {
   color.calibrar();
   dribbler.iniciar();
   motoresRobot.iniciar();
+  ultrasonico.iniciar();
 
 
-  pinMode(Constantes::trigPin, OUTPUT);
-  pinMode(Constantes::echoPin, INPUT);
   pinMode(Constantes::analogo, INPUT);
   pinMode(Constantes::led, OUTPUT);
 
@@ -346,7 +339,7 @@ void voltear() {
   actualizarPorterias();
   Serial.println(porteriaAzul.getX());
   //Verificar si se debe voltear
-  if ((atacar == Constantes::amarillo && porteriaAzul.getX() != -1) || (atacar == Constantes::azul && porteriaAmarilla.getX() != -1)) {
+  if ((atacar == amarillo && porteriaAzul.getX() != -1) || (atacar == azul && porteriaAmarilla.getX() != -1)) {
     gyro.setOffset(180);
     digitalWrite(Constantes::led, HIGH);
     Serial.println("Voltear");
@@ -367,9 +360,9 @@ void tests() {
 //   //ANALOGO
 // filterAnalogo.AddValue(analogRead(analogo));
 
-Serial.print(detector());
- Serial.print("\t\t");
- Serial.println(hasPosesion());
+// Serial.print(detector());
+//  Serial.print("\t\t");
+//  Serial.println(hasPosesion());
 //   Serial.print("\t\t");
 //  Serial.print(filterAnalogo.GetLowPass());
 //  Serial.print("\t\t");
@@ -431,10 +424,10 @@ Serial.print(detector());
 
 
   //IMU______________________________________
-        //  gyro.readValues();
-        // Serial.println(gyro.getYaw());
+         gyro.readValues();
+        Serial.println(gyro.getYaw());
 
-      // Serial.println(gyro.getMag());
+     // Serial.println(gyro.getMag());
 
   //    int change = correccionesImuTarget(-40);
   //    motoresRobot.setAllMotorSpeed(velocidades);

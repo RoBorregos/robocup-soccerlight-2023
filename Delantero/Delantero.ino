@@ -10,6 +10,7 @@
 #include "SingleEMAFilterLib.h"
 #include "BNO.h"
 #include "Constantes.h"
+#include "Ultrasonico.h"
 
 SingleEMAFilter<int> filterAnalogo(0.6);
 Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
@@ -28,14 +29,34 @@ Color color;
 Porteria porteriaAzul;
 Porteria porteriaAmarilla;
 Dribbler dribbler(7);
+Ultrasonico ultrasonico(36,38);
 
-Constantes::Lados atacar = Constantes::azul;
-Constantes::Estados estado;
+enum Estados {
+        linea,
+        buscarPelota,
+        hasPelota,
+        golPorteria,
+        nada
+};
+
+       enum Lados {
+        amarillo = 0,
+        azul = 1
+};
+
+
+Lados atacar = azul;
+Estados estado;
 
 
 
 //SETUP------------------------------------------------------
 void setup() {
+  Serial3.begin(115200);
+  Serial3.setTimeout(100);
+  Serial.begin(9600);
+  Serial2.begin(9600);
+  Serial2.setTimeout(100);
 
   iniciarObjetos();
   delay(1600);
@@ -49,14 +70,15 @@ void setup() {
 void loop() {
 
 
-  estado = Constantes::linea;
+  estado = linea;
 
   //Verificar si está en la línea y moverse si es necesario
-  if (estado == Constantes::linea) {
+  if (estado == linea) {
 
     int angle1 = color.checkForLineaPlaca();
     Serial.println(angle1);
-    if (distanciaUltrasonico() < 30) {
+
+    if (ultrasonico.getDistancia() < 30) {
       angle1 = 0;
     }
 
@@ -64,24 +86,25 @@ void loop() {
     Serial.println("lineaa");
 
       salirLinea(angle1);
-      //digitalWrite(led, HIGH);
+      digitalWrite(Constantes::led, HIGH);
     } else {
-      //digitalWrite(led, LOW);
+      digitalWrite(Constantes::led, LOW);
     Serial.println("nada");
-     estado = Constantes::hasPelota;
+     estado = hasPelota;
 
     }
+
   }
 
   //Revisar si se tiene posesión de la pelota
-  if (estado == Constantes::hasPelota) {
+  if (estado == hasPelota) {
     aroIR.actualizarDatos();
 
-    estado = (detector() > 15 && abs(aroIR.getAngulo()) < 20) ? Constantes::golPorteria : Constantes::buscarPelota;
+    estado = (detector() > 5 && abs(aroIR.getAngulo()) < 20) ? golPorteria : buscarPelota;
   }
 
   //Buscar la pelota
-  if (estado == Constantes::buscarPelota) {
+  if (estado == buscarPelota) {
     digitalWrite(Constantes::led, LOW);
     Serial.println("buscar");
     buscar();
@@ -89,18 +112,18 @@ void loop() {
 
 
   //Ir a la portería con la pelota
-  if (estado == Constantes::golPorteria) {
+  if (estado == golPorteria) {
     digitalWrite(Constantes::led, HIGH);
     unsigned long ms = millis();
     actualizarPorterias();    
-    int x1 = (atacar == Constantes::amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-    int y1 = (atacar == Constantes::amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
+    int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
+    int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
     gol(x1,y1);
 
   }
 
   //Pruebas
-  if (estado == Constantes::nada) {
+  if (estado == nada) {
    tests();
   }
 
