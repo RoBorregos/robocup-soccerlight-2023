@@ -12,17 +12,12 @@
 #include "Constantes.h"
 #include "Ultrasonico.h"
 
+
+//Objetos
 SingleEMAFilter<int> filterAnalogo(0.6);
 Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
 BNO gyro;
 
-//Variables
-int lastP = 1;
-int last = 1;
-int atacarE = 1;
-
-
-//Objetos
 AroIR aroIR;
 PID pid;
 Color color;
@@ -31,11 +26,13 @@ Porteria porteriaAmarilla;
 Dribbler dribbler(7);
 Ultrasonico ultrasonico(36,38);
 
+
 enum Estados {
         linea,
         buscarPelota,
         hasPelota,
         golPorteria,
+        salir,
         nada
 };
 
@@ -44,6 +41,11 @@ enum Estados {
         azul = 1
 };
 
+
+//Variables
+int lastP = 1;
+int last = 1;
+int atacarE = 1;
 
 Lados atacar = azul;
 Estados estado;
@@ -58,48 +60,30 @@ void setup() {
   Serial2.begin(9600);
   Serial2.setTimeout(100);
 
-  iniciarObjetos();
-  delay(1600);
-  voltear();  
+  iniciarObjetos();   //Set up de objetos
+  voltear();          //Verificar si el robot inició volteado y corregirlo
  
 }
 
 
-//Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
 
-
+  //Estado inicial
   estado = linea;
 
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
+    estado = (inLinea()) ? salir : hasPelota;
+  }
 
-    int angle1 = color.checkForLineaPlaca();
-    Serial.println(angle1);
-
-    if (ultrasonico.getDistancia() < 30) {
-      angle1 = 0;
-    }
-
-    if (angle1 != -1) {
-    Serial.println("lineaa");
-
-      salirLinea(angle1);
-      digitalWrite(Constantes::led, HIGH);
-    } else {
-      digitalWrite(Constantes::led, LOW);
-    Serial.println("nada");
-     estado = hasPelota;
-
-    }
-
+  if (estado == salir) {
+    salirLinea();
   }
 
   //Revisar si se tiene posesión de la pelota
   if (estado == hasPelota) {
     aroIR.actualizarDatos();
-
     estado = (detector() > 5 && abs(aroIR.getAngulo()) < 20) ? golPorteria : buscarPelota;
   }
 
@@ -114,11 +98,7 @@ void loop() {
   //Ir a la portería con la pelota
   if (estado == golPorteria) {
     digitalWrite(Constantes::led, HIGH);
-    unsigned long ms = millis();
-    actualizarPorterias();    
-    int x1 = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-    int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
-    gol(x1,y1);
+    gol();
 
   }
 
@@ -126,7 +106,6 @@ void loop() {
   if (estado == nada) {
    tests();
   }
-
 
 }
 

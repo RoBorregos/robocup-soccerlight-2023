@@ -1,8 +1,5 @@
-//#include "Constantes.h"
-//------------------------------------------------------------------------------------ Funciones de estados -------------------------------------------------------------------------------------
-void iniciarObjetos(){
- 
-
+//Setup de objetos
+void iniciarObjetos(){ 
   pinMode(Constantes::ledPin, OUTPUT);
   motoresRobot.iniciar();
   gyro.iniciar();
@@ -20,19 +17,19 @@ void iniciarObjetos(){
   }
 }
 
-  //Verificar si se debe voltear
-void voltear(){
+//Verificar si se debe voltear
+void voltear() {
   actualizarPorterias();
   actualizarPorterias();
 
   if ((atacar == amarillo && porteriaAzul.getX() == -1) || (atacar == azul && porteriaAmarilla.getX() == -1)) {
     gyro.setOffset(180);
-    //digitalWrite(led, HIGH);
     Serial.println("Voltear");
   }
 
 }
 
+//Ir a la portería
 void buscarPorteria(){
   actualizarPorterias();
   int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
@@ -59,28 +56,20 @@ void buscarPorteria(){
 
       motoresRobot.movimientoLinealCorregido(ang-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
 
-
-
-
 }
 
 
-//---------------------------------------IMU
 //Devolver el error a corregir
 int correccionesImu() {
-  //actualizarPorterias();
   gyro.readValues();
   int change = pid.calcularError(0, gyro.getYaw(), Constantes::velocidades);
 
   return change;
 }
 
-
+//Devolver ángulo a corregir si se busca un ángulo específico
 int correccionesImuTarget(int target) {
-  //actualizarPorterias();
   gyro.readValues();
-  //int change = pid.calcularError(target, gyro.getYaw(), velocidades);
-
   int error = abs(target - gyro.getYaw());
   bool r = ((target - gyro.getYaw()) > 0) ? true : false;
   pid.setR(r);
@@ -88,7 +77,7 @@ int correccionesImuTarget(int target) {
   error = 1.3 * error;
   error = min(error, 255);
   error = map(error, 0, 255, 110, 255);
-  //Serial.println(error);
+
   return error;
 }
 
@@ -96,12 +85,9 @@ int correccionesImuTarget(int target) {
 //Obtener y almacenar los datos de la cámara
 void actualizarPorterias() {
 
-
   if (Serial2.available()) {
     String input1 =  Serial2.readStringUntil('\n');
-    //Serial.println(input1);
 
-    //Serial.println(input);
     if (input1[0] == 'a')
       porteriaAmarilla.actualizar(input1);
     else if (input1[0] == 'b')
@@ -110,11 +96,6 @@ void actualizarPorterias() {
 
 }
 
-void p() {
-  
-  
-
-}
 
 void buscarC() {
   aroIR.actualizarDatos2();
@@ -136,7 +117,7 @@ void buscarC() {
 
   bool derecha = true;
   if (distancia > 29 || largo < 30) {
-    if (x1 > 190) //debe ir a laa izquierda
+    if (x1 > 190)     //debe ir a la izquierda
       seguidorI();
     else if (x1 < 90) //debe ir a la derecha
       seguidorD();
@@ -228,21 +209,8 @@ void buscarA(int tiempo) {
 
 }
 
-// void salirLinea(int angleC, int tiempo) {
-//   int change = correccionesImu();
-//   unsigned long  ms2 = millis();
-//   //int t = (angleC == 0) ? 200 : tiempo;
 
-//   while ((millis() - ms2) < tiempo) {
-//     gyro.readValues();
-
-//     if (angleC == 120) angleC = angleC*-1;
-//     else if (angleC == 240) angleC = 120;
-//     motoresRobot.movimientoLinealCorregido(angleC-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
-//   }
-
-// }
-
+//Salir de la linea
 void salirAdelante(int angleC) {
   int change = correccionesImu();
   unsigned long ms2 = millis();
@@ -254,77 +222,26 @@ void salirAdelante(int angleC) {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-void actualizarPorterias2(int col) {
-  
-  //Serial.println(col);
-  if (col == 1)
-    Serial3.write("1");
-  else 
-    Serial3.write("0");
-
-  int ms3 = millis();
-
-  while ((millis() - ms3) < 50) {
-    
-  }
-
-  if (Serial3.available()) { 
-    String input =  Serial3.readStringUntil('\n');
-    Serial.println(input);
-    
-  }
-
-
-} 
-
+//Seguidor de linea (a la derecha)
 void seguidorD() {
   double k = 0.6;
   int change = correccionesImu();
-  int lectura = color.getValor(2, 2);
+  int lectura = color.getValor(2, 2); //Foto transistor 2 placa 2 (derecha)
   double error = 90 + (80-lectura)*k;
-  //error = min(110,error);
   motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
 
 }
 
+//Seguidor de linea (a la izquierda)
 void seguidorI() {
   double k = 0.6;
   int change = correccionesImu();
-  int lectura = color.getValor(0, 1);
+  int lectura = color.getValor(0, 1); //Foto transistor 1 placa 0 (izquierda)
   double error = -90 - (60-lectura)*k;
   motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
 }
 
-void seguidor2(int mid, char lado) {
-  double k = 0.6;
-  double error = 90;
-  int change = correccionesImu();
-int lectura;
-
-  if (lado == 'd') {
-    lectura = color.getValor(2, 2);
-     error = 90 + (80-lectura)*k;
-  } else {
-    k=0.3;
-    lectura = color.getValor(0, 1);
-     error = -90 - (mid-lectura)*k;
-  }
-      Serial.println(error);
-
-      motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
-
-}
-
+//Calcular el valor medio de los fotos
 double getMid(double verde, double blanco) {
   return (verde + (blanco - verde)/2);
 }
@@ -333,9 +250,8 @@ double getMid(double verde, double blanco) {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
-  //buscarC();
   
-  //CAMARA____________________________________
+//CAMARA____________________________________
 //     actualizarPorterias();
 //     // Serial.println(porteriaAmarilla.getX());
 //       int x1 = (atacar == 0)? porteriaAzul.getX() : porteriaAmarilla.getX();
@@ -351,14 +267,6 @@ void tests() {
     // int x = porteriaAmarilla.getX();
     //   Serial.println(porteriaAmarilla.getX());
 
-    //   if (x < 75)
-    //     seguidorD();
-    //   else if (x > 240)
-    //     seguidorI();
-     
-//       Serial.println(porteriaAmarilla.getX());
-
-//   <75 
 
 
 //   int placa = 2;
