@@ -1,24 +1,22 @@
 //#include "Constantes.h"
 //------------------------------------------------------------------------------------ Funciones de estados -------------------------------------------------------------------------------------
 void iniciarObjetos(){
-  Serial.begin(9600);
-  Serial2.begin(9600);
-  Serial2.setTimeout(100);
-  Serial.setTimeout(100);
+ 
 
   pinMode(Constantes::ledPin, OUTPUT);
   motoresRobot.iniciar();
   gyro.iniciar();
   aroIR.iniciar2();
   aroIR.actualizarDatos2();
-  pid.setKP(0.08);
+  pid.setKP(0.1);
   pid.setMinToMove(40);
   color.iniciar();
-  //color.calibrar();
+  ultrasonico.iniciar();
+  color.calibrar();
 
   if (Constantes::velocidades > 120) {
     pid.setAngle(120);
-    pid.setKP(0.08);
+    pid.setKP(0.1);
   }
 }
 
@@ -47,17 +45,19 @@ void buscarPorteria(){
   Serial.println(x1);
     if (x1 == -1) {
       ang = 0;
-    } if (x1 < 60) {
+      Serial.println("No hay porteria");
+    } if (x1 < 80) {
       ang = 135;
-    } else if (x1 > (260)) {
+      Serial.println("Ir a la derecha");
+    } else if (x1 > (240)) {
       ang = -135;
+      Serial.println("Ir a la izquierda");
     } else {
       ang = 180;
+      Serial.println("Ir atras");
     }
 
-    
-
-      motoresRobot.movimientoLinealCorregido(ang - gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
+      motoresRobot.movimientoLinealCorregido(ang-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
 
 
 
@@ -109,6 +109,45 @@ void actualizarPorterias() {
   }
 
 }
+
+void p() {
+  
+  
+
+}
+
+void buscarC() {
+  aroIR.actualizarDatos2();
+  double angulo = aroIR.getAngulo();
+  double distancia = ultrasonico.getDistancia();
+  actualizarPorterias();
+  int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
+  int largo = (atacar == amarillo) ? porteriaAzul.getLargo() : porteriaAmarilla.getLargo();
+  // Serial.print(distancia);
+  // Serial.print("\t\t");
+  // Serial.println(x1);
+
+
+
+  if (aroIR.getStrength() == 0) {
+    motoresRobot.apagarMotores();
+    return;
+  }
+
+  bool derecha = true;
+  if (distancia > 29 || largo < 30) {
+    if (x1 > 190) //debe ir a laa izquierda
+      seguidorI();
+    else if (x1 < 90) //debe ir a la derecha
+      seguidorD();
+
+  } else {
+      (angulo > 0) ? seguidorD() : seguidorI();
+
+  }
+    
+}
+
 
 void buscarB() {
   aroIR.actualizarDatos2();
@@ -189,40 +228,33 @@ void buscarA(int tiempo) {
 
 }
 
-void salirLinea(int angleC, int tiempo) {
+// void salirLinea(int angleC, int tiempo) {
+//   int change = correccionesImu();
+//   unsigned long  ms2 = millis();
+//   //int t = (angleC == 0) ? 200 : tiempo;
+
+//   while ((millis() - ms2) < tiempo) {
+//     gyro.readValues();
+
+//     if (angleC == 120) angleC = angleC*-1;
+//     else if (angleC == 240) angleC = 120;
+//     motoresRobot.movimientoLinealCorregido(angleC-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
+//   }
+
+// }
+
+void salirAdelante(int angleC) {
   int change = correccionesImu();
-  unsigned long  ms2 = millis();
-  //int t = (angleC == 0) ? 200 : tiempo;
+  unsigned long ms2 = millis();
 
-  while ((millis() - ms2) < tiempo) {
-    gyro.readValues();
-
-    if (angleC == 120) angleC = angleC*-1;
-    else if (angleC == 240) angleC = 120;
+  while ((millis() - ms2) < 400) {
+    gyro.readValues();  
     motoresRobot.movimientoLinealCorregido(angleC-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
   }
 
 }
 
-double distanciaUltrasonico() {
-   digitalWrite(Constantes::trigPin, HIGH);
-  unsigned long ms3 = micros();
 
-   while ((micros() - ms3) < 10) {
-   }
-
-    digitalWrite(Constantes::trigPin, LOW);
-
-
-    long t; //timepo que demora en llegar el eco
-    long d; //distancia en centimetros
-    t = pulseIn(Constantes::echoPin, HIGH); //obtenemos el ancho del pulso
-    d = t / 59;
-    Serial.println("ul");
-   // delay(100);
-
-    return d;
-}
 
 
 
@@ -255,7 +287,25 @@ void actualizarPorterias2(int col) {
 
 } 
 
-void seguidor(int mid, char lado) {
+void seguidorD() {
+  double k = 0.6;
+  int change = correccionesImu();
+  int lectura = color.getValor(2, 2);
+  double error = 90 + (80-lectura)*k;
+  //error = min(110,error);
+  motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
+
+}
+
+void seguidorI() {
+  double k = 0.6;
+  int change = correccionesImu();
+  int lectura = color.getValor(0, 1);
+  double error = -90 - (60-lectura)*k;
+  motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
+}
+
+void seguidor2(int mid, char lado) {
   double k = 0.6;
   double error = 90;
   int change = correccionesImu();
@@ -263,7 +313,6 @@ int lectura;
 
   if (lado == 'd') {
     lectura = color.getValor(2, 2);
-
      error = 90 + (80-lectura)*k;
   } else {
     k=0.3;
@@ -284,15 +333,43 @@ double getMid(double verde, double blanco) {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
-  int placa = 2;
-  int f = 2;
+  //buscarC();
+  
+  //CAMARA____________________________________
+//     actualizarPorterias();
+//     // Serial.println(porteriaAmarilla.getX());
+//       int x1 = (atacar == 0)? porteriaAzul.getX() : porteriaAmarilla.getX();
+// Serial.println(x1);
 
-//int mid = getMid(50,150);
-int mid = getMid(40,130);
-//Serial.println(mid);
-Serial.print(color.getValor(placa, f));
-Serial.print("\t\t");
-seguidor(mid,'d');
+    // int change = correccionesImu();
+    // motoresRobot.movimientoLinealCorregido(0 - gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
+
+    //  delay(800);
+    //  seguidorI();
+    //  delay(800);
+
+    // int x = porteriaAmarilla.getX();
+    //   Serial.println(porteriaAmarilla.getX());
+
+    //   if (x < 75)
+    //     seguidorD();
+    //   else if (x > 240)
+    //     seguidorI();
+     
+//       Serial.println(porteriaAmarilla.getX());
+
+//   <75 
+
+
+//   int placa = 2;
+//   int f = 2;
+
+// //int mid = getMid(50,150);
+// int mid = getMid(40,130);
+// //Serial.println(mid);
+// Serial.println(color.getValor(0, 1));
+// // Serial.print("\t\t");
+// seguidorI();
 
 
 
@@ -352,11 +429,6 @@ seguidor(mid,'d');
 //    Serial.println(low);
 
 
-  //CAMARA____________________________________
-    // actualizarPorterias();
-    //   Serial.println(porteriaAmarilla.getX());
-//       Serial.println(porteriaAmarilla.getX());
-
 
   //IMU______________________________________
       //   gyro.readValues();
@@ -376,12 +448,12 @@ seguidor(mid,'d');
 
 
   //MOTORESS INDIVIDUAL______________________________________
-    // motoresRobot.setAllMotorSpeed(Constantes::velocidades);
-    //   motoresRobot.mover1();
-    //   delay(1000);
-    //   motoresRobot.mover2();
-    //   delay(1000);
-    //   motoresRobot.mover3();
+    motoresRobot.setAllMotorSpeed(Constantes::velocidades);
+      motoresRobot.mover1();
+      delay(1000);
+      motoresRobot.mover2();
+      delay(1000);
+      motoresRobot.mover3();
   // //
   //   motoresRobot.giroH();
 
@@ -410,7 +482,7 @@ seguidor(mid,'d');
   //      int change = correccionesImu();
   // //     //motoresRobot.movimientoLineal(0,velocidades);
   //      // gyro.actualizar();
-  //       motoresRobot.movimientoLinealCorregido(-90-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
+  //       motoresRobot.movimientoLinealCorregido(-45-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
   // //
 
   //SEEKER

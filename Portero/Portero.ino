@@ -8,15 +8,22 @@
 #include "Porteria.h"
 #include "Imu.h"  
 #include "Constantes.h"
+#include "Ultrasonico.h"
+#include  "SingleEMAFilterLib.h"  
+#include "BNO.h"
+
 
 //Objetos
 Motores motoresRobot(5, 28, 27, 6, 26, 25, 4, 30, 29);    //robot imu
-Imu gyro;
+Ultrasonico ultrasonico(10, 36);
+BNO gyro;
 AroIR aroIR;
 PID pid;
 Color color;
 Porteria porteriaAzul;
 Porteria porteriaAmarilla;
+
+
 
   //Estados del robot
     enum Estados {
@@ -28,6 +35,7 @@ Porteria porteriaAmarilla;
         golPorteria,
         salir,
         regresar,
+        defender,
         nada
     };
 
@@ -42,9 +50,14 @@ bool flagAdelante = false;
 
 
  
- 
+
 //SETUP------------------------------------------------------
 void setup() {
+   Serial.begin(9600);
+  Serial2.begin(9600);
+  Serial2.setTimeout(100);
+  Serial.setTimeout(100);
+
   iniciarObjetos();
   delay(1500);
   Serial.println("SETUP DONE");
@@ -57,52 +70,98 @@ void setup() {
 void loop() {
 
 
-  estado = nada;
+  estado = inicio;
   //Verificar si está en la línea y moverse si es necesario
-  
-  if (estado == linea) {
-    int angle1 = color.checkForLineaPlaca2();
-   
-     if (angle1 != -1) {
-      Serial.println(angle1);
-      digitalWrite(Constantes::ledPin, HIGH);
+  if (estado == inicio) {
+    actualizarPorterias();
+    int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
+    //Serial.println(y1);
+    if (y1 == -1)
       
-      if (angle1 == 0 || angle1 == 60 || angle1 == -60) {
-       flagAdelante = true;
-       //salirLinea(angle1, 200);
-
-      } else {
-        salirLinea(angle1, 500);
-      }
-
-
-    } else {
-      digitalWrite(Constantes::ledPin, LOW);
-    }
-
-    estado = inicio;
-
+    if (y1 < 80)
+      estado = regresar;
+    else 
+      estado = linea;
+    //flagAdelante = false;
 
   }
 
-  if (estado == inicio) {
-    actualizarPorterias();
-    int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();   
-    estado = (flagAdelante && y1 > 95) ? salir : regresar;
-  
+  if (estado == linea) {
+      int angle1 = color.checkForLineaPlaca2();
+      actualizarPorterias();
+        int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
+
+      if (angle1 == 180 || ultrasonico.getDistancia() < 15) {
+        salirAdelante(0);
+        digitalWrite(Constantes::ledPin, HIGH);
+
+
+      // } else if (x1 < 10) {
+      //   salirAdelante(45);
+      //   digitalWrite(Constantes::ledPin, HIGH);
+
+      // } else if (x1 > 320) {
+      //   salirAdelante(-45);
+      //   digitalWrite(Constantes::ledPin, HIGH);
+      // }
+     } else {
+        estado = defender;
+    }
+
+    
   }
 
   if (estado == regresar) {
-    Serial.println("regresar");
+    //Serial.println("regresar");
     buscarPorteria();
-    flagAdelante = false;
+  }
+
+  if (estado == defender) {
+    buscarC();
+    digitalWrite(Constantes::ledPin, LOW);
 
   }
+
+
+  // if (estado == linea) {
+  //   int angle1 = color.checkForLineaPlaca2();
+   
+  //    if (angle1 != -1) {
+  //     Serial.println(angle1);
+  //     digitalWrite(Constantes::ledPin, HIGH);
+      
+  //     if (angle1 == 0 || angle1 == 60 || angle1 == -60) {
+  //      flagAdelante = true;
+  //      //salirLinea(angle1, 200);
+
+  //     } else {
+  //       salirLinea(angle1, 500);
+  //     }
+
+
+  //   } else {
+  //     digitalWrite(Constantes::ledPin, LOW);
+  //   }
+
+  //   estado = inicio;
+
+
+  // }
+
+  // if (estado == inicio) {
+  //   actualizarPorterias();
+  //   int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();   
+  //   estado = (flagAdelante && y1 > 95) ? salir : regresar;
+  
+  // }
+
+
 
   if (estado == salir) {
     Serial.println("salir");
-    buscarB();
+    //buscar();
   }
+
 
   //Pruebas
   if (estado == nada) {
