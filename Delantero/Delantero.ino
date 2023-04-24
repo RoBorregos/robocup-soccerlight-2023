@@ -60,8 +60,9 @@ void setup() {
   Serial2.begin(9600);
   Serial2.setTimeout(100);
 
+
   iniciarObjetos();   //Set up de objetos
-  delay(1500);
+  delay(1600);
   voltear();          //Verificar si el robot inició volteado y corregirlo
  
 }

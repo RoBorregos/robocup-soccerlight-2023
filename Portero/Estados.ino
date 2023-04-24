@@ -29,6 +29,17 @@ void voltear() {
 
 }
 
+bool checkUltrasonicos() {
+  double distanciaD = ultrasonicoD.getDistancia();
+  double distanciaI = ultrasonicoI.getDistancia();
+  gyro.readValues();
+
+  if (distanciaD + distanciaI > 110 && abs(gyro.getYaw()) < 30) //132 --> medida de la cancha
+    return true;
+  
+  return false;
+}
+
 //Ir a la portería
 void buscarPorteria(){
   actualizarPorterias();
@@ -114,18 +125,16 @@ void buscarC() {
   }
 
   bool derecha = true;
-  if (largo < 110) {
+  if (largo < 120 ) {
+   // && ((x1 > 160 && angulo >= 0) || (x1 < 160 && angulo <= 0))
     if (x1 > 200) 
       seguidorI();
     else if (x1 < 120)
       seguidorD();
   
-  //if ((largo < 110) && ((x1 > 200 && angulo < 0) || (x1 < 120 && angulo >= 0))){
-         //debe ir a la izquierda
-     // motoresRobot.apagarMotores();
-    //   seguidorI();
-    // else if (x1 < 120) //debe ir a la derecha
-    //   seguidorD();
+
+      //motoresRobot.apagarMotores();
+
 
   } else {
       (angulo > 0) ? seguidorD() : seguidorI();
@@ -222,23 +231,27 @@ void salirAdelante(int angleC) {
 
   while ((millis() - ms2) < 400) {
     gyro.readValues();  
-    motoresRobot.movimientoLinealCorregido(angleC-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
+    motoresRobot.movimientoLinealCorregido(angleC-gyro.getYaw(), Constantes::velMin+20, change, gyro.isRight());
   }
 
 }
 
 //Seguidor de linea (a la derecha)
 void seguidorD() {
-  double k = 0.6;
-  Serial.println("D");
-
+  double k = 0.2; //0.2   a  110
+  //Serial.println("D");
+  int vel = getErrorVelocidades(1);
   int change = correccionesImu();
   int lectura = color.getValor(2, 2); //Foto transistor 2 placa 2 (derecha)
-  double error = 90 + (80-lectura)*k;
-  error = min(error, 100);
-  error = max(80,error);
-  int vel = getErrorVelocidades(1);
-  motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), vel, change, gyro.isRight());
+  double error = 90 + (75-lectura)*k;
+  // error = min(error, 96);
+  // error = max(84,error);
+  Serial.print(lectura);
+  Serial.print("\t\t");
+  Serial.println(error);
+  
+  
+  motoresRobot.movimientoLinealCorregido(error, vel, change, gyro.isRight());
 
 
 }
@@ -246,25 +259,41 @@ void seguidorD() {
 double getErrorVelocidades(int signo) {
   aroIR.actualizarDatos2();
   double angulo = aroIR.getAngulo();
-  double k = 0.3;
-  if (abs(angulo) > 90) angulo = 90;
-  double error = (90 - signo*angulo)*k;
-  error = Constantes::velocidades - abs(error);
-  Serial.print(error);
-  Serial.print("\t\t");
-  Serial.println(angulo);
+  double k = 0.4;
+  double str = aroIR.getStrength();
+  str = min(90-str, 50);
 
-  //error = max(error,Constantes::minVelocidad);
-  return error;
+  double strX = (angulo > 0) ? (str)*cos((90-angulo) * PI / 180) : (str)*cos((-90-angulo) * PI / 180);
+
+  if (abs(angulo) > 90) angulo = 90;
+  angulo = map(abs(angulo), 0, 90, 0, 50);
+
+  double errorFinal = (strX + angulo);
+  errorFinal = k*errorFinal;
+  int vel = min(errorFinal + Constantes::velMin,Constantes::velMax);
+  
+  //error = Constantes::velocidades - abs(error);
+  Serial.print(str);
+  Serial.print("\t\t");
+  Serial.print(angulo);
+  Serial.print("\t\t");
+  Serial.print(strX);
+  Serial.print("\t\t");
+  Serial.print(errorFinal);
+  Serial.print("\t\t");
+  Serial.println(vel);
+   
+  
+  return vel;
 }
 
 //Seguidor de linea (a la izquierda)
 void seguidorI() {
-  double k = 0.6;
+  double k = 0.2;
   Serial.println("I");
   int change = correccionesImu();
   int lectura = color.getValor(0, 1); //Foto transistor 1 placa 0 (izquierda)
-  double error = -90 - (70-lectura)*k;
+  double error = -90 - (50-lectura)*k;
   int vel = getErrorVelocidades(-1);
   motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), vel, change, gyro.isRight());
 }
@@ -278,7 +307,7 @@ double getMid(double verde, double blanco) {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
-  
+  seguidorD();
 //CAMARA____________________________________
 //     actualizarPorterias();
 //     // Serial.println(porteriaAmarilla.getX());
@@ -300,16 +329,16 @@ void tests() {
 //   int placa = 2;
 //   int f = 2;
 
-// //int mid = getMid(50,150);
+//int mid = getMid(50,150);
 // int mid = getMid(40,130);
 // //Serial.println(mid);
-// Serial.println(color.getValor(2, 2));
-// // Serial.print("\t\t");
-// seguidorD();
+ Serial.println(color.getValor(2, 2));
+// Serial.print("\t\t");
+//seguidorD();
 
-actualizarPorterias();
-  int largo = porteriaAzul.getLargo();
-  Serial.println(largo);
+// actualizarPorterias();
+//   int largo = porteriaAzul.getLargo();
+//   Serial.println(largo);
 
   // Serial.print(analogRead(analogo));
 //  Serial.print("\t\t");
@@ -340,9 +369,9 @@ actualizarPorterias();
 
 //
 //     Serial.println("Cam");
-//  if (Serial2.available()) {
+//  if (Serial1.available()) {
 //          //Serial.println("serial1");
-//           String input = Serial2.readStringUntil('\n');
+//           String input = Serial1.readStringUntil('\n');
 //          Serial.println(input);
  
 //      }
@@ -351,10 +380,14 @@ actualizarPorterias();
 
 
   //ARO-IRRRR________________________________
-        //  aroIR.actualizarDatos2();
-        // double angulo = aroIR.getAngulo();
-        // Serial.println(angulo);
-//  //     Serial.println(aroIR.getStrength());
+    //      aroIR.actualizarDatos2();
+   // getErrorVelocidades(1);
+    //     double angulo = aroIR.getAngulo();
+    //    // Serial.println(angulo);
+    //    double str = aroIR.getStrength();
+    // //double distancia = map(str, 10,100, 0, 10);
+
+    //  Serial.println(distancia);
 
 //         double high = aroIR.getHighPass();
 //         double low = aroIR.getLowPass();

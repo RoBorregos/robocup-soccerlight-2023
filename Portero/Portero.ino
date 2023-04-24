@@ -16,6 +16,8 @@
 //Objetos
 Motores motoresRobot(5, 28, 27, 6, 26, 25, 4, 30, 29);    //robot imu
 Ultrasonico ultrasonico(10, 36);
+Ultrasonico ultrsonicoD(A4,A5);
+Ultrasonico ultrsonicoI(8,50);
 BNO gyro;
 AroIR aroIR;
 PID pid;
@@ -61,7 +63,7 @@ void setup() {
 
   iniciarObjetos();
   delay(1500);
-  voltear();
+  //voltear();
   Serial.println("SETUP DONE");
 
 }
@@ -77,10 +79,11 @@ void loop() {
   if (estado == inicio) {
     actualizarPorterias();
     int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
-   // Serial.println(y1);
-   
+   Serial.println(y1);
+
     if (y1 < 80)
       estado = regresar;
+    
     else 
       estado = linea;
     //flagAdelante = false;
@@ -89,29 +92,28 @@ void loop() {
 
   if (estado == linea) {
       int angle1 = color.checkForLineaPlaca2();
-      actualizarPorterias();
-        int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
-
       if (angle1 == 180) {
         salirAdelante(0);
-        digitalWrite(Constantes::ledPin, HIGH);
-
-
+      else if (checkUltrasonicos() && ultrasonicoD.getDistancia < 50)
+        salirAdelante(-90);
+      else if (checkUltrasonicos() && ultrasonicoI.getDistancia < 50)
+        salirAdelante(90);
      } else {
         estado = defender;
     }
 
-    
   }
 
   if (estado == regresar) {
     //Serial.println("regresar");
+    digitalWrite(Constantes::ledPin, LOW);
     buscarPorteria();
   }
 
   if (estado == defender) {
+    Serial.println("defender");
     buscarC();
-    digitalWrite(Constantes::ledPin, LOW);
+    digitalWrite(Constantes::ledPin, HIGH);
 
   }
 

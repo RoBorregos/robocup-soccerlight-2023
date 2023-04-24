@@ -10,7 +10,7 @@ void buscar() {
   if (str == 0) {
     motoresRobot.apagarMotores();
     return;
-  } else if (str > 80 && abs(angulo) <= 90) {
+  } else if (str > 70 && abs(angulo) <= 90) {
     dribbler.prender();
   } else {
     dribbler.apagar();
@@ -47,6 +47,7 @@ void buscar() {
     result = 0;
 
   double distancia = map(str, 10,100, 0, 10);
+  distancia = str*0.1;
  // double val = 1 - pow(EULER,(0.9*(distancia-10)));
   double val = 1.087 + 1/((distancia-11.5));
   int velNuevas = Constantes::velocidades * val;
