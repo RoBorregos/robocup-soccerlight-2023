@@ -53,13 +53,15 @@ bool flagAdelante = false;
 
 //SETUP------------------------------------------------------
 void setup() {
-   Serial.begin(9600);
+  Serial.begin(9600);
   Serial2.begin(9600);
   Serial2.setTimeout(100);
   Serial.setTimeout(100);
 
+
   iniciarObjetos();
   delay(1500);
+  voltear();
   Serial.println("SETUP DONE");
 
 }
@@ -75,9 +77,8 @@ void loop() {
   if (estado == inicio) {
     actualizarPorterias();
     int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
-    //Serial.println(y1);
-    if (y1 == -1)
-      
+   // Serial.println(y1);
+   
     if (y1 < 80)
       estado = regresar;
     else 
@@ -91,19 +92,11 @@ void loop() {
       actualizarPorterias();
         int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
 
-      if (angle1 == 180 || ultrasonico.getDistancia() < 15) {
+      if (angle1 == 180) {
         salirAdelante(0);
         digitalWrite(Constantes::ledPin, HIGH);
 
 
-      // } else if (x1 < 10) {
-      //   salirAdelante(45);
-      //   digitalWrite(Constantes::ledPin, HIGH);
-
-      // } else if (x1 > 320) {
-      //   salirAdelante(-45);
-      //   digitalWrite(Constantes::ledPin, HIGH);
-      // }
      } else {
         estado = defender;
     }
@@ -154,7 +147,6 @@ void loop() {
   //   estado = (flagAdelante && y1 > 95) ? salir : regresar;
   
   // }
-
 
 
   if (estado == salir) {
