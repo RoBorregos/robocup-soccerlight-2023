@@ -367,10 +367,8 @@ void tests() {
 //   //ANALOGO
 // filterAnalogo.AddValue(analogRead(analogo));
 
-Serial.print(detector());
- Serial.print("\t\t");
- Serial.println(hasPosesion());
-//   Serial.print("\t\t");
+    dribbler.prender(7);
+//  Serial.print("\t\t");
 //  Serial.print(filterAnalogo.GetLowPass());
 //  Serial.print("\t\t");
 //  Serial.println(filterAnalogo.GetHighPass());
