@@ -6,9 +6,6 @@ void buscar() {
   double angulo = aroIR.getAngulo();
   double str = aroIR.getStrength();
 
-  //Serial.println(aroIR.getStrength());
-  //Serial.println(angulo);
-
 
   if (str == 0) {
     motoresRobot.apagarMotores();
@@ -22,7 +19,7 @@ void buscar() {
   int result = -1000;
   
 
-    if (abs(angulo) <= 20) {
+    if (abs(angulo) <= 25) {
       result = 0;
     } else if (abs(angulo) <= 50) {
       result = (angulo > 0) ? 90 : -90;
@@ -38,34 +35,36 @@ void buscar() {
 
   
   if (str < 30) {
-    if (result <= 90)
+    if (abs(result) <= 135)
       result = result * 0.7;
-    //else if (result <= 180)
-      //result = (angulo > 0) ? result * 0.85: result * -0.85;
-    
+ 
   } else if (str < 50) {
-    if (result <= 90)
-      result = result * 0.7;
-    //else if (result <= 180)
-      //result = (angulo > 0) ? result * 0.95: result * -0.95;
-  } 
+    if (abs(result) <= 135)
+      result = result * 0.8;
+    
+   
+  } else if (str < 60 && abs(angulo) < 110 && abs(angulo) > 70 && ultrasonico.getDistancia() < 30)
+    result = 0;
 
-//   double distancia = map(str, 10,100, 0, 10);
-//  // double val = 1 - pow(EULER,(0.9*(distancia-10)));
-//   double val = 1.087 + 1/((distancia-11.5));
-//   int velNuevas = velocidades * val;
-//   velNuevas = max(velMin, velNuevas);
-
+  double distancia = map(str, 10,100, 0, 10);
+ // double val = 1 - pow(EULER,(0.9*(distancia-10)));
+  double val = 1.087 + 1/((distancia-11.5));
+  int velNuevas = Constantes::velocidades * val;
+  velNuevas = max(Constantes::velMin, velNuevas);
+  if (velNuevas < 120)
+    pid.setKP(0.1);
+  else  
+    pid.setKP(0.09);
   //Serial.print("factor: ");
   //Serial.println(distancia);
 
   // Serial.print("velocidad: ");
-  // Serial.println(velNuevas);
+  //Serial.println(velNuevas);
 
   if (result == -1000) 
     motoresRobot.apagarMotores();
   else 
-    motoresRobot.movimientoLinealCorregido(result - gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
+    motoresRobot.movimientoLinealCorregido(result - gyro.getYaw(), velNuevas, change, gyro.isRight());
 
 
   if (angulo > 0)
@@ -201,10 +200,16 @@ int correccionesImuTarget(int target) {
 //Moverse en dirección contraria a la linea detectada
 void salirLinea() {
   int angle1 = color.checkForLineaPlaca();
+  if (ultrasonico.getDistancia() < 50){
+    aroIR.actualizarDatos();
+    double angulo = aroIR.getAngulo();
+    angle1 = (angulo > 0) ? 45 : -45;
+  }
+
   int change = correccionesImu();
   unsigned long ms2 = millis();
 
-  while ((millis() - ms2) < 700) {
+  while ((millis() - ms2) < 500) {
     gyro.readValues();
     motoresRobot.movimientoLinealCorregido(angle1, Constantes::velocidades, change, gyro.isRight());
   }
@@ -255,7 +260,7 @@ bool inLinea() {
   int angle1 = color.checkForLineaPlaca();
     Serial.println(angle1);
 
-    if (ultrasonico.getDistancia() < 30) 
+    if (ultrasonico.getDistancia() < 15) 
       angle1 = 0;
 
     if (angle1 != -1) {
@@ -318,12 +323,12 @@ void voltear() {
 void tests() {
 
 // ULTRASONICO
-    //Serial.println(distanciaUltrasonico());
+// Serial.println(ultrasonico.getDistancia());
 
 // ANALOGO
-//  Serial.print(detector());
-//  Serial.print("\t\t");
-//  Serial.println(filterAnalogo.GetLowPass());
+ Serial.print(detector());
+ Serial.print("\t\t");
+ Serial.println(filterAnalogo.GetLowPass());
 
 
   //ARO-IRRRR________________________________
@@ -366,7 +371,7 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-      // motoresRobot.setAllMotorSpeed(velocidades);
+      // motoresRobot.setAllMotorSpeed(Constantes::velocidades);
       // motoresRobot.mover1();
       // delay(1000);
       // motoresRobot.mover2();

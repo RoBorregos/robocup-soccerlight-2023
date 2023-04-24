@@ -24,7 +24,7 @@ Color color;
 Porteria porteriaAzul;
 Porteria porteriaAmarilla;
 Dribbler dribbler(7);
-Ultrasonico ultrasonico(36,38);
+Ultrasonico ultrasonico(40,38);
 
 
 enum Estados {
@@ -61,6 +61,7 @@ void setup() {
   Serial2.setTimeout(100);
 
   iniciarObjetos();   //Set up de objetos
+  delay(1500);
   voltear();          //Verificar si el robot inició volteado y corregirlo
  
 }
