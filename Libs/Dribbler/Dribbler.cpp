@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "Dribbler.h"
-  #include <Servo.h>
+#include <Servo.h>
 
 
 Dribbler::Dribbler (int pin) {
@@ -10,12 +10,13 @@ Dribbler::Dribbler (int pin) {
 void Dribbler::iniciar() {
     esc.attach(pin);
     delay(2000); 
-    esc.writeMicroseconds(800); // set the motor speed to minimum
+    esc.writeMicroseconds(700); // set the motor speed to minimum
     delay(1000); // wait for 3 seconds
 };
 
 void Dribbler::prender() {
-    esc.writeMicroseconds(1000);
+    esc.writeMicroseconds(780);
+	delay(50);
 
     /*for (int i = 800; i <= 1500; i++) { // increase the motor speed from min to max
         esc.writeMicroseconds(i);
