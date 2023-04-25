@@ -367,7 +367,7 @@ void tests() {
 //   //ANALOGO
 // filterAnalogo.AddValue(analogRead(analogo));
 
-    dribbler.prender(7);
+    dribbler.prender();
 //  Serial.print("\t\t");
 //  Serial.print(filterAnalogo.GetLowPass());
 //  Serial.print("\t\t");

@@ -50,7 +50,7 @@ void setup() {
 void loop() {
 
 
-  estado = Constantes::linea;
+  estado = Constantes::buscarPelota;
 
   //Verificar si está en la línea y moverse si es necesario
   if (estado == Constantes::linea) {
