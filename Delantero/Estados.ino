@@ -10,9 +10,11 @@ void buscar() {
   if (str == 0) {
     motoresRobot.apagarMotores();
     return;
-  } else if (str > 80 && abs(angulo) <= 90) {
+  } else if (str > 60 && abs(angulo) <= 90) {
+    // esc.writeMicroseconds(800);
     dribbler.prender();
   } else {
+    //esc.writeMicroseconds(0);
     dribbler.apagar();
   }
 
@@ -42,19 +44,24 @@ void buscar() {
     if (abs(result) <= 135)
       result = result * 0.8;
     
-   
-  } else if (str < 60 && abs(angulo) < 110 && abs(angulo) > 70 && ultrasonico.getDistancia() < 30)
-    result = 0;
+  } //else if (str < 60 && abs(angulo) < 110 && abs(angulo) > 70 && ultrasonico.getDistancia() < 30)
+   //result = 0;
 
-  double distancia = map(str, 10,100, 0, 10);
+  //double distancia = map(str, 10,100, 0, 10);
+  double distancia = str*0.1;
  // double val = 1 - pow(EULER,(0.9*(distancia-10)));
   double val = 1.087 + 1/((distancia-11.5));
   int velNuevas = Constantes::velocidades * val;
+
   velNuevas = max(Constantes::velMin, velNuevas);
-  if (velNuevas < 120)
-    pid.setKP(0.1);
-  else  
-    pid.setKP(0.09);
+  // if (velNuevas < 110){
+  //   pid.setKP(0.1);
+  //   //pid.setAngle(90);
+  // } else   {
+  //   pid.setKP(0.09);
+  //   pid.setAngle(120);
+  // }
+
   //Serial.print("factor: ");
   //Serial.println(distancia);
 
@@ -108,7 +115,7 @@ void atacarGol(int px,int y1) {
   int change = correccionesImu();
 
   //Movimientos para cuando esté muy cerca a la portería --> giros más bruscos
-  if (y1 > 95) {
+  if (y1 > 90) {
     dribbler.apagar();
   }
 
@@ -226,7 +233,7 @@ int detector() {
     do {       
       //Serial.println(analogRead(analogo));
             filterAnalogo.AddValue(analogRead(Constantes::analogo));
-            if(filterAnalogo.GetLowPass() > 600) {
+            if(filterAnalogo.GetLowPass() > 700) {
                 pulseWidth += deltaPulseWidth;
             }
         
@@ -278,7 +285,6 @@ bool inLinea() {
 //Set up de objetos 
 void iniciarObjetos() {
   
-  dribbler.iniciar();
   pid.setKP(0.2);
   pid.setMinToMove(40);
   gyro.iniciar();
@@ -286,17 +292,21 @@ void iniciarObjetos() {
   color.iniciar();
   aroIR.actualizarDatos();
   color.calibrar();
+  dribbler.iniciar();
   motoresRobot.iniciar();
+
+
   ultrasonico.iniciar();
+
 
 
   pinMode(Constantes::analogo, INPUT);
   pinMode(Constantes::led, OUTPUT);
 
-  if (Constantes::velocidades > 120) {
-    pid.setAngle(120);
-    pid.setKP(0.09);
-  }
+    // esc.attach(7);
+    // delay(2000); 
+    // esc.writeMicroseconds(780); // set the motor speed to minimum
+    // delay(1500); // wait for 3 seconds
 
 }
 
@@ -321,22 +331,26 @@ void voltear() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
+//DRIBBLER
+//dribbler.prender();
+//  esc.writeMicroseconds(780);
+
 
 // ULTRASONICO
 // Serial.println(ultrasonico.getDistancia());
 
 // ANALOGO
- Serial.print(detector());
- Serial.print("\t\t");
- Serial.println(filterAnalogo.GetLowPass());
+//  Serial.print(detector());
+//  Serial.print("\t\t");
+//  Serial.println(filterAnalogo.GetLowPass());
 
 
   //ARO-IRRRR________________________________
-    // aroIR.actualizarDatos();
-    // double angulo = aroIR.getAngulo();
-    // Serial.print(angulo);
-    // Serial.print("\t\t");
-    // Serial.println(aroIR.getStrength());
+    aroIR.actualizarDatos();
+    double angulo = aroIR.getAngulo();
+    Serial.print(angulo);
+    Serial.print("\t\t");
+    Serial.println(aroIR.getStrength());
 
     //     if (Serial2.available()) {
     //       input = Serial2.readStringUntil('\n');
