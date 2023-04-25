@@ -12,6 +12,10 @@
 #include "Constantes.h"
 #include "Ultrasonico.h"
 
+ #include <Servo.h>
+
+  Servo esc;
+
 
 //Objetos
 SingleEMAFilter<int> filterAnalogo(0.6);
@@ -62,8 +66,13 @@ void setup() {
 
 
   iniciarObjetos();   //Set up de objetos
-  delay(1600);
-  voltear();          //Verificar si el robot inició volteado y corregirlo
+    // esc.attach(7);
+    // delay(2000); 
+    // esc.writeMicroseconds(780); // set the motor speed to minimum
+    // delay(1500); 
+
+  //delay(1600);
+  //voltear();          //Verificar si el robot inició volteado y corregirlo
  
 }
 
@@ -72,7 +81,7 @@ void setup() {
 void loop() {
 
   //Estado inicial
-  estado = linea;
+  estado = buscarPelota;
 
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
@@ -86,7 +95,7 @@ void loop() {
   //Revisar si se tiene posesión de la pelota
   if (estado == hasPelota) {
     aroIR.actualizarDatos();
-    estado = (detector() > 5 && abs(aroIR.getAngulo()) < 20) ? golPorteria : buscarPelota;
+    estado = (detector() > 5 && abs(aroIR.getAngulo()) < 15) ? golPorteria : buscarPelota;
   }
 
   //Buscar la pelota

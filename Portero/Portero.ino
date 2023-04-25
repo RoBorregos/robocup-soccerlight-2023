@@ -14,10 +14,10 @@
 
 
 //Objetos
-Motores motoresRobot(5, 28, 27, 6, 26, 25, 4, 30, 29);    //robot imu
+Motores motoresRobot(5, 28, 27, 6, 26, 25, 4, 30, 29);    
 Ultrasonico ultrasonico(10, 36);
-Ultrasonico ultrsonicoD(A4,A5);
-Ultrasonico ultrsonicoI(8,50);
+Ultrasonico ultrasonicoD(A3,A5);
+Ultrasonico ultrasonicoI(8,50);
 BNO gyro;
 AroIR aroIR;
 PID pid;
@@ -27,26 +27,28 @@ Porteria porteriaAmarilla;
 
 
 
-  //Estados del robot
-    enum Estados {
-        linea,
-        inicio,
-        inPorteria,
-        buscarPelota,
-        hasPelota,
-        golPorteria,
-        salir,
-        regresar,
-        defender,
-        nada
-    };
+//Estados del robot
+enum Estados {
+    linea,
+    inicio,
+    inPorteria,
+    buscarPelota,
+    hasPelota,
+    golPorteria,
+    salir,
+    regresar,
+    defender,
+    detener,
+    nada
+};
 
-    enum Lados {
-        amarillo = 0,
-        azul = 1
-    };    
+enum Lados {
+    amarillo = 0,
+    azul = 1
+};    
 
-Lados atacar = amarillo;
+SingleEMAFilter<int> filterAnalogo(0.6);
+Lados atacar;
 Estados estado;
 bool flagAdelante = false;
 
@@ -72,88 +74,56 @@ void setup() {
 //Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
+  pid.setKP(0.03);
+  atacar = amarillo;
+  estado = linea;
 
+  if (estado == linea) {
+      if (color.checkForLineaPlaca2() == 180 || ultrasonico.getDistancia() < 20) 
+        salirAdelante(0);
+  
+      else 
+        estado = inicio;
 
-  estado = inicio;
-  //Verificar si está en la línea y moverse si es necesario
+  }
+
   if (estado == inicio) {
     actualizarPorterias();
     int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
-   Serial.println(y1);
+    int largo = (atacar == amarillo) ? porteriaAzul.getLargo() : porteriaAmarilla.getLargo();
 
-    if (y1 < 80)
-      estado = regresar;
-    
-    else 
-      estado = linea;
-    //flagAdelante = false;
+    //estado = (y1 < 75 || color.checkForLineaPlaca2() != 0) ? regresar : linea;
+    Serial.println(color.checkForLineaPlaca2());
+    Serial.println(y1);
+    estado = (y1 < 70 || largo < 190) ? regresar : defender;
 
   }
 
-  if (estado == linea) {
-      int angle1 = color.checkForLineaPlaca2();
-      if (angle1 == 180) {
-        salirAdelante(0);
-      else if (checkUltrasonicos() && ultrasonicoD.getDistancia < 50)
-        salirAdelante(-90);
-      else if (checkUltrasonicos() && ultrasonicoI.getDistancia < 50)
-        salirAdelante(90);
-     } else {
-        estado = defender;
-    }
 
-  }
+//200
 
+
+    //Verificar si está muy lejos de la portería 
+ 
+
+  //Si está muy lejos de la portería, regresar
   if (estado == regresar) {
     //Serial.println("regresar");
     digitalWrite(Constantes::ledPin, LOW);
     buscarPorteria();
   }
 
+  //Verificar que esté en la linea de la portería
+ 
+
+  //Seguidor de línea para defender
   if (estado == defender) {
-    Serial.println("defender");
-    buscarC();
+    Serial.print("defender ");
     digitalWrite(Constantes::ledPin, HIGH);
-
-  }
-
-
-  // if (estado == linea) {
-  //   int angle1 = color.checkForLineaPlaca2();
-   
-  //    if (angle1 != -1) {
-  //     Serial.println(angle1);
-  //     digitalWrite(Constantes::ledPin, HIGH);
-      
-  //     if (angle1 == 0 || angle1 == 60 || angle1 == -60) {
-  //      flagAdelante = true;
-  //      //salirLinea(angle1, 200);
-
-  //     } else {
-  //       salirLinea(angle1, 500);
-  //     }
-
-
-  //   } else {
-  //     digitalWrite(Constantes::ledPin, LOW);
-  //   }
-
-  //   estado = inicio;
-
-
-  // }
-
-  // if (estado == inicio) {
-  //   actualizarPorterias();
-  //   int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();   
-  //   estado = (flagAdelante && y1 > 95) ? salir : regresar;
-  
-  // }
-
-
-  if (estado == salir) {
-    Serial.println("salir");
-    //buscar();
+    // if (detector() > 5 && abs(aroIR.getAngulo()) < 20) //Si tiene posesión
+    //   sacar();
+    // else
+      buscarC();
   }
 
 
@@ -162,6 +132,9 @@ void loop() {
     tests();
   }
 
+  if (estado == detener) {
+    alinear();
+  }
 
 
 }
