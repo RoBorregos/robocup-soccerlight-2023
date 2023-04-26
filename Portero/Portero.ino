@@ -77,9 +77,14 @@ void setup() {
 //LOOP-------------------------------------------------------
 void loop() {
   current_time = millis();
-  pid.setKP(0.03);
+  pid.setKP(0.02);
   atacar = amarillo;
   estado = inicio;
+
+  //Calibrar camara
+  //Calibrar fotos
+  //Cambiar color
+  //Cambiar lado a atacar
 
   // long tiempoInicial = micros();
   // long tiempoInicio = -1;
@@ -99,7 +104,7 @@ void loop() {
   }
 
   if (estado == linea) {
-      if (color.checkPlacaDelantera() || ultrasonico.getDistancia() < 8) 
+      if (color.checkPlacaDelantera() || ultrasonico.getDistancia() < 9) 
         salirAdelante(0);
   
       else 

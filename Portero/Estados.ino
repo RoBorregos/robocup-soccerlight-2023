@@ -184,8 +184,7 @@ void buscarC() {
     if (abs(angulo) < 15 || abs(componente) < 2) 
       alinear();
     else 
-        (angulo > 0)? seguidorD(componente) : seguidorI(componente);
-
+        (aroIR.getAnguloSinFiltro() > 0)? seguidorD(componente) : seguidorI(componente);
 
     
 }
@@ -197,7 +196,7 @@ void salirAdelante(int angle) {
   unsigned long ms2 = millis();
   aroIR.actualizarDatos2();
     double angulo = aroIR.getAngulo();
-    
+
   while ((millis() - ms2) < 300) {
    
     gyro.readValues();  
@@ -286,10 +285,6 @@ double getComponente() {
   return strX;
 }
 
-//Calcular el valor medio de los fotos
-double getMid(double verde, double blanco) {
-  return (verde + (blanco - verde)/2);
-}
 
 
 
@@ -316,11 +311,11 @@ void tests() {
       //  Serial.println(gyro.getYaw());
 
 //FOTO TRANSISTORES____________________________________
-Serial.print("D: ");
-Serial.print(color.getValor(2, 2));
-Serial.print("\t\t");
-Serial.print("I: ");
-Serial.println(color.getValor(0, 1));
+// Serial.print("D: ");
+// Serial.print(color.getValor(2, 2));
+// Serial.print("\t\t");
+// Serial.print("I: ");
+// Serial.println(color.getValor(0, 1));
 
 
 //ANALOGO
@@ -330,11 +325,14 @@ Serial.println(color.getValor(0, 1));
 
 
 //ARO-IR ____________________________________
-    //    aroIR.actualizarDatos2();
-    //    double angulo = aroIR.getAngulo();
-    //    Serial.println(angulo);
-    //    double str = aroIR.getStrength();
-    //    Serial.println(str);
+       aroIR.actualizarDatos2();
+       double angulo = aroIR.getAngulo();
+       double str = aroIR.getStrength();
+       Serial.print(angulo);
+       Serial.print("\t\t");
+       Serial.print(aroIR.getAnguloSinFiltro());
+       Serial.print("\t\t");
+       Serial.println(str);
 //SERIAL ____________________________________
 //  if (Serial1.available()) {
 //        input = Serial1.readStringUntil('\n');

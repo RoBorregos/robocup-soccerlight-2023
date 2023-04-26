@@ -10,7 +10,7 @@ void buscar() {
   if (str == 0) {
     motoresRobot.apagarMotores();
     return;
-  } else if (str > 60 && abs(angulo) <= 90) {
+  } else if (str > 70 && abs(angulo) <= 70) {
     // esc.writeMicroseconds(800);
     dribbler.prender();
   } else {
@@ -87,7 +87,7 @@ void buscar() {
 void gol() {
   actualizarPorterias();    
   int px = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
-  int y1 = (atacar == amarillo) ? porteriaAmarilla.getY() : porteriaAzul.getY();
+  int alto = (atacar == amarillo) ? porteriaAmarilla.getAlto() : porteriaAzul.getAlto();
   int change = correccionesImu();
 
   Serial.print("GOL\t\t");
@@ -98,7 +98,7 @@ void gol() {
   } else if (px < 10 || px > 310){
       motoresRobot.movimientoLinealCorregido(150*lastP, Constantes::velocidades, change, gyro.isRight());
   } else {
-      atacarGol(px,y1); 
+      atacarGol(px,alto); 
   }
 
 
@@ -115,7 +115,7 @@ void atacarGol(int px,int y1) {
   int change = correccionesImu();
 
   //Movimientos para cuando esté muy cerca a la portería --> giros más bruscos
-  if (y1 > 90) {
+  if (y1 > 60) {
     dribbler.apagar();
   }
 
@@ -124,7 +124,7 @@ void atacarGol(int px,int y1) {
 
   }
 
-  if (y1 > 110 && atacarE < 100) {
+  if (y1 > 70 && atacarE < 100) {
     atacarE++;
      
     bool r = gyro.isRight();
@@ -168,7 +168,7 @@ void atacarGol(int px,int y1) {
     }
 
     //Flag
-    if (y1 <= 100)
+    if (y1 <= 70)
       atacarE = 0;
 
   }
@@ -182,6 +182,11 @@ int correccionesImu() {
   gyro.readValues();
   int change = pid.calcularError(0, gyro.getYaw(), Constantes::velocidades);
   return change;
+}
+
+void alinear() {
+  int change = correccionesImu();
+  motoresRobot.giro(change, gyro.isRight());
 }
 
 
@@ -206,17 +211,36 @@ int correccionesImuTarget(int target) {
 
 //Moverse en dirección contraria a la linea detectada
 void salirLinea() {
-  int angle1 = color.checkForLineaPlaca();
-  if (ultrasonico.getDistancia() < 50){
-    aroIR.actualizarDatos();
-    double angulo = aroIR.getAngulo();
-    angle1 = (angulo > 0) ? 45 : -45;
+  // if (ultrasonico.getDistancia() < 40){
+  //   aroIR.actualizarDatos();
+  //   double angulo = aroIR.getAngulo();
+  //   angle1 = (angulo > 0) ? 45 : -45;
+  // }
+  
+  int alto = (atacar == amarillo) ? porteriaAmarilla.getAlto() : porteriaAzul.getAlto();
+  int angle1 = 0;
+  int angle2 = color.placasAtras();
+  bool del = color.checkPlacaDelantera();
+  int t = 350;
+
+  if (alto > 75)
+    angle1 = 180;
+
+  else if (angle2 != -1 && del) 
+    angle1 = (180 + angle2)/2;
+
+  else if (color.checkPlacaDelantera()) {
+    angle1 = 180;
+    t = 400;
   }
+  else 
+    angle1 = angle2;
+  
 
   int change = correccionesImu();
   unsigned long ms2 = millis();
 
-  while ((millis() - ms2) < 500) {
+  while ((millis() - ms2) < t) {
     gyro.readValues();
     motoresRobot.movimientoLinealCorregido(angle1, Constantes::velocidades, change, gyro.isRight());
   }
@@ -266,15 +290,17 @@ void actualizarPorterias() {
 bool inLinea() {
   int angle1 = color.checkForLineaPlaca();
     Serial.println(angle1);
+  int alto = (atacar == amarillo) ? porteriaAmarilla.getAlto() : porteriaAzul.getAlto();
 
-    if (ultrasonico.getDistancia() < 15) 
-      angle1 = 0;
+  
 
-    if (angle1 != -1) {
+    // if (ultrasonico.getDistancia() < 10) 
+    //   angle1 = 0;
+
+    if (angle1 != -1 || (alto > 90)) {
       Serial.println("lineaa");
       digitalWrite(Constantes::led, HIGH);
       return true;
-
     } else {
       digitalWrite(Constantes::led, LOW);
       Serial.println("nada");
@@ -288,7 +314,7 @@ void iniciarObjetos() {
   pid.setKP(0.2);
   pid.setMinToMove(40);
   gyro.iniciar();
-  aroIR.iniciar();
+  aroIR.iniciar(&current_time);
   color.iniciar();
   aroIR.actualizarDatos();
   color.calibrar();
@@ -331,8 +357,13 @@ void voltear() {
 
 //__________________________________________________________-Para el estado de pruebas
 void tests() {
+//Placas
+//Serial.println(color.placasAtras());
 //DRIBBLER
-//dribbler.prender();
+dribbler.prender();
+delay(2000);
+dribbler.apagar();
+delay(2000);
 //  esc.writeMicroseconds(780);
 
 
@@ -385,17 +416,17 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-      motoresRobot.setAllMotorSpeed(Constantes::velocidades);
-      motoresRobot.mover1();
-      delay(1000);
-      motoresRobot.mover2();
-      delay(1000);
-      motoresRobot.mover3();
+      // motoresRobot.setAllMotorSpeed(Constantes::velocidades);
+      // motoresRobot.mover1();
+      // delay(1000);
+      // motoresRobot.mover2();
+      // delay(1000);
+      // motoresRobot.mover3();
 
 
   //MOVIMIENTOLINEALCORREGIDO___________________
-  //      int change = correccionesImu();
-  //      motoresRobot.movimientoLinealCorregido(0, velocidades, change, gyro.isRight());
+       int change = correccionesImu();
+       motoresRobot.movimientoLinealCorregido(0, Constantes::velocidades, change, gyro.isRight());
 
 
 }

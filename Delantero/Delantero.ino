@@ -19,7 +19,7 @@
 
 //Objetos
 SingleEMAFilter<int> filterAnalogo(0.6);
-Motores motoresRobot(6, 25, 26, 5, 28, 27, 4, 30, 29);    //robot bno
+Motores motoresRobot(5, 28, 27, 6, 25, 26, 4, 30, 29);    //robot bno
 BNO gyro;
 
 AroIR aroIR;
@@ -28,7 +28,7 @@ Color color;
 Porteria porteriaAzul;
 Porteria porteriaAmarilla;
 Dribbler dribbler(7);
-Ultrasonico ultrasonico(40,38);
+Ultrasonico ultrasonico(11,2);
 
 
 enum Estados {
@@ -37,6 +37,7 @@ enum Estados {
         hasPelota,
         golPorteria,
         salir,
+        detener,
         nada
 };
 
@@ -50,6 +51,8 @@ enum Estados {
 int lastP = 1;
 int last = 1;
 int atacarE = 1;
+unsigned long current_time = 0;
+
 
 Lados atacar = azul;
 Estados estado;
@@ -72,13 +75,14 @@ void setup() {
     // delay(1500); 
 
   //delay(1600);
-  //voltear();          //Verificar si el robot inició volteado y corregirlo
+  voltear();          //Verificar si el robot inició volteado y corregirlo
  
 }
 
 
 //LOOP-------------------------------------------------------
 void loop() {
+  current_time = millis();
 
   //Estado inicial
   estado = nada;
@@ -116,6 +120,10 @@ void loop() {
   //Pruebas
   if (estado == nada) {
    tests();
+  }
+
+  if (estado == detener) {
+    alinear();
   }
 
 }
