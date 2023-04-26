@@ -346,11 +346,11 @@ void tests() {
 
 
   //ARO-IRRRR________________________________
-    aroIR.actualizarDatos();
-    double angulo = aroIR.getAngulo();
-    Serial.print(angulo);
-    Serial.print("\t\t");
-    Serial.println(aroIR.getStrength());
+    // aroIR.actualizarDatos();
+    // double angulo = aroIR.getAngulo();
+    // Serial.print(angulo);
+    // Serial.print("\t\t");
+    // Serial.println(aroIR.getStrength());
 
     //     if (Serial2.available()) {
     //       input = Serial2.readStringUntil('\n');
@@ -385,12 +385,12 @@ void tests() {
 
 
   //MOTORESS INDIVIDUAL______________________________________
-      // motoresRobot.setAllMotorSpeed(Constantes::velocidades);
-      // motoresRobot.mover1();
-      // delay(1000);
-      // motoresRobot.mover2();
-      // delay(1000);
-      // motoresRobot.mover3();
+      motoresRobot.setAllMotorSpeed(Constantes::velocidades);
+      motoresRobot.mover1();
+      delay(1000);
+      motoresRobot.mover2();
+      delay(1000);
+      motoresRobot.mover3();
 
 
   //MOVIMIENTOLINEALCORREGIDO___________________

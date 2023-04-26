@@ -3,7 +3,7 @@ void iniciarObjetos(){
   pinMode(Constantes::ledPin, OUTPUT);
   motoresRobot.iniciar();
   gyro.iniciar();
-  aroIR.iniciar2();
+  aroIR.iniciar2(&current_time);
   aroIR.actualizarDatos2();
   pid.setKP(Constantes::kP);
   pid.setMinToMove(40);
@@ -12,13 +12,8 @@ void iniciarObjetos(){
   ultrasonicoD.iniciar();
   ultrasonicoI.iniciar();
   aroIR.setOffset(Constantes::offsetAro);
-
   color.calibrar();
 
-  // if (Constantes::velocidades > 120) {
-  //   pid.setAngle(120);
-  //   pid.setKP(0.1);
-  // }
 }
 
 //Verificar si se debe voltear
@@ -50,58 +45,44 @@ bool checkUltrasonicos() {
 void buscarPorteria(){
   actualizarPorterias();
   int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
-  int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
   int largo = (atacar == amarillo) ? porteriaAzul.getLargo() : porteriaAmarilla.getLargo();
-
+  int alto = (atacar == amarillo) ? porteriaAzul.getAlto() : porteriaAmarilla.getAlto();
   int change = correccionesImu();
-
-  
-  int error = x1 - 160;
-//    Serial.print("x: ");
-//    Serial.println(x1);
     
+    int error = x1 - 160;
+
     double kP = 0.375;
     int vel = Constantes::velocidades;
     if (ultrasonico.getDistancia() < 60)
         vel *= 0.85;
 
     int ang = 180;
+
+    // Si no ve la portería
     if (x1 == -1){
       ang = (ultrasonicoD.getDistancia() < ultrasonicoI.getDistancia()) ? -55 : 55;
-      //ang = 0;
-    } else if (largo <  180) { // de acuerdo a las detecciones de que lado esta ir hacia la direcci[on y checar la prioridad conel otro if para saber si te arruina cuando estas lejos]
 
-    }
-    else if (y1 > 60 && ((ultrasonicoD.getDistancia() < Constantes::ultrasonicoSalir || ultrasonicoI.getDistancia() < Constantes::ultrasonicoSalir))) {
+    //Si está muy lejos de la portería
+    } else if (alto < 85) {
+        if (abs(error) < 0)
+           180;
+        else {
+          ang = (error > 0)? 180 - (error*kP) : -180 - (error*kP);
+          ang *= -1;
+        }
+
+    //Si está cerca pero muy a los lados
+    } else { 
+      if (largo <  190)  // de acuerdo a las detecciones de que lado esta ir hacia la direcci[on y checar la prioridad conel otro if para saber si te arruina cuando estas lejos]
+      ang = (x1 > 160) ? -90 : 90;
+
+      if (alto > 50 && ((ultrasonicoD.getDistancia() < Constantes::ultrasonicoSalir || ultrasonicoI.getDistancia() < Constantes::ultrasonicoSalir))) {
       //ang = (x1 > 160) ? -45 : 45;
       ang = (ultrasonicoD.getDistancia() < ultrasonicoI.getDistancia()) ? -90 : 90;
       vel = Constantes::velocidades;
-    } else if (abs(error) < 10) {
-      //Serial.println("back");
-      ang = 180;
-    } else {
-      ang = (error > 0)? 180 - (error*kP) : -180 - (error*kP);
-      ang *= -1;
-      //Serial.println(ang);
+      }
     }
 
-
-  // int ang = 180;
-  // Serial.println(x1);
-  //   if (x1 == -1) {
-  //     ang = 0;
-  //     Serial.println("No hay porteria");
-  //   } else if (x1 < 80) {
-  //     ang = 135;
-  //     Serial.println("Ir a la derecha");
-  //   } else if (x1 > (240)) {
-  //     ang = -135;
-  //     Serial.println("Ir a la izquierda");
-  //   } else {
-  //     ang = 180;
-  //     Serial.println("Ir atras");
-  //   }
-      
       motoresRobot.movimientoLinealCorregido(ang-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
 
 }
@@ -111,7 +92,6 @@ void buscarPorteria(){
 int correccionesImu() {
   gyro.readValues();
   int change = pid.calcularError(0, gyro.getYaw(), Constantes::velocidades);
-
   return change;
 }
 
@@ -187,11 +167,9 @@ void buscarC() {
   double angulo = aroIR.getAngulo();
   double distancia = ultrasonico.getDistancia();
   actualizarPorterias();
+
   int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
   int largo = (atacar == amarillo) ? porteriaAzul.getLargo() : porteriaAmarilla.getLargo();
-//  Serial.println(largo);
-  // Serial.print("\t\t");
-  // Serial.println(x1);
 
 
   if (aroIR.getStrength() == 0) {
@@ -200,36 +178,15 @@ void buscarC() {
   }
 
   bool derecha = true;
-  // if (largo < 120 ) {
-  //  // && ((x1 > 160 && angulo >= 0) || (x1 < 160 && angulo <= 0))
-  //   if (x1 > 200) 
-  //     seguidorI();
-  //   else if (x1 < 120)
-  //     seguidorD();
-  
-
-  //     //motoresRobot.apagarMotores();
-
-  // } else {
-      Serial.println(getComponente());
-
-    if (abs(angulo) < 15 || abs(getComponente()) < 2) 
+ 
+      //Serial.println(getComponente());
+    double componente = getComponente();
+    if (abs(angulo) < 15 || abs(componente) < 2) 
       alinear();
     else 
-        (angulo > 0)? seguidorD() : seguidorI();
-
-      //angulo = aroIR.getAngulo();
-      
-      // if (angulo < 0)
-      //   seguidorD();
-      // else 
-      //   seguidorI();
-
-      
-    
+        (angulo > 0)? seguidorD(componente) : seguidorI(componente);
 
 
-  //}
     
 }
 
@@ -238,29 +195,66 @@ void buscarC() {
 void salirAdelante(int angle) {
   int change = correccionesImu();
   unsigned long ms2 = millis();
-
-  while ((millis() - ms2) < 250) {
+  aroIR.actualizarDatos2();
+    double angulo = aroIR.getAngulo();
+    
+  while ((millis() - ms2) < 300) {
+   
     gyro.readValues();  
-    motoresRobot.movimientoLinealCorregido(angle-gyro.getYaw(), Constantes::velMin+20, change, gyro.isRight());
+    angle = (angulo > 0) ? min(35, angulo) : max(-35, angulo);
+    motoresRobot.movimientoLinealCorregido(angle-gyro.getYaw(), Constantes::velMin, change, gyro.isRight());
   }
 
 }
 
 
 
-double getErrorVelocidades(int signo) {
+
+
+void alinear() {
+  int change = correccionesImu();
+  motoresRobot.giro(change, gyro.isRight());
+}
+
+//Seguidor de linea (a la derecha)
+void seguidorD(double componente) {
+  pid.setKP(0.04);
+
+  double k = 0.15; //0.2   a  110
+  Serial.println("D");
+  int vel = getErrorVelocidades(componente);
+  int change = correccionesImu();
+  int lectura = color.getValor(2, 2); //Foto transistor 2 placa 2 (derecha)
+  double error = 90 + (Constantes::fotoDerecha-lectura)*k;
+  
+  motoresRobot.movimientoLinealCorregido(error-gyro.getYaw(), vel, change, gyro.isRight());
+
+}
+
+//Seguidor de linea (a la izquierda)
+void seguidorI(double componente) {
+  pid.setKP(0.04);
+  double k = 0.15;
+  Serial.println("I");
+  int change = correccionesImu();
+  int lectura = color.getValor(0, 1); //Foto transistor 1 placa 0 (izquierda)
+  double error = -90 - (Constantes::fotoIzquierda-lectura)*k;
+  int vel = getErrorVelocidades(componente);
+  motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), vel, change, gyro.isRight());
+}
+
+//Obtener la velocidad para llegar a la pelota
+double getErrorVelocidades(double componente) {
   aroIR.actualizarDatos2();
   double angulo = aroIR.getAngulo();
   double k = 0.2;
   double str = aroIR.getStrength();
   str = min(90-str, 50);
 
-  double strX = (angulo > 0) ? (str)*cos((90-angulo) * PI / 180) : (str)*cos((-90-angulo) * PI / 180);
-
   if (abs(angulo) > 90) angulo = 90;
   angulo = map(abs(angulo), 0, 90, 0, 50);
 
-  double errorFinal = (strX + angulo);
+  double errorFinal = (componente + angulo);
   errorFinal = k*errorFinal;
   int vel = min(errorFinal + Constantes::velMin,Constantes::velMax);
   
@@ -288,43 +282,8 @@ double getComponente() {
   double strX = (angulo > 0) ? (str)*sin((angulo) * PI / 180) : (str)*sin((angulo) * PI / 180);
 
   if (abs(angulo) > 90) angulo = 90;
-
   
   return strX;
-}
-
-
-void alinear() {
-  int change = correccionesImu();
-  motoresRobot.giro(change, gyro.isRight());
-}
-
-//Seguidor de linea (a la derecha)
-void seguidorD() {
-  pid.setKP(0.04);
-
-  double k = 0.15; //0.2   a  110
-  Serial.println("D");
-  int vel = getErrorVelocidades(1);
-  //pid.setKP(0.09);
-  int change = correccionesImu();
-  int lectura = color.getValor(2, 2); //Foto transistor 2 placa 2 (derecha)
-  double error = 90 + (Constantes::fotoDerecha-lectura)*k;
-  
-  motoresRobot.movimientoLinealCorregido(error-gyro.getYaw(), vel, change, gyro.isRight());
-
-}
-
-//Seguidor de linea (a la izquierda)
-void seguidorI() {
-  pid.setKP(0.04);
-  double k = 0.15;
-  Serial.println("I");
-  int change = correccionesImu();
-  int lectura = color.getValor(0, 1); //Foto transistor 1 placa 0 (izquierda)
-  double error = -90 - (Constantes::fotoIzquierda-lectura)*k;
-  int vel = getErrorVelocidades(-1);
-  motoresRobot.movimientoLinealCorregido(error - gyro.getYaw(), vel, change, gyro.isRight());
 }
 
 //Calcular el valor medio de los fotos
@@ -356,7 +315,6 @@ void tests() {
       //   gyro.readValues();
       //  Serial.println(gyro.getYaw());
 
-
 //FOTO TRANSISTORES____________________________________
 Serial.print("D: ");
 Serial.print(color.getValor(2, 2));
@@ -385,14 +343,14 @@ Serial.println(color.getValor(0, 1));
 
 
 //CAMARA____________________________________
-//     actualizarPorterias();
-//     Serial.println(porteriaAmarilla.getX());
+    // actualizarPorterias();
+    // Serial.println(porteriaAmarilla.getAlto());
 //SERIAL
-//     if (Serial2.available()) {
-//          //Serial.println("serial1");
-//          String input = Serial2.readStringUntil('\n');
-//          Serial.println(input);
-//      }
+    // if (Serial2.available()) {
+    //      //Serial.println("serial1");
+    //      String input = Serial2.readStringUntil('\n');
+    //      Serial.println(input);
+    //  }
 
 
 

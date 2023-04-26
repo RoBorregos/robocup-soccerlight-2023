@@ -81,7 +81,7 @@ void setup() {
 void loop() {
 
   //Estado inicial
-  estado = buscarPelota;
+  estado = nada;
 
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
