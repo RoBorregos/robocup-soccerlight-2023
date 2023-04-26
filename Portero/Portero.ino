@@ -53,7 +53,7 @@ Estados estado;
 bool flagAdelante = false;
 
 
- 
+unsigned long current_time = 0;
 
 //SETUP------------------------------------------------------
 void setup() {
@@ -62,10 +62,12 @@ void setup() {
   Serial2.setTimeout(100);
   Serial.setTimeout(100);
 
+  current_time = millis();
+
 
   iniciarObjetos();
   delay(1500);
-  //voltear();
+  voltear();
   Serial.println("SETUP DONE");
 
 }
@@ -74,42 +76,49 @@ void setup() {
 //Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
-  pid.setKP(0.03);
+  current_time = millis();
+  pid.setKP(0.02);
   atacar = amarillo;
-  estado = linea;
+  estado = inicio;
+
+  //Calibrar camara
+  //Calibrar fotos
+  //Cambiar color
+  //Cambiar lado a atacar
+
+  // long tiempoInicial = micros();
+  // long tiempoInicio = -1;
+  // long tiempoLinea = -1;
+  // long tiempoRegresar = -1;
+  // long tiempoDefender = -1;
+  // long despuesDefender = -1;
+
+  actualizarPorterias();
+  int largo = (atacar == amarillo) ? porteriaAzul.getLargo() : porteriaAmarilla.getLargo();
+  int alto = (atacar == amarillo) ? porteriaAzul.getAlto() : porteriaAmarilla.getAlto();
+  int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
+
+  if (estado == inicio) {
+    estado = (alto < 75 || largo < 190) ? regresar : linea;
+    //tiempoInicio = micros() - tiempoInicial;
+  }
 
   if (estado == linea) {
-      if (color.checkForLineaPlaca2() == 180 || ultrasonico.getDistancia() < 20) 
+      if (color.checkPlacaDelantera() || ultrasonico.getDistancia() < 9) 
         salirAdelante(0);
   
       else 
-        estado = inicio;
+        estado = defender;
+
+   // tiempoLinea = micros() - tiempoInicial;
 
   }
-
-  if (estado == inicio) {
-    actualizarPorterias();
-    int y1 = (atacar == amarillo) ? porteriaAzul.getY() : porteriaAmarilla.getY();
-    int largo = (atacar == amarillo) ? porteriaAzul.getLargo() : porteriaAmarilla.getLargo();
-
-    //estado = (y1 < 75 || color.checkForLineaPlaca2() != 0) ? regresar : linea;
-    Serial.println(color.checkForLineaPlaca2());
-    Serial.println(y1);
-    estado = (y1 < 70 || largo < 190) ? regresar : defender;
-
-  }
-
-
-//200
-
-
-    //Verificar si está muy lejos de la portería 
- 
 
   //Si está muy lejos de la portería, regresar
   if (estado == regresar) {
-    //Serial.println("regresar");
     digitalWrite(Constantes::ledPin, LOW);
+   // tiempoRegresar = micros() - tiempoInicial;
+
     buscarPorteria();
   }
 
@@ -118,14 +127,40 @@ void loop() {
 
   //Seguidor de línea para defender
   if (estado == defender) {
-    Serial.print("defender ");
+    //Serial.print("defender ");
     digitalWrite(Constantes::ledPin, HIGH);
     // if (detector() > 5 && abs(aroIR.getAngulo()) < 20) //Si tiene posesión
     //   sacar();
     // else
-      buscarC();
-  }
+     // tiempoDefender = micros() - tiempoInicial;
 
+      buscarC();
+     // despuesDefender = micros() - tiempoInicial;
+
+
+  }
+  // Serial.print("t0: ");
+  // Serial.print(tiempoInicial);
+  //   Serial.print("\t");
+
+  // Serial.print("tInicio: " );
+  // Serial.print(tiempoInicio);
+  //   Serial.print("\t");
+
+  // Serial.print(" tLinea: " );
+  // Serial.print(tiempoLinea);
+  //   Serial.print("\t");
+
+  // Serial.print(" tRegresar: " );
+  // Serial.print(tiempoRegresar);
+  //   Serial.print("\t");
+
+  // Serial.print(" tDefender: " );
+  // Serial.print(tiempoDefender);
+  //  Serial.print("\t\t");
+
+  // Serial.print(" tDespues: " );
+  // Serial.println(despuesDefender);
 
   //Pruebas
   if (estado == nada) {
