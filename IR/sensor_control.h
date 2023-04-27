@@ -4,16 +4,15 @@
 #include "Arduino.h"
 #define IR_NUM 12
 
-// ハードウェア依存の変数
 const uint8_t   SensorPins[IR_NUM]  = {14, 7, 16, 5, 17, 10, 2, 9, 6, 8, 15, 3};
 const float     unitVectorX[IR_NUM] = {0.000, 0.500, 0.866, 1.000, 0.866, 0.500, 0.000, -0.500, -0.866, -1.000, -0.866, -0.500};
 const float     unitVectorY[IR_NUM] = {1.000, 0.866, 0.500, 0.000, -0.500, -0.866, -1.000, -0.866, -0.500, 0.000, 0.500, 0.866};
 const float     deltaPulseWidth     = 2.0;
 
 typedef struct {
-    int activeSensors;      // 反応したセンサの個数
-    int maxPulseWidth;      // 最大のセンサ値
-    int maxSensorNumber;    // 最大の値を観測したセンサの番号
+    int activeSensors;      
+    int maxPulseWidth;      
+    int maxSensorNumber;    
     double avgPulseWidth;
 } sensorInfo_t;
 

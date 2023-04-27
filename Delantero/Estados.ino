@@ -10,9 +10,9 @@ void buscar() {
   if (str == 0) {
     motoresRobot.apagarMotores();
     return;
-  } else if (str > 70 && abs(angulo) <= 70) {
+  } else if (str > 70 && abs(angulo) <= 90) {
     // esc.writeMicroseconds(800);
-    dribbler.prender();
+    dribbler.prender(900);
   } else {
     //esc.writeMicroseconds(0);
     dribbler.apagar();
@@ -359,12 +359,12 @@ void voltear() {
 void tests() {
 //Placas
 //Serial.println(color.placasAtras());
+
 //DRIBBLER
-dribbler.prender();
-delay(2000);
-dribbler.apagar();
-delay(2000);
-//  esc.writeMicroseconds(780);
+// dribbler.prender(900);
+// delay(2000);
+// dribbler.apagar();
+// delay(2000);
 
 
 // ULTRASONICO
@@ -411,8 +411,9 @@ delay(2000);
 //  }
 
   //IMU______________________________________
-        // gyro.readValues();
-        // Serial.println(gyro.getYaw());
+        gyro.readValues();
+        Serial.print(gyro.getYaw());
+        gyro.displayCalStatus();
 
 
   //MOTORESS INDIVIDUAL______________________________________
@@ -425,8 +426,8 @@ delay(2000);
 
 
   //MOVIMIENTOLINEALCORREGIDO___________________
-       int change = correccionesImu();
-       motoresRobot.movimientoLinealCorregido(0, Constantes::velocidades, change, gyro.isRight());
+      //  int change = correccionesImu();
+      //  motoresRobot.movimientoLinealCorregido(0, Constantes::velocidades, change, gyro.isRight());
 
 
 }
