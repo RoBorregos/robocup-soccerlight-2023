@@ -10,18 +10,21 @@ void buscar() {
   if (str == 0) {
     motoresRobot.apagarMotores();
     return;
-  } else if (str > 70 && abs(angulo) <= 90) {
-    // esc.writeMicroseconds(800);
-    dribbler.prender(900);
+  } else if (str > 80 && abs(angulo) <= 70) {
+    dribbler.prender(Constantes::velDribbler);
   } else {
-    //esc.writeMicroseconds(0);
     dribbler.apagar();
   }
 
   int result = -1000;
-  
 
-    if (abs(angulo) <= 25) {
+    if (str < 40 && abs(angulo) <= 90) {
+        result = angulo;
+    } else {
+
+    if (abs(angulo <= 100 && abs(angulo) >= 80 && ultrasonico.getDistancia() < 40 && str < 65))
+      result = (angulo > 0) ? 45 : -45;
+    else if (abs(angulo) <= 30) {
       result = 0;
     } else if (abs(angulo) <= 50) {
       result = (angulo > 0) ? 90 : -90;
@@ -35,8 +38,7 @@ void buscar() {
       result = (angulo > 0) ? -140 : 140;
     }
 
-  
-  if (str < 30) {
+    if (str < 30) {
     if (abs(result) <= 135)
       result = result * 0.7;
  
@@ -44,36 +46,37 @@ void buscar() {
     if (abs(result) <= 135)
       result = result * 0.8;
     
-  } //else if (str < 60 && abs(angulo) < 110 && abs(angulo) > 70 && ultrasonico.getDistancia() < 30)
-   //result = 0;
+  } 
 
-  //double distancia = map(str, 10,100, 0, 10);
+
+    } 
+
+    
+
+  
+  
+
+  //Regular velocidad
   double distancia = str*0.1;
- // double val = 1 - pow(EULER,(0.9*(distancia-10)));
   double val = 1.087 + 1/((distancia-11.5));
   int velNuevas = Constantes::velocidades * val;
-
   velNuevas = max(Constantes::velMin, velNuevas);
-  // if (velNuevas < 110){
-  //   pid.setKP(0.1);
-  //   //pid.setAngle(90);
-  // } else   {
-  //   pid.setKP(0.09);
-  //   pid.setAngle(120);
-  // }
 
-  //Serial.print("factor: ");
-  //Serial.println(distancia);
+  int alto = (atacar == amarillo) ? porteriaAmarilla.getAlto() : porteriaAzul.getAlto();
 
-  // Serial.print("velocidad: ");
-  //Serial.println(velNuevas);
+  if (alto > 60) {
+    velNuevas *= 0.8;
+  }
+  
 
+//Verificar y mover motores
   if (result == -1000) 
     motoresRobot.apagarMotores();
   else 
     motoresRobot.movimientoLinealCorregido(result - gyro.getYaw(), velNuevas, change, gyro.isRight());
 
 
+//Ultima posición en que se vió
   if (angulo > 0)
     last = 1;
   else
@@ -88,6 +91,7 @@ void gol() {
   actualizarPorterias();    
   int px = (atacar == amarillo) ? porteriaAmarilla.getX() : porteriaAzul.getX();
   int alto = (atacar == amarillo) ? porteriaAmarilla.getAlto() : porteriaAzul.getAlto();
+  int largo = (atacar == amarillo) ? porteriaAmarilla.getLargo() : porteriaAzul.getLargo();
   int change = correccionesImu();
 
   Serial.print("GOL\t\t");
@@ -95,13 +99,15 @@ void gol() {
   // Si no ve la porteria o si está muy en las esquinas
   if (px == -1) {
       motoresRobot.movimientoLinealCorregido(170*lastP, Constantes::velocidades, change, gyro.isRight());
-  } else if (px < 10 || px > 310){
+  } else if (largo < 65 && alto > 90){
+
       motoresRobot.movimientoLinealCorregido(150*lastP, Constantes::velocidades, change, gyro.isRight());
   } else {
       atacarGol(px,alto); 
   }
 
 
+  //Ultima posición en que se vió
   if (px < 160) 
       lastP = -1;
   else 
@@ -113,9 +119,10 @@ void gol() {
 //Movimientos específicos para atacar a la portería
 void atacarGol(int px,int y1) {
   int change = correccionesImu();
+  
 
   //Movimientos para cuando esté muy cerca a la portería --> giros más bruscos
-  if (y1 > 60) {
+  if (y1 > 76) {
     dribbler.apagar();
   }
 
@@ -178,12 +185,15 @@ void atacarGol(int px,int y1) {
 
 
 //Devolver el error a corregir
-int correccionesImu() {
+double correccionesImu() {
   gyro.readValues();
-  int change = pid.calcularError(0, gyro.getYaw(), Constantes::velocidades);
+  
+  double change = pid.calcularError(0, gyro.getYaw(), Constantes::velocidades);
+ 
   return change;
 }
 
+//Posición 0 con giroscopio
 void alinear() {
   int change = correccionesImu();
   motoresRobot.giro(change, gyro.isRight());
@@ -192,9 +202,7 @@ void alinear() {
 
 //Devolver ángulo a corregir si se busca un ángulo específico
 int correccionesImuTarget(int target) {
-  //actualizarPorterias();
   gyro.readValues();
-  //int change = pid.calcularError(target, gyro.getYaw(), velocidades);
 
   int error = abs(target - gyro.getYaw());
   bool r = ((target - gyro.getYaw()) > 0) ? true : false;
@@ -203,7 +211,6 @@ int correccionesImuTarget(int target) {
   error = 0.9 * error;
   error = min(error, 255);
   error = map(error, 0, 255, pid.getMinToMove(), 255);
-  //Serial.println(error);
   return error;
 }
 
@@ -211,19 +218,15 @@ int correccionesImuTarget(int target) {
 
 //Moverse en dirección contraria a la linea detectada
 void salirLinea() {
-  // if (ultrasonico.getDistancia() < 40){
-  //   aroIR.actualizarDatos();
-  //   double angulo = aroIR.getAngulo();
-  //   angle1 = (angulo > 0) ? 45 : -45;
-  // }
-  
+  actualizarPorterias();
   int alto = (atacar == amarillo) ? porteriaAmarilla.getAlto() : porteriaAzul.getAlto();
   int angle1 = 0;
   int angle2 = color.placasAtras();
   bool del = color.checkPlacaDelantera();
   int t = 350;
+  
 
-  if (alto > 75)
+  if (alto > 125)
     angle1 = 180;
 
   else if (angle2 != -1 && del) 
@@ -276,7 +279,6 @@ void actualizarPorterias() {
     String input1 =  Serial2.readStringUntil('\n');
     //Serial.println(input1);
 
-    //Serial.println(input);
     if (input1[0] == 'a')
       porteriaAmarilla.actualizar(input1);
     else if (input1[0] == 'b')
@@ -289,15 +291,13 @@ void actualizarPorterias() {
 //Detectar si se está en linea o no
 bool inLinea() {
   int angle1 = color.checkForLineaPlaca();
-    Serial.println(angle1);
+  actualizarPorterias();
   int alto = (atacar == amarillo) ? porteriaAmarilla.getAlto() : porteriaAzul.getAlto();
 
-  
+  Serial.print("salir: ");
+  Serial.println(alto);
 
-    // if (ultrasonico.getDistancia() < 10) 
-    //   angle1 = 0;
-
-    if (angle1 != -1 || (alto > 90)) {
+    if (angle1 != -1 || (alto > 112)) {
       Serial.println("lineaa");
       digitalWrite(Constantes::led, HIGH);
       return true;
@@ -311,8 +311,8 @@ bool inLinea() {
 //Set up de objetos 
 void iniciarObjetos() {
   
-  pid.setKP(0.2);
-  pid.setMinToMove(40);
+  pid.setKP(Constantes::kP);
+  pid.setMinToMove(60);
   gyro.iniciar();
   aroIR.iniciar(&current_time);
   color.iniciar();
@@ -329,10 +329,7 @@ void iniciarObjetos() {
   pinMode(Constantes::analogo, INPUT);
   pinMode(Constantes::led, OUTPUT);
 
-    // esc.attach(7);
-    // delay(2000); 
-    // esc.writeMicroseconds(780); // set the motor speed to minimum
-    // delay(1500); // wait for 3 seconds
+ 
 
 }
 
@@ -344,7 +341,7 @@ void voltear() {
   actualizarPorterias();
   Serial.println(porteriaAzul.getX());
   //Verificar si se debe voltear
-  if ((atacar == amarillo && porteriaAzul.getX() != -1) || (atacar == azul && porteriaAmarilla.getX() != -1)) {
+  if ((atacar == amarillo && porteriaAzul.getLargo() > 30) || (atacar == azul && porteriaAmarilla.getLargo() > 30)) {
     gyro.setOffset(180);
     digitalWrite(Constantes::led, HIGH);
     Serial.println("Voltear");
@@ -355,7 +352,7 @@ void voltear() {
 
 
 
-//__________________________________________________________-Para el estado de pruebas
+//___________________________________________________________Para el estado de pruebas
 void tests() {
 //Placas
 //Serial.println(color.placasAtras());
@@ -377,11 +374,11 @@ void tests() {
 
 
   //ARO-IRRRR________________________________
-    // aroIR.actualizarDatos();
-    // double angulo = aroIR.getAngulo();
+    //  aroIR.actualizarDatos();
+    //  double angulo = aroIR.getAnguloSinFiltro();
     // Serial.print(angulo);
     // Serial.print("\t\t");
-    // Serial.println(aroIR.getStrength());
+    // Serial.println(aroIR.getAngulo());
 
     //     if (Serial2.available()) {
     //       input = Serial2.readStringUntil('\n');
@@ -389,31 +386,24 @@ void tests() {
   
     //  }
 
-//         double high = aroIR.getHighPass();
-//         double low = aroIR.getLowPass();
-//
-//    Serial.print(angulo);
-//    Serial.print(",\t\t");
-//    Serial.print(high);
-//    Serial.print(",\t\t");
-//    Serial.println(low);
 
 
   //CAMARA____________________________________
-//       actualizarPorterias();
-//       Serial.println(porteriaAzul.getX());
-//       Serial.println(porteriaAmarilla.getX());
+      // actualizarPorterias();
+      // Serial.print(porteriaAmarilla.getAlto());
+      // Serial.print("/t/t");
+      // Serial.println(porteriaAmarilla.getLargo());
 
 //       if (Serial2.available()) {
-//        input = Serial2.readStringUntil('\n');
+//       String input = Serial2.readStringUntil('\n');
 //       Serial.println(input);
 
 //  }
 
-  //IMU______________________________________
-        gyro.readValues();
-        Serial.print(gyro.getYaw());
-        gyro.displayCalStatus();
+  //GYRO______________________________________
+      //  gyro.readValues();
+      //  Serial.println(gyro.getYaw());
+//        gyro.displayCalStatus();
 
 
   //MOTORESS INDIVIDUAL______________________________________
@@ -426,8 +416,10 @@ void tests() {
 
 
   //MOVIMIENTOLINEALCORREGIDO___________________
-      //  int change = correccionesImu();
-      //  motoresRobot.movimientoLinealCorregido(0, Constantes::velocidades, change, gyro.isRight());
+       double change = correccionesImu();
+        Serial.print("CHange: ");
+       Serial.println(change);
+       motoresRobot.movimientoLinealCorregido(0-gyro.getYaw(), Constantes::velocidades, change, gyro.isRight());
 
 
 }

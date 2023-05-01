@@ -1,11 +1,13 @@
 #include "sensor_control.h"
 
+//Set de todos los pines
 void setAllSensorPinsInput(void) {
     for (int i = 0; i < IR_NUM; ++i) {
         pinMode(SensorPins[i], INPUT);
     }
 }
 
+//Obtener los valores directamente de los registros
 bool getSensorPin(uint8_t pin) {
     switch(pin) {
         case 0:   return PINC&(1<<0);
@@ -24,6 +26,7 @@ bool getSensorPin(uint8_t pin) {
 
 }
 
+//Obtener el ancho de pulso
 sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit) {
     sensorInfo_t sensorInfo;
 
@@ -41,19 +44,6 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
         }
     } while((micros() - startTime_us) < timeLimit);
 
-
-//        for (int i = 0; i < IR_NUM; i++) {
-//         unsigned long startTime_us = micros();
-//
-//          do {
-//            if(getSensorPin(i) == false) {
-//                pulseWidth[i] += deltaPulseWidth;
-//            }
-//            
-//          } while((micros() - startTime_us) < timeLimit); 
-//        }
-
-        
 
     sensorInfo.activeSensors    = 0; 
     sensorInfo.maxPulseWidth     = 0; 
@@ -75,6 +65,7 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
     return sensorInfo;
 }
 
+//Cálculo del vector resultante 
 vectorXY_t calcVectorXYFromPulseWidth(float *pulseWidth) {
     vectorXY_t rslt = {0, 0};
     for(int i = 0; i < IR_NUM; i++) {
@@ -85,6 +76,7 @@ vectorXY_t calcVectorXYFromPulseWidth(float *pulseWidth) {
     return rslt;
 }
 
+//Cálculo del radio y el ángulo 
 vectorRT_t calcRTfromXY(vectorXY_t *vectorXY_p) {
     vectorRT_t rslt;
     rslt.radius  = sqrt(pow(vectorXY_p->x, 2.0) + pow(vectorXY_p->y, 2.0));

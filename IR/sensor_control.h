@@ -4,6 +4,7 @@
 #include "Arduino.h"
 #define IR_NUM 12
 
+//
 const uint8_t   SensorPins[IR_NUM]  = {14, 7, 16, 5, 17, 10, 2, 9, 6, 8, 15, 3};
 const float     unitVectorX[IR_NUM] = {0.000, 0.500, 0.866, 1.000, 0.866, 0.500, 0.000, -0.500, -0.866, -1.000, -0.866, -0.500};
 const float     unitVectorY[IR_NUM] = {1.000, 0.866, 0.500, 0.000, -0.500, -0.866, -1.000, -0.866, -0.500, 0.000, 0.500, 0.866};
