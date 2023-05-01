@@ -74,35 +74,35 @@ void Imu::readValues() {
       double q2sqr = q2 * q2;
 
       // roll (x-axis rotation)
-      double t0 = +2.0 * (q0 * q1 + q2 * q3);
-      double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
-      double roll1 = atan2(t0, t1) * 180.0 / PI;
+      // double t0 = +2.0 * (q0 * q1 + q2 * q3);
+      // double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
+      // double roll1 = atan2(t0, t1) * 180.0 / PI;
 
-      // pitch (y-axis rotation)
-      double t2 = +2.0 * (q0 * q2 - q3 * q1);
-      t2 = t2 > 1.0 ? 1.0 : t2;
-      t2 = t2 < -1.0 ? -1.0 : t2;
-      double pitch1 = asin(t2) * 180.0 / PI;
+      // // pitch (y-axis rotation)
+      // double t2 = +2.0 * (q0 * q2 - q3 * q1);
+      // t2 = t2 > 1.0 ? 1.0 : t2;
+      // t2 = t2 < -1.0 ? -1.0 : t2;
+      // double pitch1 = asin(t2) * 180.0 / PI;
 
       // yaw (z-axis rotation)
       double t3 = +2.0 * (q0 * q3 + q1 * q2);
       double t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
       double yaw1 = atan2(t3, t4) * 180.0 / PI;
 
-      yaw = yaw1;
-      pitch = pitch1;
-      roll = roll1;
-//      yaw = yaw*-1;
+      yaw = yaw1*-1;
+      // pitch = pitch1;
+      // roll = roll1;
+      
 
-      if (yaw > 180) {
-        yaw = -180 + (yaw - 180);
-      }
+      
+      // yaw = yaw*-1;
+
 
       if (offset > 0) {
         yaw = (yaw > 0) ? (180 - yaw) * -1 : (-180 - yaw) * -1;
       }
 
-      right = (yaw > 0) ? true : false;
+      right = (yaw < 0) ? true : false;
 
 
     }

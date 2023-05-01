@@ -23,7 +23,9 @@
       double getMag();
       void setOffset(double off);
       bool isRight();
-      
+      void readValues2();
+      void displayCalStatus();
+      void iniciar2();
   };
 
 #endif

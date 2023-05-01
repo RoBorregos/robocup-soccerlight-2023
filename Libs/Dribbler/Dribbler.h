@@ -12,7 +12,7 @@
     public:
         Dribbler(int pin);
         void iniciar();
-        void prender();
+        void prender(int vel);
         void apagar();
         
   };

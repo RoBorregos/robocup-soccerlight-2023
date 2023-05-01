@@ -176,6 +176,8 @@ void Motores::giro(int velocidad, bool right) {
       motor2.motorAtras();
       motor3.motorAtras();
     }
+  } else {
+    apagarMotores();
   }
 
 }

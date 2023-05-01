@@ -28,8 +28,8 @@ void Porteria::actualizar(String str) {
 
     x = arr[0];
     y = arr[1];
-    h = arr[2];
-    w = arr[3];
+    w = arr[2];
+    h = data.toInt();
 
     area = w * h;
 
@@ -51,4 +51,16 @@ int Porteria::getX() {
 
 int Porteria::getColor() {
   return color;
+}
+
+int Porteria::getArea() {
+  return area;
+}
+
+int Porteria::getLargo() {
+  return w;
+}
+
+int Porteria::getAlto() {
+  return h;
 }

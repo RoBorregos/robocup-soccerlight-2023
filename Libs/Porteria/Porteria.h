@@ -18,6 +18,9 @@ class Porteria {
     int getX();
     int getY();
     int getColor();
+    int getArea();
+    int getLargo();
+    int getAlto();
     
 };
 

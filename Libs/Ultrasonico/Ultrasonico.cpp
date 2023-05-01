@@ -27,7 +27,7 @@ double Ultrasonico::getDistancia(){
 
     long t; //timepo que demora en llegar el eco
     long d; //distancia en centimetros
-    t = pulseIn(echoPin, HIGH); //obtenemos el ancho del pulso
+    t = pulseIn(echoPin, HIGH, 10000); //obtenemos el ancho del pulso
     d = t / 59;
     filterDistancia.AddValue(d);
 

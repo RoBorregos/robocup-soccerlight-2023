@@ -8,23 +8,22 @@
       const int pinBoton = 7;
       int proportion = 2.5; //BNO
       double anguloF[3] = {60, 180.0, 300};
-         double anguloF2[3] = {60, 180.0, -60};
+      double anguloF2[3] = {60, 180.0, -60};
+      double angulosAtras[2][4] = {{90,65,45,20},{-90,-65,-45,-20}};
 
   
-      //ROBOT BNO
-      // const int sig[3] = {A1, A0, A2}; // pines signal: IZQ, PRINCIPAL, DER
-      // const int sC[3] = {46, 47, 43}; // pines de 'control' ABC
-      // const int sB[3] = {45, 48, 42}; //robot bno
-      // const int sA[3] = {44, 49, 41};
-
-      
+      //ROBOT Delantero
+      const int sig[3] = {A1, A0, A2}; // pines signal: 
+      const int sC[3] = {46, 47, 43}; // pines de 'control' ABC
+      const int sB[3] = {45, 48, 42}; //robot bno
+      const int sA[3] = {44, 49, 41};
   
    
-      //ROBOT IMU
-      const int sig[3] = {A1, A0, A2}; // pines signal: IZQ, PRINCIPAL, DER
-      const int sC[3] = {40, 47, 32}; 
-      const int sB[3] = {39, 48, 42}; 
-      const int sA[3] = {38, 49, 41};
+      //ROBOT Portero
+      // const int sig[3] = {A1, A0, A2}; // pines signal: IZQ, PRINCIPAL, DER
+      // const int sC[3] = {40, 47, 32}; 
+      // const int sB[3] = {39, 48, 42}; 
+      // const int sA[3] = {38, 49, 41};
   
         
          
@@ -53,6 +52,8 @@
       double checkForLineaPlaca();
       double checkForLineaPlaca2();
       double getValor(int placa, int foto);
+      bool checkPlacaDelantera();
+      double placasAtras();
  
 
   };

@@ -135,7 +135,7 @@ double Color::checkForLineaPlaca(){
       int count = 0;
       for (int i=0; i<4; i++){
         for (int j=0; j<3; j++){
-          if (lectura(i,j) - foto[j][i] >= 60){ //15
+          if (lectura(i,j) - foto[j][i] >= 65){ //15
             degree += anguloF[j];
             count++;
             
@@ -156,6 +156,49 @@ double Color::checkForLineaPlaca(){
       
     }
 
+      double anguloIzquierda[2][4] = {{90,65,45,30},{-90,-65,-45,-30}};
+
+    double Color::placasAtras() {
+      double angulo = -1;
+      int count = 0;
+      
+      for (int i=0; i<4; i++){
+        //Placa izquierda
+          if (lectura(i,0) - foto[0][i] >= 50){ //15
+            angulo += angulosAtras[0][i];
+            count++;
+        //Placa derecha
+          } 
+          if (lectura(i,2) - foto[2][i] >= 50){
+            angulo += angulosAtras[1][i];
+            count++;
+          }
+          // if (lectura(i,1) - foto[1][i] >= 50){
+          //   angulo += 180;
+          //   count++;
+          // }
+      }
+
+      if (count > 0){
+        angulo++;
+        angulo = angulo / count;
+        return angulo;
+      }
+      else 
+        return -1; 
+
+
+    }
+
+    bool Color::checkPlacaDelantera() {
+      for (int i=0; i<4; i++){
+          if (lectura(i,1) - foto[1][i] >= 50){ //15
+            return true;
+        }
+      }
+      return false;
+    }
+    
     double Color::checkForLineaPlaca2(){
       bool placas1[] = {false, false, false};
 
