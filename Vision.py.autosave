@@ -5,10 +5,9 @@ from pyb import UART
 
 #Thresholds (LAB)
 #amarillo = ((51, 81, -34, 4, 15, 84))     #Amarillo
-amarillo = (64, 87, -1, 86, 29, 58)
+amarillo = (57, 69, 24, 67, 43, 94)
 #azul = (14, 53, 1, 40, -74, -15)       #Azul
-azul = (16, 41, 0, 33, -68, -27)
-
+azul = (14, 45, 22, 56, -63, -15)
 
 blue_led = pyb.LED(3)
 red_led = pyb.LED(1)

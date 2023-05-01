@@ -54,7 +54,7 @@ int atacarE = 1;
 unsigned long current_time = 0;
 
 
-Lados atacar = azul;
+Lados atacar = amarillo;
 Estados estado;
 
 
@@ -69,12 +69,6 @@ void setup() {
 
 
   iniciarObjetos();   //Set up de objetos
-    // esc.attach(7);
-    // delay(2000); 
-    // esc.writeMicroseconds(780); // set the motor speed to minimum
-    // delay(1500); 
-
-  //delay(1600);
   voltear();          //Verificar si el robot inició volteado y corregirlo
  
 }
@@ -84,8 +78,15 @@ void setup() {
 void loop() {
   current_time = millis();
 
+
+  /*Calibrar camara
+  Cambiar color
+  Cambiar lado a atacar
+  Estado = linea*/
+  
+
   //Estado inicial
-  estado = nada;
+  estado = linea;
 
   //Verificar si está en la línea y moverse si es necesario
   if (estado == linea) {
@@ -99,7 +100,7 @@ void loop() {
   //Revisar si se tiene posesión de la pelota
   if (estado == hasPelota) {
     aroIR.actualizarDatos();
-    estado = (detector() > 5 && abs(aroIR.getAngulo()) < 15) ? golPorteria : buscarPelota;
+    estado = (detector() >= 5 && abs(aroIR.getAngulo()) < 15) ? golPorteria : buscarPelota;
   }
 
   //Buscar la pelota
@@ -117,11 +118,15 @@ void loop() {
 
   }
 
+
+
   //Pruebas
   if (estado == nada) {
+  
    tests();
   }
 
+  //Detener para pruebas
   if (estado == detener) {
     alinear();
   }
@@ -130,7 +135,3 @@ void loop() {
 
 
 
-
-
-
-//------------------------------------------------------------------------------------ Funciones de estados -------------------------------------------------------------------------------------

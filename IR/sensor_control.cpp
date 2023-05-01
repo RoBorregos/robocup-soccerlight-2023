@@ -1,17 +1,13 @@
 #include "sensor_control.h"
 
+//Set de todos los pines
 void setAllSensorPinsInput(void) {
     for (int i = 0; i < IR_NUM; ++i) {
         pinMode(SensorPins[i], INPUT);
     }
 }
 
-/*
- デジタル読み込みの高速化のためのポート操作
- 詳しくは以下を参照
- http://www.musashinodenpa.com/arduino/ref/index.php?f=0&pos=849
- digitalRead()で一般化されていないため、ハードウェア依存の実装
- */
+//Obtener los valores directamente de los registros
 bool getSensorPin(uint8_t pin) {
     switch(pin) {
         case 0:   return PINC&(1<<0);
@@ -28,23 +24,17 @@ bool getSensorPin(uint8_t pin) {
         case 11:  return PIND&(1<<3);
     }
 
-   // return digitalRead(SensorPins[pin]);
 }
 
+//Obtener el ancho de pulso
 sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit) {
-    // 実験用データを格納する構造体
     sensorInfo_t sensorInfo;
 
-    // pulseWidth[]は加算計算用変数なので最初に初期化する
     for(int i = 0; i < IR_NUM; i++) {
         pulseWidth[i] = 0;
-    }
-
-//Todos 
-    
+    }    
 
 
-    // do-whileで時間(833us)を監視しながらセンサの読み込み
     const unsigned long startTime_us = micros();
     do {
         for (int i = 0; i < IR_NUM; i++) {
@@ -55,23 +45,9 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
     } while((micros() - startTime_us) < timeLimit);
 
 
-//        for (int i = 0; i < IR_NUM; i++) {
-//         unsigned long startTime_us = micros();
-//
-//          do {
-//            if(getSensorPin(i) == false) {
-//                pulseWidth[i] += deltaPulseWidth;
-//            }
-//            
-//          } while((micros() - startTime_us) < timeLimit); 
-//        }
-
-        
-
-    // ベクトル計算のみでセンシングを行うのであれば以下の実装は不要
-    sensorInfo.activeSensors    = 0; // ボールに反応しているセンサの個数
-    sensorInfo.maxPulseWidth     = 0; // 一番反応の強いセンサのパルス幅
-    sensorInfo.maxSensorNumber  = 0; // 一番反応の強いセンサの番号
+    sensorInfo.activeSensors    = 0; 
+    sensorInfo.maxPulseWidth     = 0; 
+    sensorInfo.maxSensorNumber  = 0; 
     sensorInfo.avgPulseWidth = 0;
     
     for(int i = 0; i < IR_NUM; i++) {
@@ -85,11 +61,11 @@ sensorInfo_t getAllSensorPulseWidth(float pulseWidth[IR_NUM], uint16_t timeLimit
         }
     }
 
-  //  sensorInfo.avgPulseWidth = sensorInfo.avgPulseWidth/sensorInfo.activeSensors;
 
     return sensorInfo;
 }
 
+//Cálculo del vector resultante 
 vectorXY_t calcVectorXYFromPulseWidth(float *pulseWidth) {
     vectorXY_t rslt = {0, 0};
     for(int i = 0; i < IR_NUM; i++) {
@@ -100,6 +76,7 @@ vectorXY_t calcVectorXYFromPulseWidth(float *pulseWidth) {
     return rslt;
 }
 
+//Cálculo del radio y el ángulo 
 vectorRT_t calcRTfromXY(vectorXY_t *vectorXY_p) {
     vectorRT_t rslt;
     rslt.radius  = sqrt(pow(vectorXY_p->x, 2.0) + pow(vectorXY_p->y, 2.0));

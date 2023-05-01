@@ -11,13 +11,14 @@
 #include "Ultrasonico.h"
 #include  "SingleEMAFilterLib.h"  
 #include "BNO.h"
+#include "Imu.h"
 
 
 //Objetos
-Motores motoresRobot(5, 28, 27, 6, 26, 25, 4, 30, 29);    
-Ultrasonico ultrasonico(10, 36);
-Ultrasonico ultrasonicoD(A3,A5);
-Ultrasonico ultrasonicoI(8,50);
+Motores motoresRobot(4, 29, 30, 6, 25, 26, 5, 27, 28);    
+Ultrasonico ultrasonico(2, 11);
+Ultrasonico ultrasonicoD(12,3);
+Ultrasonico ultrasonicoI(13,18);
 BNO gyro;
 AroIR aroIR;
 PID pid;
@@ -48,7 +49,7 @@ enum Lados {
 };    
 
 SingleEMAFilter<int> filterAnalogo(0.6);
-Lados atacar;
+Lados atacar = amarillo;
 Estados estado;
 bool flagAdelante = false;
 
@@ -73,25 +74,18 @@ void setup() {
 }
 
 
-//Código para atacante
 //LOOP-------------------------------------------------------
 void loop() {
   current_time = millis();
-  pid.setKP(0.02);
-  atacar = amarillo;
+  //pid.setKP(0.02);
   estado = inicio;
 
-  //Calibrar camara
-  //Calibrar fotos
-  //Cambiar color
-  //Cambiar lado a atacar
+  /*Calibrar camara
+  Calibrar fotos
+  Cambiar color
+  Cambiar lado a atacar
+  Estado = inicio*/
 
-  // long tiempoInicial = micros();
-  // long tiempoInicio = -1;
-  // long tiempoLinea = -1;
-  // long tiempoRegresar = -1;
-  // long tiempoDefender = -1;
-  // long despuesDefender = -1;
 
   actualizarPorterias();
   int largo = (atacar == amarillo) ? porteriaAzul.getLargo() : porteriaAmarilla.getLargo();
@@ -99,25 +93,27 @@ void loop() {
   int x1 = (atacar == amarillo) ? porteriaAzul.getX() : porteriaAmarilla.getX();
 
   if (estado == inicio) {
-    estado = (alto < 75 || largo < 190) ? regresar : linea;
-    //tiempoInicio = micros() - tiempoInicial;
+    Serial.print(alto);
+    Serial.print("\t\t");
+    Serial.println(largo);
+
+    estado = (alto < 70 || largo < 170) ? regresar : linea;
   }
 
   if (estado == linea) {
-      if (color.checkPlacaDelantera() || ultrasonico.getDistancia() < 9) 
+      int alto = (atacar == amarillo) ? porteriaAzul.getAlto() : porteriaAmarilla.getAlto();
+      Serial.println(alto);
+      if (color.checkPlacaDelantera() || alto > 120) 
         salirAdelante(0);
   
       else 
         estado = defender;
-
-   // tiempoLinea = micros() - tiempoInicial;
 
   }
 
   //Si está muy lejos de la portería, regresar
   if (estado == regresar) {
     digitalWrite(Constantes::ledPin, LOW);
-   // tiempoRegresar = micros() - tiempoInicial;
 
     buscarPorteria();
   }
@@ -132,35 +128,9 @@ void loop() {
     // if (detector() > 5 && abs(aroIR.getAngulo()) < 20) //Si tiene posesión
     //   sacar();
     // else
-     // tiempoDefender = micros() - tiempoInicial;
-
-      buscarC();
-     // despuesDefender = micros() - tiempoInicial;
-
+    buscarC();
 
   }
-  // Serial.print("t0: ");
-  // Serial.print(tiempoInicial);
-  //   Serial.print("\t");
-
-  // Serial.print("tInicio: " );
-  // Serial.print(tiempoInicio);
-  //   Serial.print("\t");
-
-  // Serial.print(" tLinea: " );
-  // Serial.print(tiempoLinea);
-  //   Serial.print("\t");
-
-  // Serial.print(" tRegresar: " );
-  // Serial.print(tiempoRegresar);
-  //   Serial.print("\t");
-
-  // Serial.print(" tDefender: " );
-  // Serial.print(tiempoDefender);
-  //  Serial.print("\t\t");
-
-  // Serial.print(" tDespues: " );
-  // Serial.println(despuesDefender);
 
   //Pruebas
   if (estado == nada) {
